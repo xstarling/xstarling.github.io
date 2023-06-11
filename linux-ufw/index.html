@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta content="yes" name="apple-mobile-web-app-capable" />
+<meta content="black" name="apple-mobile-web-app-status-bar-style" />
+<meta name="referrer" content="never">
+<meta name="keywords" content="">
+<meta name="description" content="欢迎访问[林星]的个人博客">
+<meta name="author" content="kveln">
+<title>linux的ufw防火墙使用 | 林星</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css">
+<link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+<link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+<link
+  href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800'
+  rel='stylesheet' type='text/css'>
+<link rel="alternate" type="application/rss+xml" title="linux的ufw防火墙使用 | 林星 » Feed"
+  href="https://xstarling.github.io/atom.xml">
+<link rel="stylesheet"
+  href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+<link href="https://xstarling.github.io/styles/main.css" rel="stylesheet">
+<script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets/highlight.min.js"></script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/850552586/ericamcdn@0.1/css/live2d.css">
+
+<script>hljs.initHighlightingOnLoad();</script>
+
+  <meta property="og:description" content="linux的ufw防火墙使用" />
+  <meta property="og:url" content="https://xstarling.github.io/linux-ufw/" />
+  <meta property="og:locale" content="zh-CN" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="林星" />
+  <!-- <script src="../assets/styles/scripts/tocScript.js"></script> -->
+</head>
+
+<body>
+  <!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+  <div class="container">
+    <a class="navbar-brand" href="https://xstarling.github.io">林星</a>
+    <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse"
+      data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false"
+      aria-label="Toggle navigation">
+      Menu
+      <i class="fas fa-bars"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarResponsive">
+      <ul class="navbar-nav ml-auto">
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/">首页</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/archives">归档</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/tags">标签</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/friends">友链</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/about-starling">关于</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          <div class="gridea-search-container">
+            <form id="gridea-search-form" style="position: relative" data-update="1686458398465"
+              action="/search/index.html">
+              <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+              <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+  <!-- Page Header -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+  <div class="container">
+    <a class="navbar-brand" href="https://xstarling.github.io">林星</a>
+    <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse"
+      data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false"
+      aria-label="Toggle navigation">
+      Menu
+      <i class="fas fa-bars"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarResponsive">
+      <ul class="navbar-nav ml-auto">
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/">首页</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/archives">归档</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/tags">标签</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/friends">友链</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/about-starling">关于</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          <div class="gridea-search-container">
+            <form id="gridea-search-form" style="position: relative" data-update="1686458398465"
+              action="/search/index.html">
+              <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+              <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+<header class="masthead" style="background-image: url('https://xstarling.github.io/media/images/home-bg.jpg')">
+  <div class="overlay"></div>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-md-10 mx-auto">
+        
+          <!-- 没Title为其他页面Header -->
+          
+            <!-- 没Title并且有headerType为Post：文章Header -->
+            <div class="post-heading">
+              <span class="tags">
+                
+                <a href="https://xstarling.github.io/8-ggtdByB/" class="tag">linux</a>
+                
+              </span>
+              <h1>linux的ufw防火墙使用</h1>
+              <span class="meta">
+                Posted on
+                2023-04-26，9 min read
+              </span>
+            </div>
+          
+        
+      </div>
+    </div>
+  </div>
+</header>
+  <!-- Post Content -->
+  <article id="post-content-article">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto post-content-container">
+          
+          <h4 id="本文参考自点击此处">本文参考自：<a href="https://markdown.com.cn/basic-syntax/code.html">点击此处</a></h4>
+<h2 id="安装ufw">安装UFW</h2>
+<pre><code>sudo apt update
+sudo apt install ufw
+</code></pre>
+<h2 id="检查ufw的状态">检查UFW的状态</h2>
+<pre><code>sudo ufw status verbose
+</code></pre>
+<h2 id="ufw默认策略">UFW默认策略</h2>
+<p>默认情况下，UFW 阻塞了所有进来的连接，并且允许所有出去的连接。这意味着任何人无法访问你的服务器，除非你打开端口。运行在服务器上的应用和服务可以访问外面的世界。</p>
+<p>默认的策略定义在<code>/etc/default/ufw</code>文件中，并且可以通过使用<code>sudo ufw default &lt;policy&gt; &lt;chain&gt;</code>命令来修改。</p>
+<p>防火墙策略是用来构建更多详细的和用户自定义的规则的基础。通常情况下，初始的默认策略是一个很好的起点。</p>
+<h2 id="应用配置">应用配置</h2>
+<p>大部分应用都附带一份应用配置，它描述了服务，并且包含了 UFW 设置。这个规则在软件包安装的时候，被自动创建在<code>/etc/ufw/applications.d</code>目录下。</p>
+<p>想要列举出你系统上所有的应用配置，输入：</p>
+<pre><code>sudo ufw app list
+</code></pre>
+<p>与你系统上安装的软件包有关系，输出应该看起来像下面这样：</p>
+<pre><code>Available applications:
+  Nginx Full
+  Nginx HTTP
+  Nginx HTTPS
+  OpenSSH
+</code></pre>
+<p>想要查找更多关于指定配置和包含规则的信息，使用下面的命令：</p>
+<pre><code class="language-sudo"></code></pre>
+<p>输出应该显示&quot;Nginx Full&quot;配置打开了端口&quot;80&quot;和&quot;443&quot;。</p>
+<pre><code>Profile: Nginx Full
+Title: Web Server (Nginx, HTTP + HTTPS)
+Description: Small, but very powerful and efficient web server
+
+Ports:
+  80,443/tcp
+</code></pre>
+<p>你也可以为你的应用创建自定义的配置。</p>
+<h2 id="启用ufw">启用UFW</h2>
+<p><strong>注意：如果你在远程位置连接你的 Ubuntu，在启用 UFW 防火墙之前，你必须显式允许进来的 SSH 连接。否则，你将永远都无法连接到机器上。</strong><br>
+现在 UFW 防火墙被配置允许 SSH 远程连接，启用它，输入：</p>
+<pre><code>sudo ufw allow ssh
+</code></pre>
+<p>输出：</p>
+<pre><code>Rules updated
+Rules updated (v6)
+</code></pre>
+<p>如果 SSH 运行在非标准端口，你需要打开这个端口。</p>
+<p>例如，如果你的 SSH 守护程序监听了<code>7722</code>，输入下面的命令，允许连接通过那个端口：</p>
+<pre><code>sudo ufw allow 7722/tcp
+</code></pre>
+<p>现在防火墙被配置允许进来的 SSH 连接，你可以输入下面的命令，启用它：</p>
+<pre><code>sudo ufw enable
+</code></pre>
+<p>输出如下：</p>
+<pre><code>Command may disrupt existing ssh connections. Proceed with operation (y|n)? y
+Firewall is active and enabled on system startup
+</code></pre>
+<p>你将会被警告启用防火墙可能会中断现有的 SSH 连接，输入&quot;y&quot;，并且回车。</p>
+<h2 id="打开端口">打开端口</h2>
+<p>取决于运行在你服务器上的应用，你需要根据服务打开不同的端口。</p>
+<p>通用的打开端口的语法如下：</p>
+<pre><code>ufw allow port_number/protocol
+</code></pre>
+<p>下面是一些关于如何允许 HTTP 连接的方法。</p>
+<p>第一个选项就是使用服务名。UFW 检查<code>/etc/services</code>文件，其中指定服务的端口和协议：</p>
+<pre><code>sudo ufw allow http
+</code></pre>
+<p>你也可以指定端口号和协议：</p>
+<pre><code>sudo ufw allow 80/tcp
+</code></pre>
+<p>当没有给出协议的时候，UFW 同时创建<code>tcp</code>和<code>udp</code>的规则。</p>
+<p>另外一个选项就是使用应用程序配置。在这个例子中，是&quot;Nginx HTTP&quot;：</p>
+<pre><code>sudo ufw allow 'Nginx HTTP'
+</code></pre>
+<p>UFW 还支持另外一种语法，使用 <code>proto</code> 关键字来指定协议。</p>
+<ol>
+<li>端口范围<br>
+UFW 允许你打开端口范围。使用分号分隔开端口的起点和终点，当你指定协议时，或者是 tcp，或者是udp。</li>
+</ol>
+<p>例如，如果你想允许端口从<code>7100</code>到<code>7200</code>，同时支持<code>tcp</code>和<code>udp</code>，你将要运行下面的命令：</p>
+<pre><code>sudo ufw allow 7100:7200/tcp
+sudo ufw allow 7100:7200/udp
+</code></pre>
+<ol start="2">
+<li>允许指定 IP 地址访问指定端口<br>
+想要允许指定源 IP 的所有端口上的所有连接通过，使用<code>from</code>关键字，加上源地址。</li>
+</ol>
+<p>这里是一个 IP 地址白名单的例子：</p>
+<pre><code>sudo ufw allow from 64.63.62.61
+</code></pre>
+<p>如果你指向允许给定 IP 访问指定的端口，使用<code>to any port</code>关键字加上端口号。</p>
+<p>例如，允许从 IP<code>64.63.62.61</code>的机器，通过<code>22</code>端口访问,输入：</p>
+<pre><code>sudo ufw allow from 64.63.62.61 to any port 22
+</code></pre>
+<p>7.3 允许子网<br>
+允许一个子网 IP 地址的访问和允许一个单个 IP 地址的访问，命令是一样的。唯一的不同是需要指定网络掩码。</p>
+<p>下面是一个例子，显示如何允许 IP 地址(192.168.1.1 到 192.168.1.254)，通过 3360(MySQL)，你可以使用这个命令：</p>
+<pre><code>sudo ufw allow from 192.168.1.0/24 to any port 3306
+</code></pre>
+<p>7.4 允许指定网络接口的连接<br>
+想要允许连接通过指定网络接口，使用<code>allow in on</code> 和 网络接口的名字：</p>
+<pre><code>sudo ufw allow in on eth2 to any port 3306
+</code></pre>
+<h2 id="禁止连接">禁止连接</h2>
+<p>对于所有进来连接的默认的策略被设置为<code>deny</code>，如果你没有修改它，UFW 将会屏蔽所有进来的连接，除非你指定打开连接。</p>
+<p>写禁止规则和写允许规则是一样的，你需要的仅仅是使用<code>deny</code>关键字替换<code>a</code>llow`。</p>
+<p>比如说你打开了端口<code>80</code>和<code>443</code>，并且你的服务器处于来自<code>23.24.25.0/24</code>网络的攻击。想要禁止来自<code>23.24.25.0/24</code>的所有连接，使用下面的命令：</p>
+<pre><code>sudo ufw deny from 23.24.25.0/24
+</code></pre>
+<p>这里是一个例子，关于禁止从<code>23.24.25.0/24</code>对<code>80</code>和<code>443</code>端口的访问，你可以使用下面的命令：</p>
+<pre><code>sudo ufw deny proto tcp from 23.24.25.0/24 to any port 80,443
+</code></pre>
+<h2 id="删除ufw规则">删除UFW规则</h2>
+<p>有两种不同的方式可以删除 UFW 规则。通过规则序号和通过指定的规则。</p>
+<p>通过规则序号来删除 UFW 规则很简单，特别是你刚接触 UFW。</p>
+<p>想要通过规则序号来删除，你需要找到你想删除的规则序号。想要这么做，运行下面的命令：</p>
+<pre><code>sudo ufw status numbered
+</code></pre>
+<p>输出：</p>
+<pre><code>Status: active
+
+     To                         Action      From
+     --                         ------      ----
+[ 1] 22/tcp                     ALLOW IN    Anywhere
+[ 2] 80/tcp                     ALLOW IN    Anywhere
+[ 3] 8080/tcp                   ALLOW IN    Anywhere
+</code></pre>
+<p>想要删除规则，序号为3，这个规则允许对端口<code>8080</code>的连接，你可以使用下面的命令：</p>
+<pre><code>sudo ufw delete 3
+</code></pre>
+<p>删除规则的第二种方法就是指定实际的规则。例如，如果你添加过一个打开端口<code>8069</code>的规则，你可以通过下面的命令删除它：</p>
+<pre><code>sudo ufw delete allow 8069
+</code></pre>
+<h2 id="禁用ufw">禁用UFW</h2>
+<p>如果因为任何原因，你需要停止 UFW，并且使得所有规则失效，你可以运行：</p>
+<pre><code>sudo ufw disable
+</code></pre>
+<p>稍后，如果你想重新启用 UFW，并且激活所有规则，输入：</p>
+<pre><code>sudo ufw enable
+</code></pre>
+<h2 id="重置ufw">重置UFW</h2>
+<p>重置 UFW 将会禁用 UFW，删除所有激活的规则。如果你想撤销所有的应用规则，并且重新开始时，这个很有用。</p>
+<p>想要重置 UFW，简单输入下面的命令:</p>
+<pre><code>sudo ufw reset
+</code></pre>
+<h2 id="ip伪装">IP伪装</h2>
+<p>IP 伪装是一种在 Linux内核中的 NAT（网络地址转换），它通过重写源 IP 和目标 IP 的地址和端口，来转换网络流量。使用 IP 伪装技术，你可以允许局域网中的一台或者多台机器，和互联网进行交互，其中的一台 Linux 机器扮演网关。</p>
+<p>使用 UFW 配置 IP 伪装需要几个步骤：</p>
+<p>首先，你需要启用 IP 转发。想要这么做，打开<code>/etc/ufw/sysctl.conf</code>文件：</p>
+<pre><code>sudo nano /etc/ufw/sysctl.conf
+</code></pre>
+<p>查找并且取消这一行的注释<code>net.ipv4.ip_forward = 0</code>:</p>
+<pre><code>net/ipv4/ip_forward=1
+</code></pre>
+<p>下一步，你需要配置 UFW 来允许转发包。打开 UFW 配置文件：</p>
+<pre><code>sudo nano /etc/default/ufw
+</code></pre>
+<p>定位到<code>DEFAULT_FORWARD_POLICY</code>处，修改值从<code>DROP</code>到<code>ACCEPT</code>：</p>
+<pre><code>DEFAULT_FORWARD_POLICY=&quot;ACCEPT&quot;
+</code></pre>
+<p>现在你需要设置在<code>nat</code>表和伪装规则中默认的<code>POSTROUTING</code>策略。想要这么做，打开<code>/etc/ufw/before.rules</code>文件，并且附加下面的行进去，像下面这样：</p>
+<pre><code>sudo nano /etc/ufw/before.rules
+</code></pre>
+<p>附加下面的行：</p>
+<pre><code>#NAT table rules
+*nat
+:POSTROUTING ACCEPT [0:0]
+
+# Forward traffic through eth0 - Change to public network interface
+-A POSTROUTING -s 10.8.0.0/16 -o eth0 -j MASQUERADE
+
+# don't delete the 'COMMIT' line or these rules won't be processed
+COMMIT
+</code></pre>
+<p>不要忘记将<code>-A POSTROUTING</code>一行中的<code>eth0</code>替换成你的公开网络接口的名字：</p>
+<p>当你做完这些，保存，并且关闭文件。</p>
+<p>最后，通过禁用，重新启用 UFW，重载 UFW 规则。</p>
+<pre><code>sudo ufw disable
+sudo ufw enable
+</code></pre>
+
+          <div class="toc-container"><ul class="markdownIt-TOC">
+<li>
+<ul>
+<li>
+<ul>
+<li>
+<ul>
+<li><a href="#%E6%9C%AC%E6%96%87%E5%8F%82%E8%80%83%E8%87%AA%E7%82%B9%E5%87%BB%E6%AD%A4%E5%A4%84">本文参考自：点击此处</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#%E5%AE%89%E8%A3%85ufw">安装UFW</a></li>
+<li><a href="#%E6%A3%80%E6%9F%A5ufw%E7%9A%84%E7%8A%B6%E6%80%81">检查UFW的状态</a></li>
+<li><a href="#ufw%E9%BB%98%E8%AE%A4%E7%AD%96%E7%95%A5">UFW默认策略</a></li>
+<li><a href="#%E5%BA%94%E7%94%A8%E9%85%8D%E7%BD%AE">应用配置</a></li>
+<li><a href="#%E5%90%AF%E7%94%A8ufw">启用UFW</a></li>
+<li><a href="#%E6%89%93%E5%BC%80%E7%AB%AF%E5%8F%A3">打开端口</a></li>
+<li><a href="#%E7%A6%81%E6%AD%A2%E8%BF%9E%E6%8E%A5">禁止连接</a></li>
+<li><a href="#%E5%88%A0%E9%99%A4ufw%E8%A7%84%E5%88%99">删除UFW规则</a></li>
+<li><a href="#%E7%A6%81%E7%94%A8ufw">禁用UFW</a></li>
+<li><a href="#%E9%87%8D%E7%BD%AEufw">重置UFW</a></li>
+<li><a href="#ip%E4%BC%AA%E8%A3%85">IP伪装</a></li>
+</ul>
+</li>
+</ul>
+</div>
+          
+          <hr />
+          <p class="next-post">下一篇：
+            <a href="https://xstarling.github.io/picgo-minio/">
+              <span class="post-title">
+                picgo+minio制作图床&rarr;
+              </span>
+            </a>
+          </p>
+          
+          <div class="comment" style="text-align: center;">
+            
+
+            
+            
+            <script src='https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js'></script>
+
+<style>
+	div#vcomments{
+		width:100%;
+		max-width: 1000px;
+		padding: 2.5%
+	}
+</style>
+
+
+	<div id="vcomments"></div>
+
+<script>
+	new Valine({
+		el: '#vcomments',
+		appId: 'Y2b59ZcCnZeowrhGKsweiviD-gzGzoHsz',
+		appKey: 'BpGUAoWRmemmVYU1cqKSUoSO',
+		avatar: '',
+		pageSize: 5,
+		recordIp: false,
+		placeholder: '请留下你的建议...',
+		visitor: false,
+	});
+</script>
+
+            
+          </div>
+        </div>
+      </div>
+  </article>
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+            <li class="list-inline-item">
+              <a href="https://github.com/xstarling" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fab fa-github fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+            </li>
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <!-- <li class="list-inline-item">
+              <a href="https://xstarling.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li> -->
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>林星</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://xstarling.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://xstarling.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));</script>
+  <!-- 更新图片的url请求头路径 -->
+  <script src="https://xstarling.github.io/media/scripts/imagePathScript.js"></script>
+  <input id="oldimagepath" name="oldimagepath" value="https://33373sl116.zicp.fun/image-blog" type="hidden" />
+  <input id="newimagepath" name="newimagepath" value="https://33373sl116.zicp.fun/image-blog" type="hidden" />
+  
+  <div id="landlord-parent">
+    <div id="landlord">
+        <div class="message" style="opacity:0"></div>
+        <canvas id="live2d" width="240" height="250" class="live2d"></canvas>
+    </div>
+</div>
+
+<script type="text/javascript">
+    if (/(iPhone|iPad|iPod|iOS|Android)/i.test(navigator.userAgent)) {
+        //移动端
+        console.log("------ 移动端");
+    } else {
+        console.log("------ PC端 " + navigator.userAgent);
+
+        addScript("https://cdn.jsdelivr.net/gh/850552586/ericamcdn@0.1/js/live2d.js", () => {
+            // 加载完成后再loadlive2d
+            loadlive2d("live2d", "https://xstarling.github.io/media/live2d/assets/hijiki.model.json");
+        });
+
+        var home_Path = "https://xstarling.github.io/";
+        addScript("https://xstarling.github.io/media/live2d/js/message.js", () => { });
+    }
+
+    // 插入js文件，完成后callback
+    function addScript(jsfile, callback) {
+        var landlord_parent = document.getElementById("landlord-parent");
+        var script = document.createElement("script");
+        script.type = "text/javascript";
+        script.src = jsfile;
+        landlord_parent.appendChild(script);
+        script.onload = script.onreadystatechange = function () {
+            if (!this.readyState || this.readyState === "loaded" || this.readyState === "complete") {
+                script.onload = script.onreadystatechange = null;
+                if (callback && typeof callback == "function") {
+                    callback(); //window[callback]();如果传递字符串过来 调用window['函数名']() 调用方法
+                }
+            }
+        };
+    }
+</script>
+  
+  <script src="https://xstarling.github.io/media/scripts/tocScript.js"></script>
+
+</body>
+
+</html>

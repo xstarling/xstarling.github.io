@@ -1,0 +1,1508 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta content="yes" name="apple-mobile-web-app-capable" />
+<meta content="black" name="apple-mobile-web-app-status-bar-style" />
+<meta name="referrer" content="never">
+<meta name="keywords" content="">
+<meta name="description" content="欢迎访问[林星]的个人博客">
+<meta name="author" content="kveln">
+<title>Uboot源码分析 | 林星</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css">
+<link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+<link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+<link
+  href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800'
+  rel='stylesheet' type='text/css'>
+<link rel="alternate" type="application/rss+xml" title="Uboot源码分析 | 林星 » Feed"
+  href="https://xstarling.github.io/atom.xml">
+<link rel="stylesheet"
+  href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+<link href="https://xstarling.github.io/styles/main.css" rel="stylesheet">
+<script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets/highlight.min.js"></script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/850552586/ericamcdn@0.1/css/live2d.css">
+
+<script>hljs.initHighlightingOnLoad();</script>
+
+  <meta property="og:description" content="Uboot源码分析" />
+  <meta property="og:url" content="https://xstarling.github.io/z9c6qfcIW/" />
+  <meta property="og:locale" content="zh-CN" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="林星" />
+  <!-- <script src="../assets/styles/scripts/tocScript.js"></script> -->
+</head>
+
+<body>
+  <!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+  <div class="container">
+    <a class="navbar-brand" href="https://xstarling.github.io">林星</a>
+    <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse"
+      data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false"
+      aria-label="Toggle navigation">
+      Menu
+      <i class="fas fa-bars"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarResponsive">
+      <ul class="navbar-nav ml-auto">
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/">首页</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/archives">归档</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/tags">标签</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/friends">友链</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/about-starling">关于</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          <div class="gridea-search-container">
+            <form id="gridea-search-form" style="position: relative" data-update="1686458398465"
+              action="/search/index.html">
+              <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+              <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+  <!-- Page Header -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+  <div class="container">
+    <a class="navbar-brand" href="https://xstarling.github.io">林星</a>
+    <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse"
+      data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false"
+      aria-label="Toggle navigation">
+      Menu
+      <i class="fas fa-bars"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarResponsive">
+      <ul class="navbar-nav ml-auto">
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/">首页</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/archives">归档</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/tags">标签</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/friends">友链</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/about-starling">关于</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          <div class="gridea-search-container">
+            <form id="gridea-search-form" style="position: relative" data-update="1686458398465"
+              action="/search/index.html">
+              <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+              <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+<header class="masthead" style="background-image: url('https://xstarling.github.io/media/images/home-bg.jpg')">
+  <div class="overlay"></div>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-md-10 mx-auto">
+        
+          <!-- 没Title为其他页面Header -->
+          
+            <!-- 没Title并且有headerType为Post：文章Header -->
+            <div class="post-heading">
+              <span class="tags">
+                
+              </span>
+              <h1>Uboot源码分析</h1>
+              <span class="meta">
+                Posted on
+                2023-05-24，32 min read
+              </span>
+            </div>
+          
+        
+      </div>
+    </div>
+  </div>
+</header>
+  <!-- Post Content -->
+  <article id="post-content-article">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto post-content-container">
+          
+          <h1 id="1-uboot的基础知识">1. uboot的基础知识</h1>
+<h2 id="11-uboot的cpu初始目录">1.1 uboot的cpu初始目录</h2>
+<figure data-type="image" tabindex="1"><img src="https://33373sl116.zicp.fun:443/image-blog/202305251339147.png" alt="初始目录文件" loading="lazy"></figure>
+<h2 id="12-uboot编译的config文件">1.2 uboot编译的config文件</h2>
+<blockquote>
+<ul>
+<li>新版uboot中的<code>config</code>文件是在<code>./configs</code>文件夹，后缀名为<code>xxx_defconfig</code>（选择配置项菜单的文件），并且与<code>kconfig</code>（是所有可以配置的菜单项的目录文件）配合，生成对应的<code>.config</code>文件，在程序启动时加载<code>.config</code>文件生成<code>config.h</code>文件。</li>
+<li>2012版的uboot 在<code>./include/configs</code>目录下直接有对应芯片的<code>xxx.h</code>文件，<strong><code>kconfig</code>文件也不是配置文件，而是一个shell脚本</strong>，通过对<code>make xxx</code>输入参数做匹配，选择对应单板的config头文件，并链接编译。通过<code>make</code> 按<code>tab</code>键补全，会显示支持的配置命令，然后选择就可以了</li>
+<li><strong>注意：</strong><code>make s5p_goni</code>会直接配置编译，<code>make s5p_goni_config</code>只进行配置</li>
+</ul>
+</blockquote>
+<ul>
+<li>uboot编译生成文件<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202305271048963.png" alt="" loading="lazy"></li>
+</ul>
+<h1 id="2-uboot的源码分析">2. uboot的源码分析</h1>
+<p>arm指令集取址流程说明</p>
+<blockquote>
+<p>arm等高级CPU采用RISC精简指令集，这个指令集采用流水线方式（取值---&gt;译码）来执行<br>
+每条指令对应一个机器字长（32=4字节，64=8字节）</p>
+</blockquote>
+<p>汇编指令说明：</p>
+<blockquote>
+<p>b：简单的程序跳转，跳转到到目标标号处执行。<br>
+bl：带链接程序跳转，也就是要带返回地址。在发生跳转前，将当前PC-4保存到R14中。也就是返回地址存在R14中，所以可以在子程序返回时只要MOV PC, LR即可。</p>
+</blockquote>
+<blockquote>
+<p>mrs：MRS    R1，CPSR   ; 将CPSR状态寄存器读取，保存到R1中<br>
+msr：MRS    R2，SPSR    ; 将SPSR状态寄存器读取，保存到R2中</p>
+</blockquote>
+<blockquote>
+<p>bic：bic 是清零指令；用于清除操作数1的某些位，并把结果放置到目的寄存器中。 BIC{条件}{S}  目的寄存器，操作数1，操作数2</p>
+<ul>
+<li>bic	r0, r0, #0x1f</li>
+</ul>
+</blockquote>
+<blockquote>
+<p>orr： orr 是位置1指令；用于在两个操作数上进行逻辑或运算，并把结果放置到目的寄存器中。ORR指令的格式为： ORR{条件}{S}  目的寄存器，操作数1，操作数2</p>
+<ul>
+<li>orr	r0, r0, #0xd3</li>
+</ul>
+</blockquote>
+<blockquote>
+<p>mrc：MRC{cond} p15,&lt;Opcode_1&gt;,<Rd>,<CRn>,<CRm>,&lt;Opcode_2&gt;<br>
+mcr：MCR{cond} p15,&lt;Opcode_1&gt;,<Rd>,<CRn>,<CRm>,&lt;Opcode_2&gt;</p>
+<ul>
+<li>cond：为指令执行的条件码。当cond忽略时指令为无条件执行。</li>
+<li>Opcode_1：协处理器的特定操作码. 对于CP15寄存器来说，opcode1=0</li>
+<li>Rd：源寄存器的ARM寄存器，其值将被传送到协处理器寄存器中，或将协处理器寄存器的值传送到该寄存器里面 ,通常为R0</li>
+<li>CRn：目标寄存器的协处理器寄存器，其编号是C~C15。</li>
+<li>CRm：协处理器中附加的目标寄存器或源操作数寄存器。如果不需要设置附加信息，将CRm设置为c0，否则结果未知</li>
+<li>Opcode_2：可选的协处理器特定操作码。（用来区分同一个编号的不同物理寄存器，当不需要提供附加信息时，指定为0）</li>
+</ul>
+</blockquote>
+<h2 id="21-uboot生成文件反汇编分析">2.1 uboot生成文件反汇编分析</h2>
+<ul>
+<li>u-boot和u-boot.bin的区别
+<ul>
+<li>u-boot是含有调试信息的（用于测试开发）</li>
+<li>u-boot.bin纯二进制文件，不含任何调试信息（用于正式发版）</li>
+</ul>
+</li>
+<li>objdump反汇编查看代码
+<blockquote>
+<p>arm-linux-objdump -S u-boot<br>
+arm-linux-objdump -S u-boot | less    # 用管道重定向到less命令</p>
+</blockquote>
+</li>
+<li>编译器和汇编器区别
+<ul>
+<li>编译器：将C，C++等高级语言编译程为汇编语言</li>
+<li>汇编器：将汇编语言编译为二进制机器码<br>
+<strong>异常中断处理</strong></li>
+</ul>
+</li>
+<li>片内中断处理（三星为例）</li>
+</ul>
+<blockquote>
+<p>系统启动首先会读取ROM中的中断向量表，启动成功后，会创建一个自己的中断向量表，并将pc，loader等中断向量信息拷贝至自定义中断向量区域，后续的中断都会从自定义中断向量中触发。<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202305271442123.png" alt="片内中断" loading="lazy"></p>
+</blockquote>
+<ul>
+<li>片外中断处理（三星为例）</li>
+</ul>
+<blockquote>
+<p>不会再使用片内地址了，boot完后，片内地址被释放。arm在cp15协处理器中开辟了<code>VBAR</code>的寄存器，只需要在自己片外启动程序中设置<code>VBAR</code>的值为新的中断向量的地址，则后续中断请求就会到请求<code>VBAR</code>地址的中断向量表进行中断处理</p>
+</blockquote>
+<p><strong>启动源码分析</strong></p>
+<ul>
+<li>启动初始化源码：</li>
+</ul>
+<pre><code class="language-c">_pad:			.word 0x12345678 /* now 16*4=64 */
+#endif	/* CONFIG_SPL_BUILD */
+
+.global _end_vect
+_end_vect:
+
+	.balignl 16,0xdeadbeef          /*告诉编译器，下面.globl _TEXT_BASE指令执行时，要满足16字节对齐，否则填充0xdeadbeef至16字节再执行*/
+/*************************************************************************
+ *
+ * Startup Code (reset vector)
+ *
+ * do important init only if we don't start from memory!
+ * setup Memory and board specific bits prior to relocation.
+ * relocate armboot to ram
+ * setup stack
+ *
+ *************************************************************************/
+
+.globl _TEXT_BASE
+_TEXT_BASE:
+	.word	CONFIG_SYS_TEXT_BASE    /*源代码起始地址*/
+</code></pre>
+<ul>
+<li>中断请求初始化：</li>
+</ul>
+<pre><code class="language-c">#ifdef CONFIG_USE_IRQ
+/* IRQ stack memory (calculated at run-time) */
+.globl IRQ_STACK_START
+IRQ_STACK_START:
+	.word	0x0badc0de     /*初始系统没有加载完成，堆栈先用badcode填充*/
+
+/* IRQ stack memory (calculated at run-time) */
+.globl FIQ_STACK_START
+FIQ_STACK_START:
+	.word 0x0badc0de
+#endif
+
+/* IRQ stack memory (calculated at run-time) + 8 bytes */
+.globl IRQ_STACK_START_IN
+IRQ_STACK_START_IN:
+	.word	0x0badc0de
+</code></pre>
+<p>reset处理：</p>
+<pre><code class="language-c">/*
+ * the actual reset code
+ */
+
+reset:
+	bl	save_boot_params
+	/*
+	 * set the cpu to SVC32 mode
+	 */
+	mrs	r0, cpsr
+	bic	r0, r0, #0x1f
+	orr	r0, r0, #0xd3
+	msr	cpsr,r0
+</code></pre>
+<h2 id="22-entry等宏展开cpsr寄存器设置">2.2 ENTRY等宏展开，CPSR寄存器设置</h2>
+<h3 id="221-entryendproc宏的展开">2.2.1 ENTRY，ENDPROC宏的展开</h3>
+<p>源代码：</p>
+<pre><code class="language-c">/*************************************************************************
+ *
+ * void save_boot_params(u32 r0, u32 r1, u32 r2, u32 r3)
+ *	__attribute__((weak));
+ *
+ * Stack pointer is not yet initialized at this moment
+ * Don't save anything to stack even if compiled with -O0
+ *
+ *************************************************************************/
+ENTRY(save_boot_params)
+	bx	lr			@ back to my caller
+ENDPROC(save_boot_params)
+	.weak	save_boot_params        //.weak：弱指令，当其他地方没有定义使用时才执行
+</code></pre>
+<blockquote>
+<p>宏定义在头文件里找，ENTRY宏的定义在<code>linux/linkage.h</code>头文件中</p>
+</blockquote>
+<ul>
+<li><strong>ENTRY宏的展开代码：</strong></li>
+</ul>
+<pre><code class="language-c">/************SYMBOL_NAME*************/
+#define SYMBOL_NAME(X)		X
+/*************LENTRY---ALIGN******************/
+#ifndef __ALIGN
+#define __ALIGN .align		4       //四字节对齐
+#define ALIGN			__ALIGN
+/*************LENTRY---SYMBOL_NAME_LABEL******************/
+#ifdef __STDC__
+#define SYMBOL_NAME_LABEL(X)	X##:
+#else
+#define SYMBOL_NAME_LABEL(X)	X:
+#endif
+/***************LENTRY**************/
+#define LENTRY(name) \
+	ALIGN; \
+	SYMBOL_NAME_LABEL(name)
+/***************ENTRY***************/
+#define ENTRY(name) \
+	.globl SYMBOL_NAME(name); \
+	LENTRY(name)
+</code></pre>
+<ul>
+<li><strong>ENDPROC宏的展开代码：</strong></li>
+</ul>
+<pre><code class="language-c">/*************ENDPROC---END***************/
+#ifndef END
+#define END(name) \
+	.size name, .-name   //当前的标号name（ENDPROC） - 开始标号name（ENTRY）；即为程序大小
+#endif
+/************ENDPROC*************/
+#ifndef ENDPROC
+#define ENDPROC(name) \
+	.type name STT_FUNC; \        //伪指令，告诉编译器数据类型为一个函数
+	END(name)
+#endif
+</code></pre>
+<h3 id="222-cpsr寄存器设置">2.2.2 CPSR寄存器设置</h3>
+<blockquote>
+<p>ARM处理器共有37个寄存器。这37个寄存器按其在用户编程中的功能划分，可分为2类寄存器，即31个通用寄存器和6个状态寄存器。这6个状态寄存器在ARM公司文件中其名称分别为：CPSR、SPSR_svc、SPSR_abt、SPSR_und、SPSR_irq和SPSR_fig。这12的作用分别如图1所示：<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202305271740756.png" alt="" loading="lazy"><br>
+所有处理器模式下都可访问当前程序状态寄存器CPSR。CPSR中包含条件码标志、中断禁止位、当前处理器模式以及其他状态和控制信息。在每种异常模式下都有一个对用的程序状态寄存器SPSR。当异常出现时，SPSR用于保存CPSR的状态，以便异常返回后恢复异常发生时的工作状态。</p>
+</blockquote>
+<ul>
+<li>
+<p><strong>条件码标志</strong><br>
+N、Z、C、V，最高4位称为条件码标志。ARM的大多数指令可以条件执行的，即通过检测这些条件码标志来决定程序指令如何执行。<br>
+各个条件码的含义如下：<br>
+N：在结果是有符号的二进制补码情况下，如果结果为负数，则N=1；如果结果为非负数，则N=0。<br>
+Z：如果结果为0，则Z=1;如果结果为非零，则Z=0。<br>
+C：其设置分一下几种情况：</p>
+<ul>
+<li>对于加法指令（包含比较指令CMN），如果产生进位，则C=1;否则C=0。</li>
+<li>对于减法指令（包括比较指令CMP），如果产生借位，则C=0;否则C=1。</li>
+<li>对于有移位操作的非法指令，C为移位操作中最后移出位的值。</li>
+<li>对于其他指令，C通常不变。</li>
+</ul>
+<p>V：对于加减法指令，在操作数和结果是有符号的整数时，如果发生溢出，则V=1;如果无溢出发生，则V=0;对于其他指令，V通常不发生变化。</p>
+</li>
+<li>
+<p><strong>控制位的作用在图1中可以看出</strong>。</p>
+</li>
+</ul>
+<h2 id="23-cp15协处理器基础">2.3 CP15协处理器基础</h2>
+<h3 id="231-vbar异常向量表基址映射">2.3.1 VBAR异常向量表基址映射</h3>
+<p>源代码展示</p>
+<pre><code class="language-c">/*
+ * Setup vector:
+ * (OMAP4 spl TEXT_BASE is not 32 byte aligned.
+ * Continue to use ROM code vector only in OMAP4 spl)
+ */
+#if !(defined(CONFIG_OMAP44XX) &amp;&amp; defined(CONFIG_SPL_BUILD))
+	/* Set V=0 in CP15 SCTRL register - for VBAR to point to vector */
+	mrc	p15, 0, r0, c1, c0, 0	@ Read CP15 SCTRL Register
+	bic	r0, #CR_V		@ V = 0  
+	mcr	p15, 0, r0, c1, c0, 0	@ Write CP15 SCTRL Register
+
+	/* Set vector address in CP15 VBAR register */
+	ldr	r0, =_start
+	mcr	p15, 0, r0, c12, c0, 0	@Set VBAR
+#endif
+</code></pre>
+<p>bic r0,#CR_V：V=0为普通中断，跳转地址<code>0x00000000</code>，V=1位高级中断（可以跳到自定义地址），默认地址<code>0xFFFF0000</code></p>
+<h3 id="232-cp15子过程分析cache操作">2.3.2 CP15子过程分析——cache操作</h3>
+<p>源代码分析</p>
+<pre><code class="language-c">/* the mask ROM code should have PLL and others stable */
+#ifndef CONFIG_SKIP_LOWLEVEL_INIT     //如果为片内则执行，若为片外，则因为会先执行DDR初始化，所以此处便不会重发执行
+	bl	cpu_init_cp15
+	bl	cpu_init_crit
+#endif
+</code></pre>
+<p>icache操作源码分析</p>
+<pre><code class="language-c">/*************************************************************************
+ *
+ * cpu_init_cp15
+ *
+ * Setup CP15 registers (cache, MMU, TLBs). The I-cache is turned on unless
+ * CONFIG_SYS_ICACHE_OFF is defined.
+ *
+ *************************************************************************/
+ENTRY(cpu_init_cp15)
+	/*
+	 * Invalidate L1 I/D
+	 */
+	mov	r0, #0			@ set up for MCR
+	mcr	p15, 0, r0, c8, c7, 0	@ invalidate TLBs
+	mcr	p15, 0, r0, c7, c5, 0	@ invalidate icache     //设置缓存失效
+	mcr	p15, 0, r0, c7, c5, 6	@ invalidate BP array  //分支预测失效
+	mcr     p15, 0, r0, c7, c10, 4	@ DSB       //DSB伪指令（推荐），直接使用指令，可能会导致多核CPU数据不同步
+	mcr     p15, 0, r0, c7, c5, 4	@ ISB       //ISB伪指令（推荐，同上）
+</code></pre>
+<p>缓存实现的方式有三种：</p>
+<ul>
+<li>invalidate icache：设置指令的有效位为无效，则CPU会从RAM直接取数据</li>
+<li>flush：清空icache缓存中的所有数据，则CPU会从RAM中直接获取数据（速度比较慢）</li>
+<li>enable：使能用或不用这个icache缓存功能</li>
+</ul>
+<h3 id="233-cp15子过程分析分支预测mmu操作">2.3.3 CP15子过程分析——分支预测，MMU操作</h3>
+<blockquote>
+<p>影响现代处理器性能的两大关键因素是cache和分支预测<br>
+调用子函数：bl cpu_init_cp15</p>
+</blockquote>
+<h4 id="2331-分支预测">2.3.3.1 分支预测</h4>
+<p><strong>分支预测的目的</strong></p>
+<ul>
+<li>
+<p>在冯诺依曼的存储指令结构下，指令的执行包含有三种冒险：<strong>结构冒险</strong>、<strong>数据冒险</strong>和<strong>控制冒险</strong>。</p>
+<ul>
+<li><strong>结构冒险</strong>：是指硬件部件不足导致指令无法继续执行；</li>
+<li><strong>数据冒险</strong>：是指指令所需要的数据受到前面指令的影响，暂时无法取用，从而导致指令无法继续执行；</li>
+<li><strong>控制冒险</strong>：是指分支指令在控制程序的过程中中断指令流，从而导致程序无法继续执行</li>
+</ul>
+</li>
+<li>
+<p>分支预测技术是指处理器在遇到分支指令时不再傻傻地等待分支结果，而是直接在取指阶段预测分支“跳”或者“不跳”以及跳转目标地址，目的是根据预测结果来实现不间断的指令流，从而让处理器的CPI再度接近理想情况中的1 .</p>
+</li>
+<li>
+<p>分支预测要预测两件事：<strong>分支指令的跳转方向</strong>，<strong>分支指令的跳转目标地址</strong>。</p>
+</li>
+</ul>
+<p><strong>分支方向的预测</strong></p>
+<ul>
+<li>静态预测</li>
+<li>根据最后一次结果预测</li>
+<li>基于两位饱和计数预测</li>
+<li>基于局部历史的预测</li>
+<li>基于全局历史的预测</li>
+<li>竞争的分支预测</li>
+</ul>
+<p><strong>分支地址的预测</strong></p>
+<ul>
+<li>直接跳转类型的分支预测</li>
+<li>BTB缺失的处理</li>
+<li>间接跳转类型的分支预测</li>
+<li>其他预测方法</li>
+</ul>
+<h4 id="2332-mmu操作">2.3.3.2 MMU操作</h4>
+<p><strong>MMU是什么</strong><br>
+MMU是Memory Management Unit的缩写，中文名是内存管理单元，它是<strong>中央处理器（CPU）中用来管理虚拟存储器</strong>、物理存储器的控制线路，同时也负责虚拟地址映射为物理地址，以及提供硬件机制的内存访问授权，多用户多进程操作系统。<br>
+其功能主要有：</p>
+<ul>
+<li>完成虚拟地址到物理地址的转化</li>
+<li>对相应的地址空间的访问权限控制</li>
+<li>与操作系统的内存管理程序一起协作对内存进行管理</li>
+</ul>
+<p><strong>为什么要关闭MMU呢？</strong><br>
+mmu在设备上电之初是没有任何作用的，也就是说，在u-boot的初始化之初执行汇编的那一段代码中，<br>
+包括后面的初始化一些具体的外设时，访问的都是实际的地址，mmu的打开起不到任何的意义，为了不影响启动之初对程序的启动，关闭掉mmu设备是常用的做法。</p>
+<p>代码说明：</p>
+<pre><code class="language-c">/*
+	 * disable MMU stuff and caches
+	 */
+	mrc	p15, 0, r0, c1, c0, 0
+	bic	r0, r0, #0x00002000	@ clear bits 13 (--V-)
+	bic	r0, r0, #0x00000007	@ clear bits 2:0 (-CAM)
+	orr	r0, r0, #0x00000002	@ set bit 1 (--A-) Align
+	orr	r0, r0, #0x00000800	@ set bit 11 (Z---) BTB
+#ifdef CONFIG_SYS_ICACHE_OFF
+	bic	r0, r0, #0x00001000	@ clear bit 12 (I) I-cache
+#else
+	orr	r0, r0, #0x00001000	@ set bit 12 (I) I-cache
+#endif
+</code></pre>
+<h2 id="24-cpu_initcrit子过程分析">2.4 cpu_initcrit子过程分析</h2>
+<h3 id="241-led显示启动运行状态">2.4.1 LED显示启动运行状态</h3>
+<blockquote>
+<p>现在<strong>串口调试等方式还没有建立</strong>，为了确信程序运行到这里了，可以在这里设计一个点亮LED的程序，在lowlevel_init中调用，这样就可以观察到程序运行到哪一步了</p>
+</blockquote>
+<ul>
+<li>初始化代码入口函数：</li>
+</ul>
+<pre><code class="language-c">    /* the mask ROM code should have PLL and others stable */
+#ifndef CONFIG_SKIP_LOWLEVEL_INIT
+    bl	cpu_init_cp15   //初始化cp15协处理器（关闭mmu，分支预测等）
+    bl	cpu_init_crit    //初始化cp15后，就好执行此处初始化函数
+#endif
+</code></pre>
+<ul>
+<li>跳转至对应的初始化函数（<strong>跨文件跳转</strong>）</li>
+</ul>
+<pre><code class="language-c">#ifndef CONFIG_SKIP_LOWLEVEL_INIT
+/*************************************************************************
+*
+* CPU_init_critical registers
+*
+* setup important registers
+* setup memory timing
+*
+*************************************************************************/
+ENTRY(cpu_init_crit)
+    /*
+    * Jump to board specific initialization...
+    * The Mask ROM will have already initialized
+    * basic memory. Go here to bump up clock rate and handle
+    * wake up conditions.
+    */
+    b	lowlevel_init		@ go setup pll,mux,memory  //在lowlevel_init.S文件中
+ENDPROC(cpu_init_crit)
+#endif
+</code></pre>
+<ul>
+<li>GPIO点亮代码：</li>
+</ul>
+<pre><code class="language-c">/*************跳转函数必须放在cpu_init_crit前面**************/
+bl  gpio_out    //bl:带链跳转，初始化GPIO引脚
+bl  led1_on     //点亮LED等代码
+
+........
+/****************GPIO点亮等******************/
+gpio_out:
+	ldr	r11, =0xE0200200
+	ldr	r12, =0x00001111
+	str	r12, [r11]
+	
+	ldr	r11, =0xE0200284
+	ldr	r12, =0XF
+	str	r12, [r11]
+	mov	pc, lr
+	
+.globl led1_on
+led1_on:
+	ldr	r11, =0xE0200284
+	ldr	r12, [r11]
+	bic	r12, r12, #1       //清0r12的第一位，再回写r12中
+	str r12, [r11]      //
+	mov	pc, lr
+</code></pre>
+<h3 id="242-gpio电路分析">2.4.2 GPIO电路分析</h3>
+<p>推挽输出和开漏输出参考视频链接：</p>
+<ul>
+<li>爱上半导体：<a href="https://www.bilibili.com/video/BV1Pr4y1n74J/?spm_id_from=333.337.search-card.all.click&amp;vd_source=9752c2c90782ff8bd76174dfbc76c933">点击此处</a></li>
+<li>工科孙老师：<a href="https://www.bilibili.com/video/BV1D84y1c7GV/?spm_id_from=333.337.search-card.all.click&amp;vd_source=9752c2c90782ff8bd76174dfbc76c933">点击此处</a></li>
+</ul>
+<p>GPIO引脚电路：</p>
+<ul>
+<li>三种输出状态<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202305280922984.png" alt="GPIO三种输出状态图" loading="lazy"></li>
+<li>推挽输出
+<ul>
+<li>推：<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202305280924938.png" alt="GPIO电流推" loading="lazy"></li>
+<li>挽：<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202305280926357.png" alt="GPIO电流挽" loading="lazy"></li>
+</ul>
+</li>
+<li>开漏输出<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202305280930343.png" alt="开漏模式" loading="lazy">
+<ul>
+<li>5v控制3.3v<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202305280934562.png" alt="开漏设置高电平" loading="lazy"><br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202305280934073.png" alt="开漏设置低电平" loading="lazy"></li>
+<li>多个GPIO同时控制一个输入
+<ul>
+<li>推挽模式（多个GPIO控制同一个输入，一个mos管必定短路烧毁）<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202305280937891.png" alt="" loading="lazy"></li>
+<li>开漏模式<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202305280940969.png" alt="" loading="lazy"></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>总结<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202305280942528.png" alt="" loading="lazy"></li>
+</ul>
+<h3 id="243-u-boot烧录镜像分析">2.4.3 u-boot烧录镜像分析</h3>
+<p>参考视频链接：<a href="https://www.bilibili.com/video/BV1s4411t7eT?p=10&amp;spm_id_from=pageDriver&amp;vd_source=9752c2c90782ff8bd76174dfbc76c933">点击此处</a></p>
+<ul>
+<li>
+<p>mkv210芯片uboot加载的片内（iROM）内存仅为16k，若uboot大小超过16k怎么办呢？<br>
+通过代码限制，将uboot中重要的前16k内容（包括校验和）先拷贝进去，等完成内存（DDR）初始化后，将剩余的全部拷贝到内存中，进行系统启动，并清除片内内存（IROM）</p>
+</li>
+<li>
+<p>片内内存和片外内存的数据关系图示</p>
+<ul>
+<li><strong>校验和</strong>：除校验和16字节外的其余内容累加求和<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202305281623781.png" alt="" loading="lazy"></li>
+</ul>
+</li>
+<li>
+<p>mkv210_image.c源码（三星的S5PV210所特有的）<br>
+作用：保证文件小于16k，并为BL1添加校验头。</p>
+<pre><code class="language-c">    /*
+    * mkv210_image.c作用：将usb启动时使用的xxx_usb.bin制作得到由sd卡启动的镜像xxx_sd.bin
+    * 本文件来自于友善之臂的裸机教程，据友善之臂的文档中讲述，本文件是一个热心网友提供，在此表示感谢。
+    *
+    * 在BL0阶段，Irom内固化的代码读取nandflash或SD卡前16K的内容，
+    * 并比对前16字节中的校验和是否正确，正确则继续，错误则停止。
+    */
+    #include &lt;stdio.h&gt;
+    #include &lt;string.h&gt;
+    #include &lt;stdlib.h&gt;
+
+    #define BUFSIZE                 (16*1024)
+    #define IMG_SIZE                (16*1024)
+    #define SPL_HEADER_SIZE         16
+    #define SPL_HEADER            &quot;S5PC110 HEADER  &quot;    // 16字节，随便16个字节即可
+
+    int main (int argc, char *argv[])
+    {
+        FILE *fp;
+        char *Buf, *a;
+        int BufLen;
+        int nbytes, fileLen;
+        unsigned int checksum, count;
+        int i;
+
+        // 1.检查参数个数是否为3
+        if (argc != 3)
+        {
+            printf(&quot;Usage: %s &lt;source file&gt; &lt;destination file&gt;\n&quot;, argv[0]);
+            return -1;
+        }
+
+        // 2.分配16K的buffer并请零
+        BufLen = BUFSIZE;
+        Buf = (char *)malloc(BufLen);
+        if (!Buf)
+        {
+            printf(&quot;malloc buffer failed!\n&quot;);
+            return -1;
+        }
+        memset(Buf, 0x00, BufLen);
+
+        // 3.读源bin到buffer
+        // 3.1 打开源bin
+        fp = fopen(argv[1], &quot;rb&quot;);
+        if( fp == NULL)
+        {
+            printf(&quot;source file open error\n&quot;);
+            free(Buf);
+            return -1;
+        }
+        // 3.2获取源bin长度
+        fseek(fp, 0L, SEEK_END);                                // 定位到文件尾
+        fileLen = ftell(fp);                                    // 得到文件长度
+        fseek(fp, 0L, SEEK_SET);                                // 再次定位到文件头
+        // 3.3源bin长度不得超过16K-16byte，
+        // 注意若裸机程序大于16KB，则裸机程序会出问题，在后续做LCD实验时需特别注意
+        count = (fileLen &lt; (IMG_SIZE - SPL_HEADER_SIZE))
+            ? fileLen : (IMG_SIZE - SPL_HEADER_SIZE);
+        // 3.4在buffer[0~15]中存放&quot;S5PC110 HEADER  &quot;
+        memcpy(&amp;Buf[0], SPL_HEADER, SPL_HEADER_SIZE);
+        // 3.5读源bin到buffer[16]
+        nbytes = fread(Buf + SPL_HEADER_SIZE, 1, count, fp);
+        if ( nbytes != count )
+        {
+            printf(&quot;source file read error\n&quot;);
+            free(Buf);
+            fclose(fp);
+            return -1;
+        }
+        fclose(fp);
+
+        // 4.计算校验和
+        // 4.1从第16byte开始计算，把buffer中所有的字节数据加和起来得到的结果
+        a = Buf + SPL_HEADER_SIZE;
+        for(i = 0, checksum = 0; i &lt; IMG_SIZE - SPL_HEADER_SIZE; i++)
+            checksum += (0x000000FF) &amp; *a++;
+        // 4.2将校验和保存在buffer[8~12]
+        a = Buf + 8;    // Buf是xxx_sd.bin的起始地址，+8表示向后位移2个字，也就是说写入到第3个字
+        *((unsigned int *)a) = checksum;
+
+        // 5.拷贝buffer中的内容到目的bin
+        // 5.1打开目的bin
+        fp = fopen(argv[2], &quot;wb&quot;);
+        if (fp == NULL)
+        {
+            printf(&quot;destination file open error\n&quot;);
+            free(Buf);
+            return -1;
+        }
+        // 5.2将16k的buffer拷贝到目的bin中
+        a = Buf;
+        nbytes = fwrite(a, 1, BufLen, fp);
+        if (nbytes != BufLen)
+        {
+            printf(&quot;destination file write error\n&quot;);
+            free(Buf);
+            fclose(fp);
+            return -1;
+        }
+
+        free(Buf);
+        fclose(fp);
+
+        return 0;
+    }
+</code></pre>
+</li>
+<li>
+<p>使用hexdump分析16进制代码</p>
+<ul>
+<li>大端存储<br>
+数据的高字节存储在低地址中，数据的低字节存储在高地址中 如：<br>
+<strong>用于网络数据报协议传输,暂时不可替代。</strong></li>
+<li>小端存储<br>
+数据的低位放在低地址空间，数据的高位放在高地址空间<br>
+简记：小端就是低位对应低地址，高位对应高地址</li>
+</ul>
+</li>
+</ul>
+<h2 id="25-编写自己的boot程序">2.5 编写自己的boot程序</h2>
+<h3 id="251-gcc编译过程详解">2.5.1 gcc编译过程详解</h3>
+<figure data-type="image" tabindex="2"><img src="https://33373sl116.zicp.fun:443/image-blog/202305282239296.png" alt="" loading="lazy"></figure>
+<h3 id="252-文件链接过程">2.5.2 文件链接过程</h3>
+<blockquote>
+<p>text：存放代码<br>
+data：存放已经初始化且不为0的全局变量<br>
+bss：存放初始化为0或未初始化的全局变量，以及标记说明</p>
+</blockquote>
+<ul>
+<li>
+<p>工具链使用</p>
+<ul>
+<li>arm-none-eabi-as /arm-none-eabi-gcc -c        #编译</li>
+<li>arm-none-eabi-ld -T      #链接文件</li>
+</ul>
+</li>
+<li>
+<p>链接示意图<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202305282318742.png" alt="" loading="lazy"></p>
+</li>
+<li>
+<p>代码示例<br>
+<code>ldr fp, [pc,#20]</code>: 中<code>[pc,#20]</code>属于基址变址寻址，pc+20的地方取址</p>
+<ul>
+<li>mystart.S文件——uboot初始化代码<pre><code class="language-c">/***********处理异常中断处理——根据cpu的中断向量长度来设置`b reset`的个数***********/
+b reset
+b reset
+b reset
+b reset
+b reset
+b reset
+b reset
+b reset
+/**********初始化uboot的启动函数************/
+reset:  
+        bl gpio_out
+        bl led2_on
+        mov r0,r1          //无意义的空指令
+        mov r1,r2
+        mov r2,r3
+        mov r3,r4
+        mov r4,r5
+1:
+        b 1b    @ b:back jump;f:forward jump
+/************配置GPIO输出功能************/
+gpio_out:
+        ldr     r11, =0xE0200200
+        ldr     r12, =0x00001111
+        str     r12, [r11]
+
+        ldr     r11, =0xE0200284
+        ldr     r12, =0XF
+        str     r12, [r11]
+        mov     pc, lr
+</code></pre>
+</li>
+<li>mylowlevel.S文件——led点亮代码<pre><code class="language-c">.globl led2_on  @ .globl:marking the instruction can be used in other file
+led2_on:
+        ldr     r11, =0xE0200284
+        ldr     r12, [r11]
+        bic     r12, r12, #[1&lt;&lt;1]       @ left shift one step,turn on led2
+        str     r12, [r11]
+        mov     pc, lr              
+</code></pre>
+</li>
+<li>myboot.lds链接配置文件<pre><code class="language-c">SECTIONS
+{
+        . = 0xD0020010; /** 16k memory start addr*/
+        .text : {
+                mystart.o
+                * (.text)
+        }
+        .data : {
+                * (.data)
+        }
+        .bss_start = .;
+        .bss : {
+                * (.bss)
+        }
+        .bss_end = .;
+}                                    
+</code></pre>
+</li>
+</ul>
+</li>
+<li>
+<p>objdump调试链接文件</p>
+<ul>
+<li><code>arm-none-eabi-objdump -S myboot</code></li>
+</ul>
+</li>
+<li>
+<p>objcopy剥离注释说明生成二进制文件</p>
+<ul>
+<li><code>arm-none-eabi-objcopy -O binary myboot myboot.bin</code></li>
+</ul>
+</li>
+</ul>
+<h3 id="253-makefile命令">2.5.3 Makefile命令</h3>
+<ul>
+<li>.PHONY<br>
+但是如果Makefile当前目录下有一个和clean目标同名的文件clean，那么这么写就会有问题，因为clean文件永远是最新的，所以clean目标的命令永远得不到执行，为了解决这个问题，Makefile提供了伪目标这个功能，所以新的清除命令可以写成下面这样：<pre><code class="language-make">.PHONY : clean
+clean :
+    $(RM) *.o target
+</code></pre>
+只要有这个声明，不管是否有clean文件，make clean都会得到执行，make在执行此规则时不会去试图查找隐含规则来创建它，这样也提高了make的最新效率。</li>
+<li>自动化变量
+<ul>
+<li><code>$@</code>：所有目标文件集合</li>
+<li><code>$&lt;</code>：所有依赖文件中的第一个</li>
+<li><code>$^</code>：所有依赖文件集合</li>
+</ul>
+</li>
+<li>模式匹配
+<ul>
+<li><code>%</code>：%.o，%.s</li>
+</ul>
+</li>
+</ul>
+<h2 id="26-uart分析">2.6 UART分析</h2>
+<h3 id="261-异步通信uart和同步通信spi概念">2.6.1 异步通信（UART）和同步通信（SPI）概念</h3>
+<p>通信协议（SPI，UART，I2C）：<a href="https://zhuanlan.zhihu.com/p/450963372">点击此处</a></p>
+<ul>
+<li>同步串行通信（SPI）<br>
+在SPI设备中，设备分为主机与从机系统。主机是控制设备（通常是微控制器），而从机（通常是传感器，显示器或存储芯片）从主机那获取指令。一套SPI通讯共包含四种信号线：MOSI (Master Output/Slave Input) – 信号线，主机输出，从机输入。MISO (Master Input/Slave Output) – 信号线，主机输入，从机输出。SCLK (Clock) – 时钟信号。SS/CS (Slave Select/Chip Select) – 片选信号。
+<ul>
+<li>通信方式：全双工通信</li>
+<li>缺点：通讯距离短，一般适用于开发板直接连线通信；SPI使用四根线（I2C和UART使用两根线），没有信号接收成功的确认（I2C拥有此功能），没有任何形式的错误检查（如UART中的奇偶校验位等）。</li>
+<li>优点：可以无中断传输数据，可以连续地发送或接收任意数量的位；没有像I2C这样的复杂的从站寻址系统，数据传输速率比I2C更高（几乎快两倍）。独立的MISO和MOSI线路，可以同时发送和接收数据。</li>
+<li>图示：<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202305291552101.png" alt="" loading="lazy"></li>
+</ul>
+</li>
+<li>异步串行通信（UART）<br>
+UART代表通用异步接收器/发送器也称为串口通讯，它不像SPI和I2C这样的通信协议，而是微控制器中的物理电路或独立的IC。<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202305291558790.png" alt="" loading="lazy"><br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202305291624175.png" alt="" loading="lazy"><br>
+UART的主要目的是发送和接收串行数据，其最好的优点是它仅使用两条线在设备之间传输数据。 UART属于<strong>异步通讯</strong>，这意味着<strong>没有时钟信号</strong>，取而代之的是在数据包中添加开始和停止位。
+<ul>
+<li>数据报文格式：<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202305291605763.png" alt="" loading="lazy"><br>
+<strong>起始位</strong>：发送1位逻辑0（低电平），开始传输数据。<br>
+<strong>数据位</strong>：可以是5~8位的数据，先发低位，再发高位，一般常见的就是8位（1个字节），其他的如7位的ASCII码。<br>
+<strong>校验位</strong>：奇偶校验，将数据位加上校验位，1的位数为偶数（偶校验），1的位数4为奇数（奇校验）。<br>
+<strong>停止位</strong>：停止位是数据传输结束的标志，可以是1/1.5/2位的逻辑1（高电平）。<br>
+<strong>空闲位</strong>：空闲时数据线为高电平状态，代表无数据传输</li>
+<li>通信方式：全双工通信（需要协调波特率）</li>
+<li>缺点：
+<ul>
+<li>数据帧的大小最大为9位</li>
+<li>不支持多个从属系统或多个主系统</li>
+<li>每个UART的波特率必须在彼此的10％之内</li>
+</ul>
+</li>
+<li>优点：
+<ul>
+<li>仅使用两根电线</li>
+<li>无需时钟信号</li>
+<li>具有奇偶校验位以允许进行错误检查</li>
+<li>只要双方都设置好数据包的结构</li>
+<li>有据可查并得到广泛使用的方法</li>
+</ul>
+</li>
+<li>图示：<br>
+启动条件：当SCL是高电平时，SDA从高电平向低电平切换。停止条件：当SCL是高电平时，SDA由低电平向高电平切换。<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202305291602981.png" alt="" loading="lazy"></li>
+</ul>
+</li>
+<li>波特率的概念<br>
+波特率，即调制速率，模拟线路信号的速率，以波形每秒的振荡数来衡量。如果数据不压缩，波特率等于每秒钟传输的数据位数，单位bit/s或bps。注意和比特率不严格相关<br>
+在UART中：BYTE/s = bps / 10
+<ul>
+<li>
+<p>波特率与传输举例的关系</p>
+<table>
+<thead>
+<tr>
+<th>data rate（bps）</th>
+<th>maximum（meters）</th>
+<th>distance（feet）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>19200</td>
+<td>15</td>
+<td>45</td>
+</tr>
+<tr>
+<td>9600</td>
+<td>25</td>
+<td>76</td>
+</tr>
+<tr>
+<td>4800</td>
+<td>50</td>
+<td>152</td>
+</tr>
+<tr>
+<td>2400</td>
+<td>100</td>
+<td>304</td>
+</tr>
+<tr>
+<td>1200</td>
+<td>200</td>
+<td>608</td>
+</tr>
+<tr>
+<td>600</td>
+<td>400</td>
+<td>1216</td>
+</tr>
+</tbody>
+</table>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="262-uart时钟频率配置">2.6.2 UART时钟频率配置</h3>
+<ul>
+<li>波特率设置（UBRDIV0，R/W，Address=0x----_----)<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202305291655458.png" alt="" loading="lazy"></li>
+<li>信道划分槽（UDIVSLOT0，R/W，Address=0x----_----）<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202305291701675.png" alt="" loading="lazy"></li>
+<li>串口数据发送寄存器设置（UTXH0，W，Address=0x----_----)<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202305291708478.png" alt="" loading="lazy"></li>
+</ul>
+<pre><code class="language-c">100:
+    ...........
+    ldr r0,=0xE2900020
+    ldr r1,=0x55            @ UTH0 = 'U'
+    str r1,[r0]                 @ 将r1中的内存传输到r0地址缓冲区中
+
+    ldr r1,=0x61            @UTH0 = 'a'
+    str r1,[r0]                 @ 将r1中的内存传输到r0地址缓冲区中
+    ...........
+</code></pre>
+<p><strong>str指令</strong></p>
+<blockquote>
+<p>str r0，[r1]，＃8             ；将R0中的字数据写入以r1为地址的存储器中，并将新地址R1＋8写入R1。<br>
+str r0，[r1，＃8]             ；将r0中的字数据写入以r1＋8为地址的存储器中。<br>
+str     r1, [r0]                       ；将r1寄存器的值，传送到地址值为r0的（存储器）内存中</p>
+</blockquote>
+<ul>
+<li>串口数据接受寄存器设置（URXH0，W，Address=0x----_----）<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202305291710979.png" alt="" loading="lazy"></li>
+</ul>
+<pre><code class="language-c">
+</code></pre>
+<h3 id="263-可能存在问题">2.6.3 可能存在问题</h3>
+<p>参考链接：<a href="https://www.bilibili.com/video/BV1s4411t7eT/?p=25&amp;spm_id_from=pageDriver&amp;vd_source=9752c2c90782ff8bd76174dfbc76c933">点击此处</a><br>
+<strong>编译文件顺序</strong><br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202305292320659.png" alt="" loading="lazy"><br>
+<strong>问题描述</strong>：<br>
+自定义的lowlevel_init.S文件编译时处于编译的最末尾，在后续截取16k有效uboot时，会被截取掉<br>
+<strong>解决方法</strong>：</p>
+<pre><code class="language-shell">vim makefile
+# 搜索变量 “LIBS”
+# 将$(LIBBOARD)变量放在前面即可
+</code></pre>
+<blockquote>
+<p>start.S为最重要的（必须有的），其他的都是可有可无的</p>
+</blockquote>
+<h3 id="264-uart显示内存中数据">2.6.4 UART显示内存中数据</h3>
+<ul>
+<li>
+<p>原理图展示：</p>
+</li>
+<li>
+<p>代码展示（lowlevel_init.S)：</p>
+<ul>
+<li>显示代码<pre><code class="language-c">display_hex:
+    ldr r1,=0xE2900020
+
+    ldr r2,=0x30
+    str r2,[r1]            @UTH0='0'
+
+    ldr r2,=0x78
+    str r2,[r1]            @UTH0='x'
+
+    ldr r3,=28           @ 记录右移位数
+
+disphex_loop_cnt:
+    lsr r2, r0, r3          @将r0的数据右移28位，存入r2
+    and r2, r2, #0xF    @ 清除最后一位外的其他位,并存入r2
+    cmp r2,#10
+    addmi   r2,r2,#0x30     @cmp小于10则累加
+    addpl   r2,r2,#0x37     @cmp大于10则累加
+    str r2,[r1]
+
+    sub r3,r3,#4
+    cmp r3,#0
+    bpl disphex_loop_cnt    @若没移位完，继续循环
+
+    ldr r2,=0xA
+    str r2,[r1]     @UTH0='\r'
+
+    ldr r2,=0x0
+    str r2,[r1]     @UTH0='\n'
+
+    mov     pc,lr       @通过bl跳转，故需要将lr1放入pc指针，进行返回
+</code></pre>
+</li>
+<li>uart初始化代码<pre><code class="language-c">    /* for UART */
+    bl	uart_asm_init
+
+    ldr	r0, =0x1234abcd         @内存中要读入的数据
+    bl	display_hex                 @跳转的处理函数
+
+    bl	internal_ram_init
+</code></pre>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="27-ddr内存">2.7 DDR内存</h2>
+<h3 id="271-sram-dram-ddr-sdram存储器的区别">2.7.1 SRAM、DRAM、DDR、SDRAM存储器的区别</h3>
+<p>内存可分为DRAM动态随机存取内存和SRAM静态随机存取内存两种。两种存储器都是挥发性的内存，SRAM的主要使用flip-flop正反器，通常用于快取(Cache)，而DRAM则是使用电容器及晶体管组成。<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202305301025932.png" alt="" loading="lazy"></p>
+<ul>
+<li>SRAM<br>
+SRAM是一种基于触发器的存储器，使用稳定的存储电路来存储和保持数据。每个存储单元由一个存储器单元和控制电路组成，其中<strong>存储器单元由多个触发器构成</strong>，能够存储比特数据。由于采用了触发器结构，SRAM在不断刷新的过程中保持数据的<strong>稳定性</strong>。
+<ul>
+<li>特点：</li>
+</ul>
+<blockquote>
+<p>由于SRAM的存储单元采用稳定的触发器结构，不需要进行定期刷新操作。数据可以一直保持稳定，无需周期性刷新。<br>
+SRAM的访问速度非常快，因为数据存储在触发器中，可以立即读取和写入。SRAM具有较低的访问延迟和高速的读写性能。</p>
+</blockquote>
+<ul>
+<li>用途：</li>
+</ul>
+<blockquote>
+<p>高速缓存</p>
+</blockquote>
+</li>
+<li>DRAM<br>
+DRAM是一种基于电容的存储器，使用<strong>电容来存储和表示数据</strong>。每个存储单元由一个电容和一个访问晶体管组成。电容在存储器中充电或放电来表示数据的0和1。由于电容会逐渐漏电，DRAM需要定期刷新以保持数据的<strong>正确性</strong>。
+<ul>
+<li>特点：</li>
+<li>由于DRAM的电容逐渐漏电，数据需要定期刷新以保持其正确性。DRAM需要通过刷新操作周期性地重新写入数据，否则数据会丢失。</li>
+<li>由于DRAM的电容逐渐漏电，数据需要定期刷新以保持其正确性。DRAM需要通过刷新操作周期性地重新写入数据，否则数据会丢失。</li>
+<li>用途：</li>
+</ul>
+<blockquote>
+<p>内存条</p>
+</blockquote>
+</li>
+<li>DDR</li>
+</ul>
+<blockquote>
+<p>DDR其实指的是DDRSDRAM<br>
+DDR2 是 2 * 2 * SDRAM</p>
+</blockquote>
+<ul>
+<li>SDRAM</li>
+</ul>
+<blockquote>
+<p>同步动态随机存储器</p>
+</blockquote>
+<h3 id="272-ddr在cpu中的架构">2.7.2 DDR在CPU中的架构</h3>
+<p>CPU中DRAM的架构图<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202305301338753.png" alt="" loading="lazy"><br>
+DRAM内部实现结构<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202305301340730.png" alt="" loading="lazy"></p>
+<h3 id="273-ddr内存初始化">2.7.3 DDR内存初始化</h3>
+<h3 id="274-随机存储和顺序存储方式">2.7.4 随机存储和顺序存储方式</h3>
+<p>随机存储：内存，<br>
+顺序存储：机械硬盘，磁带</p>
+<h2 id="28-board_init_f函数分析">2.8 board_init_f函数分析</h2>
+<p>board_init_f：调用c语言函数</p>
+<h3 id="281-堆栈的初始化">2.8.1 堆栈的初始化</h3>
+<p>代码示例：</p>
+<pre><code class="language-c">/* Set stackpointer in internal RAM to call board_init_f */
+call_board_init_f:
+	ldr	sp, =(CONFIG_SYS_INIT_SP_ADDR)                  @初始化堆栈指针
+	bic	sp, sp, #7 /* 8-byte alignment for ABI compliance */   
+	ldr	r0,=0x00000000      @设置函数入口参数
+	bl	board_init_f            @跳转c语言函数，位于：u-boot-2012.10\arch\arm\lib\board.c
+
+</code></pre>
+<h3 id="282-代码分析">2.8.2 代码分析</h3>
+<ul>
+<li>board_init_f代码分析</li>
+<li><code>u-boot-2012.10\arch\arm\include\asm\global_data.h</code>代码分析</li>
+</ul>
+<pre><code class="language-c">#define DECLARE_GLOBAL_DATA_PTR     register volatile gd_t *gd asm (&quot;r8&quot;)
+</code></pre>
+<p><code>register</code>：声明数据存储在寄存器中<br>
+<code>volatile</code>：声明变量不需要进行优化操作<br>
+<code>asm (&quot;r8&quot;)</code>：设置存储的寄存器</p>
+<h2 id="29-mmc_relocate分析">2.9 mmc_relocate分析</h2>
+<h2 id="210-u-boot的镜像结构">2.10 u-boot的镜像结构</h2>
+<h2 id="211-">2.11 -----</h2>
+<h2 id="212-bootm启动流程分析">2.12 bootm启动流程分析</h2>
+<h2 id="213-附加芯片基础知识">2.13 附加——芯片基础知识</h2>
+<h3 id="2131-lowlevel_inits分析">2.13.1 lowlevel_init.S分析</h3>
+<p>参考链接：<a href="https://blog.csdn.net/a1598025967/article/details/106893165">点击此处</a></p>
+<blockquote>
+<p>目录：u-boot-2012.10/board/samsung/goni/lowlevel_init.S<br>
+u-boot-2012.10/arch/arm/cpu/armv7/lowlevel_init.S：弱属性，当没有任何芯片定义对应的<code>lowlevel.S</code>文件时会执行<br>
+u-boot-2012.10/board/samsung/goni/lowlevel_init.S：具体实现不同芯片的初始化代码</p>
+</blockquote>
+<ul>
+<li>
+<p>#include头文件引入符与文件路径不同？<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202305291022318.png" alt="" loading="lazy"></p>
+</li>
+<li>
+<p>EVT1和EVT0？</p>
+<ul>
+<li>EVT(工程验证测试)→DVT(设计验证测试)→MVT(生产验证测试)→PP(中试生产)→MP(导入量产)</li>
+</ul>
+</li>
+<li>
+<p>隐藏寄存器</p>
+</li>
+</ul>
+<pre><code class="language-c">skip_check_didle:
+    ...................
+    /*
+    * Diable ABB block to reduce sleep current at low temperature
+    * Note that it's hidden register setup don't modify it
+    */
+    ldr	r0, =0xE010C300
+    ldr	r1, =0x00800000
+    str	r1, [r0]
+</code></pre>
+<ul>
+<li>IO设置
+<ul>
+<li>初始化ro文件</li>
+</ul>
+<pre><code class="language-c">100:
+    /* IO retension release */
+    ldreq	r0, =S5PC100_OTHERS			@ 0xE0108200            
+    ldrne	r0, =S5PC110_OTHERS			@ 0xE010E000
+    .......................
+</code></pre>
+<blockquote>
+<p>S5PC100_OTHERS和S5PC110_OTHERS：定义在<code>u-boot-2012.10/arch/arm/include/asm/arch-s5pc1xx/power.h</code>头文件中</p>
+</blockquote>
+</li>
+<li>设置看门狗（watch timer）程序</li>
+</ul>
+<pre><code class="language-c">100:
+    ..................
+    /* Disable Watchdog */
+    ldreq	r0, =S5PC100_WATCHDOG_BASE		@ 0xEA200000
+    ldrne	r0, =S5PC110_WATCHDOG_BASE		@ 0xE2700000
+    str	r5, [r0]
+    ...................
+</code></pre>
+<ul>
+<li>设置SRAM</li>
+</ul>
+<blockquote>
+<p>RAM可分为<strong>静态存储器</strong>（Static Random Access Memory,SRAM）和<strong>动态存储器</strong>（Dynamic Random Access Memory）。SRAM中的存储单元相当于一个锁存器，只有0，1两个稳态；DRAM则是利用电容存储电荷来保存0和1两种状态，因此需要定时对其进行刷新，否则随着时间的推移，电容其中存储的电荷将逐渐消失。<br>
+<strong>SRAM</strong>：读写速度快，生产成本高，多用于容量较小的高速缓冲存储器。<br>
+<strong>DRAM</strong>：读写速度较慢，集成度高，生产成本低，多用于容量较大的主存储器。</p>
+</blockquote>
+<pre><code class="language-c">100:
+    .................
+	/* setting SRAM */
+	ldreq	r0, =S5PC100_SROMC_BASE
+	ldrne	r0, =S5PC110_SROMC_BASE
+	ldr	r1, =0x9
+	str	r1, [r0]
+    ...................
+</code></pre>
+<ul>
+<li>
+<p>设置中断IRQ和FRQ等中断</p>
+</li>
+<li>
+<p>UART初始化代码分析</p>
+</li>
+</ul>
+
+          <div class="toc-container"><ul class="markdownIt-TOC">
+<li><a href="#1-uboot%E7%9A%84%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86">1. uboot的基础知识</a>
+<ul>
+<li><a href="#11-uboot%E7%9A%84cpu%E5%88%9D%E5%A7%8B%E7%9B%AE%E5%BD%95">1.1 uboot的cpu初始目录</a></li>
+<li><a href="#12-uboot%E7%BC%96%E8%AF%91%E7%9A%84config%E6%96%87%E4%BB%B6">1.2 uboot编译的config文件</a></li>
+</ul>
+</li>
+<li><a href="#2-uboot%E7%9A%84%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90">2. uboot的源码分析</a>
+<ul>
+<li><a href="#21-uboot%E7%94%9F%E6%88%90%E6%96%87%E4%BB%B6%E5%8F%8D%E6%B1%87%E7%BC%96%E5%88%86%E6%9E%90">2.1 uboot生成文件反汇编分析</a></li>
+<li><a href="#22-entry%E7%AD%89%E5%AE%8F%E5%B1%95%E5%BC%80cpsr%E5%AF%84%E5%AD%98%E5%99%A8%E8%AE%BE%E7%BD%AE">2.2 ENTRY等宏展开，CPSR寄存器设置</a>
+<ul>
+<li><a href="#221-entryendproc%E5%AE%8F%E7%9A%84%E5%B1%95%E5%BC%80">2.2.1 ENTRY，ENDPROC宏的展开</a></li>
+<li><a href="#222-cpsr%E5%AF%84%E5%AD%98%E5%99%A8%E8%AE%BE%E7%BD%AE">2.2.2 CPSR寄存器设置</a></li>
+</ul>
+</li>
+<li><a href="#23-cp15%E5%8D%8F%E5%A4%84%E7%90%86%E5%99%A8%E5%9F%BA%E7%A1%80">2.3 CP15协处理器基础</a>
+<ul>
+<li><a href="#231-vbar%E5%BC%82%E5%B8%B8%E5%90%91%E9%87%8F%E8%A1%A8%E5%9F%BA%E5%9D%80%E6%98%A0%E5%B0%84">2.3.1 VBAR异常向量表基址映射</a></li>
+<li><a href="#232-cp15%E5%AD%90%E8%BF%87%E7%A8%8B%E5%88%86%E6%9E%90cache%E6%93%8D%E4%BD%9C">2.3.2 CP15子过程分析——cache操作</a></li>
+<li><a href="#233-cp15%E5%AD%90%E8%BF%87%E7%A8%8B%E5%88%86%E6%9E%90%E5%88%86%E6%94%AF%E9%A2%84%E6%B5%8Bmmu%E6%93%8D%E4%BD%9C">2.3.3 CP15子过程分析——分支预测，MMU操作</a>
+<ul>
+<li><a href="#2331-%E5%88%86%E6%94%AF%E9%A2%84%E6%B5%8B">2.3.3.1 分支预测</a></li>
+<li><a href="#2332-mmu%E6%93%8D%E4%BD%9C">2.3.3.2 MMU操作</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#24-cpu_initcrit%E5%AD%90%E8%BF%87%E7%A8%8B%E5%88%86%E6%9E%90">2.4 cpu_initcrit子过程分析</a>
+<ul>
+<li><a href="#241-led%E6%98%BE%E7%A4%BA%E5%90%AF%E5%8A%A8%E8%BF%90%E8%A1%8C%E7%8A%B6%E6%80%81">2.4.1 LED显示启动运行状态</a></li>
+<li><a href="#242-gpio%E7%94%B5%E8%B7%AF%E5%88%86%E6%9E%90">2.4.2 GPIO电路分析</a></li>
+<li><a href="#243-u-boot%E7%83%A7%E5%BD%95%E9%95%9C%E5%83%8F%E5%88%86%E6%9E%90">2.4.3 u-boot烧录镜像分析</a></li>
+</ul>
+</li>
+<li><a href="#25-%E7%BC%96%E5%86%99%E8%87%AA%E5%B7%B1%E7%9A%84boot%E7%A8%8B%E5%BA%8F">2.5 编写自己的boot程序</a>
+<ul>
+<li><a href="#251-gcc%E7%BC%96%E8%AF%91%E8%BF%87%E7%A8%8B%E8%AF%A6%E8%A7%A3">2.5.1 gcc编译过程详解</a></li>
+<li><a href="#252-%E6%96%87%E4%BB%B6%E9%93%BE%E6%8E%A5%E8%BF%87%E7%A8%8B">2.5.2 文件链接过程</a></li>
+<li><a href="#253-makefile%E5%91%BD%E4%BB%A4">2.5.3 Makefile命令</a></li>
+</ul>
+</li>
+<li><a href="#26-uart%E5%88%86%E6%9E%90">2.6 UART分析</a>
+<ul>
+<li><a href="#261-%E5%BC%82%E6%AD%A5%E9%80%9A%E4%BF%A1uart%E5%92%8C%E5%90%8C%E6%AD%A5%E9%80%9A%E4%BF%A1spi%E6%A6%82%E5%BF%B5">2.6.1 异步通信（UART）和同步通信（SPI）概念</a></li>
+<li><a href="#262-uart%E6%97%B6%E9%92%9F%E9%A2%91%E7%8E%87%E9%85%8D%E7%BD%AE">2.6.2 UART时钟频率配置</a></li>
+<li><a href="#263-%E5%8F%AF%E8%83%BD%E5%AD%98%E5%9C%A8%E9%97%AE%E9%A2%98">2.6.3 可能存在问题</a></li>
+<li><a href="#264-uart%E6%98%BE%E7%A4%BA%E5%86%85%E5%AD%98%E4%B8%AD%E6%95%B0%E6%8D%AE">2.6.4 UART显示内存中数据</a></li>
+</ul>
+</li>
+<li><a href="#27-ddr%E5%86%85%E5%AD%98">2.7 DDR内存</a>
+<ul>
+<li><a href="#271-sram-dram-ddr-sdram%E5%AD%98%E5%82%A8%E5%99%A8%E7%9A%84%E5%8C%BA%E5%88%AB">2.7.1 SRAM、DRAM、DDR、SDRAM存储器的区别</a></li>
+<li><a href="#272-ddr%E5%9C%A8cpu%E4%B8%AD%E7%9A%84%E6%9E%B6%E6%9E%84">2.7.2 DDR在CPU中的架构</a></li>
+<li><a href="#273-ddr%E5%86%85%E5%AD%98%E5%88%9D%E5%A7%8B%E5%8C%96">2.7.3 DDR内存初始化</a></li>
+<li><a href="#274-%E9%9A%8F%E6%9C%BA%E5%AD%98%E5%82%A8%E5%92%8C%E9%A1%BA%E5%BA%8F%E5%AD%98%E5%82%A8%E6%96%B9%E5%BC%8F">2.7.4 随机存储和顺序存储方式</a></li>
+</ul>
+</li>
+<li><a href="#28-board_init_f%E5%87%BD%E6%95%B0%E5%88%86%E6%9E%90">2.8 board_init_f函数分析</a>
+<ul>
+<li><a href="#281-%E5%A0%86%E6%A0%88%E7%9A%84%E5%88%9D%E5%A7%8B%E5%8C%96">2.8.1 堆栈的初始化</a></li>
+<li><a href="#282-%E4%BB%A3%E7%A0%81%E5%88%86%E6%9E%90">2.8.2 代码分析</a></li>
+</ul>
+</li>
+<li><a href="#29-mmc_relocate%E5%88%86%E6%9E%90">2.9 mmc_relocate分析</a></li>
+<li><a href="#210-u-boot%E7%9A%84%E9%95%9C%E5%83%8F%E7%BB%93%E6%9E%84">2.10 u-boot的镜像结构</a></li>
+<li><a href="#211-">2.11 -----</a></li>
+<li><a href="#212-bootm%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90">2.12 bootm启动流程分析</a></li>
+<li><a href="#213-%E9%99%84%E5%8A%A0%E8%8A%AF%E7%89%87%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86">2.13 附加——芯片基础知识</a>
+<ul>
+<li><a href="#2131-lowlevel_inits%E5%88%86%E6%9E%90">2.13.1 lowlevel_init.S分析</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+          
+          <hr />
+          <p class="next-post">下一篇：
+            <a href="https://xstarling.github.io/7nr0vBgCD/">
+              <span class="post-title">
+                uboot编译过程学习&rarr;
+              </span>
+            </a>
+          </p>
+          
+          <div class="comment" style="text-align: center;">
+            
+
+            
+            
+            <script src='https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js'></script>
+
+<style>
+	div#vcomments{
+		width:100%;
+		max-width: 1000px;
+		padding: 2.5%
+	}
+</style>
+
+
+	<div id="vcomments"></div>
+
+<script>
+	new Valine({
+		el: '#vcomments',
+		appId: 'Y2b59ZcCnZeowrhGKsweiviD-gzGzoHsz',
+		appKey: 'BpGUAoWRmemmVYU1cqKSUoSO',
+		avatar: '',
+		pageSize: 5,
+		recordIp: false,
+		placeholder: '请留下你的建议...',
+		visitor: false,
+	});
+</script>
+
+            
+          </div>
+        </div>
+      </div>
+  </article>
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+            <li class="list-inline-item">
+              <a href="https://github.com/xstarling" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fab fa-github fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+            </li>
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <!-- <li class="list-inline-item">
+              <a href="https://xstarling.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li> -->
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>林星</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://xstarling.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://xstarling.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));</script>
+  <!-- 更新图片的url请求头路径 -->
+  <script src="https://xstarling.github.io/media/scripts/imagePathScript.js"></script>
+  <input id="oldimagepath" name="oldimagepath" value="https://33373sl116.zicp.fun/image-blog" type="hidden" />
+  <input id="newimagepath" name="newimagepath" value="https://33373sl116.zicp.fun/image-blog" type="hidden" />
+  
+  <div id="landlord-parent">
+    <div id="landlord">
+        <div class="message" style="opacity:0"></div>
+        <canvas id="live2d" width="240" height="250" class="live2d"></canvas>
+    </div>
+</div>
+
+<script type="text/javascript">
+    if (/(iPhone|iPad|iPod|iOS|Android)/i.test(navigator.userAgent)) {
+        //移动端
+        console.log("------ 移动端");
+    } else {
+        console.log("------ PC端 " + navigator.userAgent);
+
+        addScript("https://cdn.jsdelivr.net/gh/850552586/ericamcdn@0.1/js/live2d.js", () => {
+            // 加载完成后再loadlive2d
+            loadlive2d("live2d", "https://xstarling.github.io/media/live2d/assets/hijiki.model.json");
+        });
+
+        var home_Path = "https://xstarling.github.io/";
+        addScript("https://xstarling.github.io/media/live2d/js/message.js", () => { });
+    }
+
+    // 插入js文件，完成后callback
+    function addScript(jsfile, callback) {
+        var landlord_parent = document.getElementById("landlord-parent");
+        var script = document.createElement("script");
+        script.type = "text/javascript";
+        script.src = jsfile;
+        landlord_parent.appendChild(script);
+        script.onload = script.onreadystatechange = function () {
+            if (!this.readyState || this.readyState === "loaded" || this.readyState === "complete") {
+                script.onload = script.onreadystatechange = null;
+                if (callback && typeof callback == "function") {
+                    callback(); //window[callback]();如果传递字符串过来 调用window['函数名']() 调用方法
+                }
+            }
+        };
+    }
+</script>
+  
+  <script src="https://xstarling.github.io/media/scripts/tocScript.js"></script>
+
+</body>
+
+</html>

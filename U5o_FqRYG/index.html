@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta content="yes" name="apple-mobile-web-app-capable" />
+<meta content="black" name="apple-mobile-web-app-status-bar-style" />
+<meta name="referrer" content="never">
+<meta name="keywords" content="">
+<meta name="description" content="欢迎访问[林星]的个人博客">
+<meta name="author" content="kveln">
+<title>java中HashMap的负载因子 | 林星</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css">
+<link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+<link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+<link
+  href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800'
+  rel='stylesheet' type='text/css'>
+<link rel="alternate" type="application/rss+xml" title="java中HashMap的负载因子 | 林星 » Feed"
+  href="https://xstarling.github.io/atom.xml">
+<link rel="stylesheet"
+  href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+<link href="https://xstarling.github.io/styles/main.css" rel="stylesheet">
+<script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets/highlight.min.js"></script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/850552586/ericamcdn@0.1/css/live2d.css">
+
+<script>hljs.initHighlightingOnLoad();</script>
+
+  <meta property="og:description" content="java中HashMap的负载因子" />
+  <meta property="og:url" content="https://xstarling.github.io/U5o_FqRYG/" />
+  <meta property="og:locale" content="zh-CN" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="林星" />
+  <!-- <script src="../assets/styles/scripts/tocScript.js"></script> -->
+</head>
+
+<body>
+  <!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+  <div class="container">
+    <a class="navbar-brand" href="https://xstarling.github.io">林星</a>
+    <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse"
+      data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false"
+      aria-label="Toggle navigation">
+      Menu
+      <i class="fas fa-bars"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarResponsive">
+      <ul class="navbar-nav ml-auto">
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/">首页</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/archives">归档</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/tags">标签</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/friends">友链</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/about-starling">关于</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          <div class="gridea-search-container">
+            <form id="gridea-search-form" style="position: relative" data-update="1686458398465"
+              action="/search/index.html">
+              <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+              <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+  <!-- Page Header -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+  <div class="container">
+    <a class="navbar-brand" href="https://xstarling.github.io">林星</a>
+    <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse"
+      data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false"
+      aria-label="Toggle navigation">
+      Menu
+      <i class="fas fa-bars"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarResponsive">
+      <ul class="navbar-nav ml-auto">
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/">首页</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/archives">归档</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/tags">标签</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/friends">友链</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/about-starling">关于</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          <div class="gridea-search-container">
+            <form id="gridea-search-form" style="position: relative" data-update="1686458398465"
+              action="/search/index.html">
+              <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+              <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+<header class="masthead" style="background-image: url('https://xstarling.github.io/media/images/home-bg.jpg')">
+  <div class="overlay"></div>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-md-10 mx-auto">
+        
+          <!-- 没Title为其他页面Header -->
+          
+            <!-- 没Title并且有headerType为Post：文章Header -->
+            <div class="post-heading">
+              <span class="tags">
+                
+              </span>
+              <h1>java中HashMap的负载因子</h1>
+              <span class="meta">
+                Posted on
+                2023-05-20，5 min read
+              </span>
+            </div>
+          
+        
+      </div>
+    </div>
+  </div>
+</header>
+  <!-- Post Content -->
+  <article id="post-content-article">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto post-content-container">
+          
+          <h2 id="1-什么负载因子loadfactor">1. 什么负载因子（loadFactor）?</h2>
+<blockquote>
+<p>负载因子（loadFactor）：当存储的数据占总容量的比例，取值范围（0,1）<br>
+容量（capacity）：hashMap可以存储多少个数据，取值范围[0，MAX_VALUE]，MAX_VALUE:为计算机最大整数值</p>
+</blockquote>
+<ul>
+<li><strong>HashMap中数据量存储扩容机制</strong><br>
+第一次创建 HashMap 的时候，就会指定其容量（如果未明确指定，默认是 16），那随着我们不断的向 HashMap 中 put 元素的时候，若数据超过某个阀值（threshold）时，就需要提前对HashMap申请一些新的空间存储数据，存储未来可能需要put的元素。
+<blockquote>
+<ul>
+<li><strong>阀值如何确定呢？</strong><br>
+阀值（threshold） = 总容量（capacity） x 负载因子（loadFactor）</li>
+</ul>
+</blockquote>
+</li>
+<li><strong>HashMap扩容具体示例</strong><pre><code class="language-java">void addEntry(int hash, K key, V value, int bucketIndex) {
+    if ((size &gt;= threshold) &amp;&amp; (null != table[bucketIndex])) {
+        resize(2 * table.length);
+        hash = (null != key) ? hash(key) : 0;
+        bucketIndex = indexFor(hash, table.length);
+    }
+    createEntry(hash, key, value, bucketIndex);
+}
+</code></pre>
+从代码中我们可以看到，在向 HashMap 中添加元素过程中，如果 元素个数（size）超过临界值（threshold） 的时候，就会进行自动扩容（resize），并且，在扩容之后，还需要对 HashMap 中原有元素进行 rehash，即将原来桶中的元素重新分配到新的桶中。</li>
+</ul>
+<h2 id="2hashmap为什么要扩容呢">2.HashMap为什么要扩容呢？</h2>
+<pre><code>  提示：HashMap 在扩容到过程中不仅要对其容量进行扩充，还需要进行 rehash！所以，这个过程其实是很耗时的，并且 Map 中元素越多越耗时。
+  rehash 的过程相当于对其中所有的元素重新做一遍 hash，重新计算要分配到那个桶中。
+</code></pre>
+<ul>
+<li>
+<p><strong>为什么还要扩容呢？</strong></p>
+<blockquote>
+<p>原因：哈希冲突</p>
+</blockquote>
+<p>我们知道，HashMap 其实是底层基于哈希函数实现的，但是哈希函数都有如下一个基本特性：根据同一哈希函数计算出的哈希值如果不同，那么输入值肯定也不同。但是，根据同一哈希函数计算出的哈希值如果相同，输入值不一定相同。<br>
+两个不同的输入值，根据同一哈希函数计算出的哈希值相同的现象叫做碰撞。<br>
+衡量一个哈希函数的好坏的重要指标就是发生碰撞的概率以及发生碰撞的解决方案。<br>
+而为了解决哈希碰撞，有很多<a href="https://www.jianshu.com/p/4d3cb99d7580">办法</a>，HashMap采用数组+链表方法。如下图：<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202305201153911.png" alt="hashMap底层原理图" loading="lazy"></p>
+</li>
+<li>
+<p><strong>如何避免哈希冲突？</strong></p>
+<ul>
+<li><strong>哈希冲突的原因：</strong>
+<ul>
+<li>容量太小。容量小，碰撞的概率就高了。狼多肉少，就会发生争抢</li>
+<li>hash 算法不够好。算法不合理，就可能都分到同一个或几个桶中。分配不均，也会发生争抢。</li>
+</ul>
+</li>
+<li><strong>解决方案</strong>
+<ul>
+<li><a href="https://www.cnblogs.com/gongcheng-/p/10894205.html">经典hash冲突解决参考方法</a></li>
+<li>针对HashMap来说，上述两种原因的解决方法相结合，在合适的时候扩大数组容量，再通过一个合适的 hash 算法计算元素分配到哪个数组中，就可以大大的减少冲突的概率，就能避免查询效率低下的问题。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="3为什么默认负载因子loadfactor是075">3.为什么默认负载因子（loadFactor）是0.75？</h2>
+<ul>
+<li>
+<p><strong>JDK官方文档描述</strong></p>
+<pre><code class="language-java">As a general rule, the default load factor (.75) offers a good tradeoff 
+between time and space costs. Higher values decrease the space overhead 
+but increase the lookup cost (reflected in most of the operations of the 
+HashMap class, including get and put).
+</code></pre>
+<p>意思： 一般来说，默认的负载因子 (0.75) 在时间和空间成本之间提供了很好的权衡。更高的值减少了空间开销，但增加了查找成本(反映在 HashMap 类的大多数操作中，包括 get 和 put)。    <br><br>
+其他原因：还有个原因是计算机使用二进制，为了保证负载因子（loadFactor） * 容量（capacity）的结果是一个整数，则就需要找与2的幂乘积结果都是整数的负载因子，这值是 0.75(3/4)且接近于log(2),故比较合理。参考自<a href="https://www.jianshu.com/p/effb601f2c48">原文</a><br></p>
+</li>
+<li>
+<p><strong>若负载因子为1呢？</strong><br>
+如果我们把负载因子设置成 1，容量使用默认初始值 16，那么表示一个 HashMap在存储空间用完之后才会进行扩容。那么在 HashMap 中，最好的情况是这 16 个元素通过 hash 算法之后分别落到了 16 个不同的桶中，否则就必然发生哈希碰撞。而且随着元素越多，哈希碰撞的概率越大，查找速度也会越低。</p>
+</li>
+</ul>
+
+          <div class="toc-container"><ul class="markdownIt-TOC">
+<li>
+<ul>
+<li><a href="#1-%E4%BB%80%E4%B9%88%E8%B4%9F%E8%BD%BD%E5%9B%A0%E5%AD%90loadfactor">1. 什么负载因子（loadFactor）?</a></li>
+<li><a href="#2hashmap%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E6%89%A9%E5%AE%B9%E5%91%A2">2.HashMap为什么要扩容呢？</a></li>
+<li><a href="#3%E4%B8%BA%E4%BB%80%E4%B9%88%E9%BB%98%E8%AE%A4%E8%B4%9F%E8%BD%BD%E5%9B%A0%E5%AD%90loadfactor%E6%98%AF075">3.为什么默认负载因子（loadFactor）是0.75？</a></li>
+</ul>
+</li>
+</ul>
+</div>
+          
+          <hr />
+          <p class="next-post">下一篇：
+            <a href="https://xstarling.github.io/imx6ull-de-uboot-he-kernel-bian-yi-qi-dong/">
+              <span class="post-title">
+                开发板的uboot和kernel编译启动&rarr;
+              </span>
+            </a>
+          </p>
+          
+          <div class="comment" style="text-align: center;">
+            
+
+            
+            
+            <script src='https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js'></script>
+
+<style>
+	div#vcomments{
+		width:100%;
+		max-width: 1000px;
+		padding: 2.5%
+	}
+</style>
+
+
+	<div id="vcomments"></div>
+
+<script>
+	new Valine({
+		el: '#vcomments',
+		appId: 'Y2b59ZcCnZeowrhGKsweiviD-gzGzoHsz',
+		appKey: 'BpGUAoWRmemmVYU1cqKSUoSO',
+		avatar: '',
+		pageSize: 5,
+		recordIp: false,
+		placeholder: '请留下你的建议...',
+		visitor: false,
+	});
+</script>
+
+            
+          </div>
+        </div>
+      </div>
+  </article>
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+            <li class="list-inline-item">
+              <a href="https://github.com/xstarling" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fab fa-github fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+            </li>
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <!-- <li class="list-inline-item">
+              <a href="https://xstarling.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li> -->
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>林星</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://xstarling.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://xstarling.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));</script>
+  <!-- 更新图片的url请求头路径 -->
+  <script src="https://xstarling.github.io/media/scripts/imagePathScript.js"></script>
+  <input id="oldimagepath" name="oldimagepath" value="https://33373sl116.zicp.fun/image-blog" type="hidden" />
+  <input id="newimagepath" name="newimagepath" value="https://33373sl116.zicp.fun/image-blog" type="hidden" />
+  
+  <div id="landlord-parent">
+    <div id="landlord">
+        <div class="message" style="opacity:0"></div>
+        <canvas id="live2d" width="240" height="250" class="live2d"></canvas>
+    </div>
+</div>
+
+<script type="text/javascript">
+    if (/(iPhone|iPad|iPod|iOS|Android)/i.test(navigator.userAgent)) {
+        //移动端
+        console.log("------ 移动端");
+    } else {
+        console.log("------ PC端 " + navigator.userAgent);
+
+        addScript("https://cdn.jsdelivr.net/gh/850552586/ericamcdn@0.1/js/live2d.js", () => {
+            // 加载完成后再loadlive2d
+            loadlive2d("live2d", "https://xstarling.github.io/media/live2d/assets/hijiki.model.json");
+        });
+
+        var home_Path = "https://xstarling.github.io/";
+        addScript("https://xstarling.github.io/media/live2d/js/message.js", () => { });
+    }
+
+    // 插入js文件，完成后callback
+    function addScript(jsfile, callback) {
+        var landlord_parent = document.getElementById("landlord-parent");
+        var script = document.createElement("script");
+        script.type = "text/javascript";
+        script.src = jsfile;
+        landlord_parent.appendChild(script);
+        script.onload = script.onreadystatechange = function () {
+            if (!this.readyState || this.readyState === "loaded" || this.readyState === "complete") {
+                script.onload = script.onreadystatechange = null;
+                if (callback && typeof callback == "function") {
+                    callback(); //window[callback]();如果传递字符串过来 调用window['函数名']() 调用方法
+                }
+            }
+        };
+    }
+</script>
+  
+  <script src="https://xstarling.github.io/media/scripts/tocScript.js"></script>
+
+</body>
+
+</html>

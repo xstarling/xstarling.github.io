@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta content="yes" name="apple-mobile-web-app-capable" />
+<meta content="black" name="apple-mobile-web-app-status-bar-style" />
+<meta name="referrer" content="never">
+<meta name="keywords" content="">
+<meta name="description" content="欢迎访问[林星]的个人博客">
+<meta name="author" content="kveln">
+<title>开发板的uboot和kernel编译启动 | 林星</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css">
+<link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+<link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+<link
+  href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800'
+  rel='stylesheet' type='text/css'>
+<link rel="alternate" type="application/rss+xml" title="开发板的uboot和kernel编译启动 | 林星 » Feed"
+  href="https://xstarling.github.io/atom.xml">
+<link rel="stylesheet"
+  href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+<link href="https://xstarling.github.io/styles/main.css" rel="stylesheet">
+<script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets/highlight.min.js"></script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/850552586/ericamcdn@0.1/css/live2d.css">
+
+<script>hljs.initHighlightingOnLoad();</script>
+
+  <meta property="og:description" content="开发板的uboot和kernel编译启动" />
+  <meta property="og:url" content="https://xstarling.github.io/imx6ull-de-uboot-he-kernel-bian-yi-qi-dong/" />
+  <meta property="og:locale" content="zh-CN" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="林星" />
+  <!-- <script src="../assets/styles/scripts/tocScript.js"></script> -->
+</head>
+
+<body>
+  <!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+  <div class="container">
+    <a class="navbar-brand" href="https://xstarling.github.io">林星</a>
+    <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse"
+      data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false"
+      aria-label="Toggle navigation">
+      Menu
+      <i class="fas fa-bars"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarResponsive">
+      <ul class="navbar-nav ml-auto">
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/">首页</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/archives">归档</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/tags">标签</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/friends">友链</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/about-starling">关于</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          <div class="gridea-search-container">
+            <form id="gridea-search-form" style="position: relative" data-update="1686458398465"
+              action="/search/index.html">
+              <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+              <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+  <!-- Page Header -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+  <div class="container">
+    <a class="navbar-brand" href="https://xstarling.github.io">林星</a>
+    <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse"
+      data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false"
+      aria-label="Toggle navigation">
+      Menu
+      <i class="fas fa-bars"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarResponsive">
+      <ul class="navbar-nav ml-auto">
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/">首页</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/archives">归档</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/tags">标签</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/friends">友链</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/about-starling">关于</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          <div class="gridea-search-container">
+            <form id="gridea-search-form" style="position: relative" data-update="1686458398465"
+              action="/search/index.html">
+              <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+              <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+<header class="masthead" style="background-image: url('https://xstarling.github.io/media/images/home-bg.jpg')">
+  <div class="overlay"></div>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-md-10 mx-auto">
+        
+          <!-- 没Title为其他页面Header -->
+          
+            <!-- 没Title并且有headerType为Post：文章Header -->
+            <div class="post-heading">
+              <span class="tags">
+                
+              </span>
+              <h1>开发板的uboot和kernel编译启动</h1>
+              <span class="meta">
+                Posted on
+                2023-05-09，3 min read
+              </span>
+            </div>
+          
+        
+      </div>
+    </div>
+  </div>
+</header>
+  <!-- Post Content -->
+  <article id="post-content-article">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto post-content-container">
+          
+          <h2 id="umx6ull">umx6ull</h2>
+<h3 id="资料准备">资料准备</h3>
+<p>imx6ull现在已经将源代码放到github仓库了，<code>source.codeaurora.org</code>这个已经弃用了<br>
+代码迁移到github的解释：<a href="https://community.nxp.com/t5/i-MX-Processors/source-codeaurora-org-is-closed-where-is-the-nxp-source-code-how/m-p/1627753#M203723">点击此处</a><br>
+git仓库地址：<a href="https://github.com/nxp-imx">点击此处</a></p>
+<h3 id="内核编译详细说明">内核编译详细说明</h3>
+<p>关于内核编译共性，详细说明，请参考<a href="../linux_kernel_compiler">内核编译这篇文章</a></p>
+<h3 id="kernel编译">kernel编译</h3>
+<h4 id="编译内核文件">编译内核文件</h4>
+<pre><code class="language-sh">    # 设置自己开发版对应的cpu架构，arm或其他（也可以直接配置到环境变量中）
+    export ARCH=arm
+    export CROSS_COMPILE=arm-none-linux-gnueabihf-
+    export PATH=$PATH:交叉编译工具的bin目录 （如：/home/software/tools/gcc-arm-10.2-2020.11-aarch64-arm-none-linux-gnueab/bin）
+    # 切换到内核源码根目录
+    cd linux-imx
+    make mrproper   #移除之前编译生成的文件和配置文件，备份文件等
+    # 制作开发板对应的配置文件
+    # defconfig：一般位于linux-4.9.88/arch/$ARCH/configs/这个目录下
+    make imx_v7_defconfig
+    # 使用make menuconfig，对make imx_v7_defconfig进行调整修改
+    make menuconfig     （可选）
+
+    # 编译内核：编译得到的输出文件在linux-4.9.88/arch/$ARCH/boot/目录下
+    make zImage -j4
+</code></pre>
+<h5 id="错误解决">错误解决</h5>
+<ol>
+<li>问题一
+<blockquote>
+<p>/usr/bin/ld: scripts/dtc/dtc-parser.tab.o:(.bss+0x10): multiple definition of `yylloc'; scripts/dtc/dtc-lexer.lex.o:(.bss+0x0): first defined here collect2: error: ld returned 1 exit status</p>
+</blockquote>
+</li>
+</ol>
+<ul>
+<li>问题原因：
+<blockquote>
+<p>gcc版本过高</p>
+</blockquote>
+</li>
+<li>解决方案：
+<blockquote>
+<ul>
+<li>scripts/dtc/dtc-lexer.lex.c文件进行编辑，找到<code>YYLTYPE yylloc</code> 在前面添加<code>extern</code>关键字，保存退出，然后执行<code>make clean</code> 清除之前编译的文件，再执行<code>make</code>进行编译</li>
+<li>scripts/dtc/dtc-lexer.lex.c文件，位于当前编译的内核源码目录的根目录中</li>
+</ul>
+</blockquote>
+</li>
+</ul>
+<ol start="2">
+<li>问题二
+<blockquote>
+<p>/bin/sh: 1: lzop：not found</p>
+</blockquote>
+</li>
+</ol>
+<ul>
+<li>问题原因：<br>
+没有lzop库</li>
+<li>解决方案：<br>
+<code>sudo apt install lzop</code></li>
+</ul>
+<h5 id="补充说明">补充说明</h5>
+<pre><code>&gt; make Image，make zImage，make uImage的区别与解释说明，[点击此处]( https://blog.csdn.net/LEON1741/article/details/54809347)
+&gt; make zImage -j4：中`-j4`表示指定4个内核进行编译速度比较快（不是越多越好，具体根据自己的开发板选择）
+</code></pre>
+<h4 id="编译设备树">编译设备树</h4>
+<pre><code class="language-sh">    make dtbs
+</code></pre>
+<h4 id="编译模块驱动">编译模块驱动</h4>
+<pre><code class="language-sh">    # 编译模块
+    make modules
+    # 安装模块
+    make INSTALL_MOD_PATH=module的path modules_install
+</code></pre>
+<h3 id="uboot编译">uboot编译</h3>
+
+          <div class="toc-container"><ul class="markdownIt-TOC">
+<li>
+<ul>
+<li><a href="#umx6ull">umx6ull</a>
+<ul>
+<li><a href="#%E8%B5%84%E6%96%99%E5%87%86%E5%A4%87">资料准备</a></li>
+<li><a href="#%E5%86%85%E6%A0%B8%E7%BC%96%E8%AF%91%E8%AF%A6%E7%BB%86%E8%AF%B4%E6%98%8E">内核编译详细说明</a></li>
+<li><a href="#kernel%E7%BC%96%E8%AF%91">kernel编译</a>
+<ul>
+<li><a href="#%E7%BC%96%E8%AF%91%E5%86%85%E6%A0%B8%E6%96%87%E4%BB%B6">编译内核文件</a>
+<ul>
+<li><a href="#%E9%94%99%E8%AF%AF%E8%A7%A3%E5%86%B3">错误解决</a></li>
+<li><a href="#%E8%A1%A5%E5%85%85%E8%AF%B4%E6%98%8E">补充说明</a></li>
+</ul>
+</li>
+<li><a href="#%E7%BC%96%E8%AF%91%E8%AE%BE%E5%A4%87%E6%A0%91">编译设备树</a></li>
+<li><a href="#%E7%BC%96%E8%AF%91%E6%A8%A1%E5%9D%97%E9%A9%B1%E5%8A%A8">编译模块驱动</a></li>
+</ul>
+</li>
+<li><a href="#uboot%E7%BC%96%E8%AF%91">uboot编译</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+          
+          <hr />
+          <p class="next-post">下一篇：
+            <a href="https://xstarling.github.io/qemu-shi-yong/">
+              <span class="post-title">
+                QEMU使用&rarr;
+              </span>
+            </a>
+          </p>
+          
+          <div class="comment" style="text-align: center;">
+            
+
+            
+            
+            <script src='https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js'></script>
+
+<style>
+	div#vcomments{
+		width:100%;
+		max-width: 1000px;
+		padding: 2.5%
+	}
+</style>
+
+
+	<div id="vcomments"></div>
+
+<script>
+	new Valine({
+		el: '#vcomments',
+		appId: 'Y2b59ZcCnZeowrhGKsweiviD-gzGzoHsz',
+		appKey: 'BpGUAoWRmemmVYU1cqKSUoSO',
+		avatar: '',
+		pageSize: 5,
+		recordIp: false,
+		placeholder: '请留下你的建议...',
+		visitor: false,
+	});
+</script>
+
+            
+          </div>
+        </div>
+      </div>
+  </article>
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+            <li class="list-inline-item">
+              <a href="https://github.com/xstarling" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fab fa-github fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+            </li>
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <!-- <li class="list-inline-item">
+              <a href="https://xstarling.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li> -->
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>林星</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://xstarling.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://xstarling.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));</script>
+  <!-- 更新图片的url请求头路径 -->
+  <script src="https://xstarling.github.io/media/scripts/imagePathScript.js"></script>
+  <input id="oldimagepath" name="oldimagepath" value="https://33373sl116.zicp.fun/image-blog" type="hidden" />
+  <input id="newimagepath" name="newimagepath" value="https://33373sl116.zicp.fun/image-blog" type="hidden" />
+  
+  <div id="landlord-parent">
+    <div id="landlord">
+        <div class="message" style="opacity:0"></div>
+        <canvas id="live2d" width="240" height="250" class="live2d"></canvas>
+    </div>
+</div>
+
+<script type="text/javascript">
+    if (/(iPhone|iPad|iPod|iOS|Android)/i.test(navigator.userAgent)) {
+        //移动端
+        console.log("------ 移动端");
+    } else {
+        console.log("------ PC端 " + navigator.userAgent);
+
+        addScript("https://cdn.jsdelivr.net/gh/850552586/ericamcdn@0.1/js/live2d.js", () => {
+            // 加载完成后再loadlive2d
+            loadlive2d("live2d", "https://xstarling.github.io/media/live2d/assets/hijiki.model.json");
+        });
+
+        var home_Path = "https://xstarling.github.io/";
+        addScript("https://xstarling.github.io/media/live2d/js/message.js", () => { });
+    }
+
+    // 插入js文件，完成后callback
+    function addScript(jsfile, callback) {
+        var landlord_parent = document.getElementById("landlord-parent");
+        var script = document.createElement("script");
+        script.type = "text/javascript";
+        script.src = jsfile;
+        landlord_parent.appendChild(script);
+        script.onload = script.onreadystatechange = function () {
+            if (!this.readyState || this.readyState === "loaded" || this.readyState === "complete") {
+                script.onload = script.onreadystatechange = null;
+                if (callback && typeof callback == "function") {
+                    callback(); //window[callback]();如果传递字符串过来 调用window['函数名']() 调用方法
+                }
+            }
+        };
+    }
+</script>
+  
+  <script src="https://xstarling.github.io/media/scripts/tocScript.js"></script>
+
+</body>
+
+</html>

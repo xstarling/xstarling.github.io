@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta content="yes" name="apple-mobile-web-app-capable" />
+<meta content="black" name="apple-mobile-web-app-status-bar-style" />
+<meta name="referrer" content="never">
+<meta name="keywords" content="">
+<meta name="description" content="欢迎访问[林星]的个人博客">
+<meta name="author" content="kveln">
+<title>linux内核编译 | 林星</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css">
+<link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+<link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+<link
+  href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800'
+  rel='stylesheet' type='text/css'>
+<link rel="alternate" type="application/rss+xml" title="linux内核编译 | 林星 » Feed"
+  href="https://xstarling.github.io/atom.xml">
+<link rel="stylesheet"
+  href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+<link href="https://xstarling.github.io/styles/main.css" rel="stylesheet">
+<script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets/highlight.min.js"></script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/850552586/ericamcdn@0.1/css/live2d.css">
+
+<script>hljs.initHighlightingOnLoad();</script>
+
+  <meta property="og:description" content="linux内核编译" />
+  <meta property="og:url" content="https://xstarling.github.io/linux_kernel_compiler/" />
+  <meta property="og:locale" content="zh-CN" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="林星" />
+  <!-- <script src="../assets/styles/scripts/tocScript.js"></script> -->
+</head>
+
+<body>
+  <!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+  <div class="container">
+    <a class="navbar-brand" href="https://xstarling.github.io">林星</a>
+    <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse"
+      data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false"
+      aria-label="Toggle navigation">
+      Menu
+      <i class="fas fa-bars"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarResponsive">
+      <ul class="navbar-nav ml-auto">
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/">首页</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/archives">归档</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/tags">标签</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/friends">友链</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/about-starling">关于</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          <div class="gridea-search-container">
+            <form id="gridea-search-form" style="position: relative" data-update="1686458398465"
+              action="/search/index.html">
+              <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+              <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+  <!-- Page Header -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+  <div class="container">
+    <a class="navbar-brand" href="https://xstarling.github.io">林星</a>
+    <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse"
+      data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false"
+      aria-label="Toggle navigation">
+      Menu
+      <i class="fas fa-bars"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarResponsive">
+      <ul class="navbar-nav ml-auto">
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/">首页</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/archives">归档</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/tags">标签</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/friends">友链</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/about-starling">关于</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          <div class="gridea-search-container">
+            <form id="gridea-search-form" style="position: relative" data-update="1686458398465"
+              action="/search/index.html">
+              <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+              <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+<header class="masthead" style="background-image: url('https://xstarling.github.io/media/images/home-bg.jpg')">
+  <div class="overlay"></div>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-md-10 mx-auto">
+        
+          <!-- 没Title为其他页面Header -->
+          
+            <!-- 没Title并且有headerType为Post：文章Header -->
+            <div class="post-heading">
+              <span class="tags">
+                
+                <a href="https://xstarling.github.io/8-ggtdByB/" class="tag">linux</a>
+                
+              </span>
+              <h1>linux内核编译</h1>
+              <span class="meta">
+                Posted on
+                2023-04-23，12 min read
+              </span>
+            </div>
+          
+        
+      </div>
+    </div>
+  </div>
+</header>
+  <!-- Post Content -->
+  <article id="post-content-article">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto post-content-container">
+          
+          <h2 id="内核编译准备">内核编译准备</h2>
+<hr>
+<h4 id="imx6ull内核资料下载参考博客">imx6ull内核资料下载参考博客</h4>
+<ul>
+<li><a href="https://blog.csdn.net/ZHONGCAI0901/article/details/118705741">内核源码和资料下载</a></li>
+</ul>
+<h4 id="linux-内核下载地址">Linux 内核下载地址</h4>
+<ul>
+<li>官方：<a href="https://mirrors.edge.kernel.org/pub/linux/kernel/">点击下拉最下面为内核源码</a></li>
+<li>国内：<a href="https://mirror.bjtu.edu.cn/kernel/linux/kernel/">点击下拉最下面为内核源码</a></li>
+<li>编译好的镜像文件：<a href="https://kernel.ubuntu.com/~kernel-ppa/mainline/">点击此处</a></li>
+</ul>
+<h3 id="交叉编译工具">交叉编译工具</h3>
+<ul>
+<li>下载：<a href="https://developer.arm.com/downloads/-/gnu-a">交叉编译工具</a></li>
+<li>下载：<a href="https://launchpad.net/gcc-arm-embedded/+download">更老的交叉编译工具链</a>
+<ul>
+<li>如果64位机器运行老的交叉编译工具，可能会出现<code>bash: /home/learn/software/tools/linux-embedded/bin/arm-none-eabi-gcc: No such file or directory</code></li>
+</ul>
+<blockquote>
+<p>原因：老的交叉编译工具为32位，需要下载下面安装包，使64位系统支持运行32位交叉工具<br>
+<code>sudo apttitude update</code><br>
+<code>sudo apttitude install lib32z1</code><br>
+<code>sudo apttitude install lib32ncurses5-dev</code><br>
+<code>sudo apttitude install libc6-dev-i386</code></p>
+</blockquote>
+</li>
+</ul>
+<h4 id="交叉编译工具概述">交叉编译工具概述：</h4>
+<ol>
+<li>
+<p>gnueabi和gnueabihf的区别(硬浮点、软浮点)</p>
+<blockquote>
+<p>gcc-arm-linux-gnueabi – The GNU C compiler for armel architecture<br>
+gcc-arm-linux-gnueabihf – The GNU C compiler for armhf architecture</p>
+</blockquote>
+<p>可见这两个交叉编译器<strong>适用于arm-el和arm-hf两个不同的架构, 在对待浮点运算采取了不同的策略</strong>，其实这两个交叉编译器只不过是gcc的选项-mfloat-abi的默认值不同. gcc的选项-mfloat-abi有三种值soft,softfp,hard(其中后两者都要求arm里有fpu浮点运算单元,soft与后两者是兼容的，但softfp和hard两种模式互不兼容)：</p>
+<blockquote>
+<ul>
+<li><strong>soft</strong> :不用fpu进行浮点计算，即使有fpu浮点运算单元也不用,而是使用软件模式。</li>
+<li><strong>softfp</strong> :armel架构(对应的编译器为gcc-arm-linux-gnueabi)采用的默认值，用fpu计算，但是传参数用普通寄存器传，这样中断的时候，只需要保存普通寄存器，中断负荷小，但是参数需要转换成浮点的再计算。</li>
+<li><strong>hard</strong> :armhf架构(对应的编译器为gcc-arm-linux-gnueabihf)采用的默认值，用fpu计算，传参数也用fpu中的浮点寄存器传，省去了转换, 性能最好，但是中断负荷高。</li>
+</ul>
+</blockquote>
+</li>
+</ol>
+<h3 id="编译操作步骤">编译操作步骤</h3>
+<hr>
+<ol>
+<li>
+<p>复制源码到linux系统中的自定义文件夹下，并解压</p>
+<pre><code>scp -r ip地址:内核源码路径  本地存放的路径 
+tar -zxvf linux-5.4.tar.gz
+</code></pre>
+<blockquote>
+<p><code>tar.gz</code> 是 <code>gzip</code> 格式的压缩包<br>
+<code># 解压命令</code><br>
+<code>tar -zxvf 压缩包名.tar.gz -C 目标目录/</code><br>
+<code>tar.xz</code> 是 <code>xz</code> 格式的压缩包<br>
+<code> # 解压命令</code><br>
+<code>tar -xvf 压缩包名.tar.xz -C 目标目录/</code><br>
+<code>-z</code> 表示：通过 gzip 过滤归档（用 gzip 解压）<br>
+<code>-x</code> 表示：从归档中解出文件（提取压缩包）<br>
+<code>-v</code> 表示：详细地列出处理的文件（打印一大堆信息）<br>
+<code>-f</code> 表示：使用归档文件或 ARCHIVE 设备（就是压缩文件）</p>
+</blockquote>
+</li>
+<li>
+<p>内核源码文件夹说明</p>
+<blockquote>
+<p><code>arch/</code>：是linux内核支持的所有cpu体系架构（如：arm64，x86）---内核移植常用做修改代码<br>
+<code>Documentation/</code>：内核的参考文档<br>
+<code>init/</code>：内核启动的相关代码，main.c中start_kernel(void) 为内核启动c语言入口函数<br>
+<code>block/</code>：块设备相关代码<br>
+<code>drivers/</code>：设备驱动代码，占据70%代码量左右，（如：i2c，mmc等）---驱动移植常用，可以修改其中与自己相似的代码作为自己设备的驱动程序<br>
+<code>ipc/</code>：进程通信相关代码<br>
+<code>security/</code>：系统安全相关代码<br>
+<code>net/</code>：网络协议栈相关代码<br>
+<code>sound/</code>：声音播放器相关代码<br>
+<code>fs/</code>：文件系统相关代码，（如：jffs2：nor flash用的；yaffs：nand flash用的；sysfs：虚拟文件系统；ntfs：window和linux可用的文件系统）<br>
+<code>kernel/</code>：内核核心相关代码，（如：进程管理，和进程调度）<br>
+<code>include/</code>：内核头文件<br>
+<code>mm/</code>：内核内存管理相关代码</p>
+</blockquote>
+</li>
+<li>
+<p>配置内核源码</p>
+<ul>
+<li>生成一个.config配置文件，方便编译过程中确定编译的方向为x86还是arm64</li>
+<li>环境变量.bashrc，.profile，.bash_profile区别：<a href="https://zhuanlan.zhihu.com/p/405174594">参考知乎文章</a></li>
+</ul>
+<pre><code>//设置自己开发版对应的cpu架构，arm或其他（也可以直接配置到环境变量中）
+export ARCH=x86
+export CROSS_COMPILE=arm-none-linux-gnueabihf-    // (x86不用交叉编译工具链，此步骤可以忽略)
+export PATH=$PATH:交叉编译工具的bin目录 （如：/home/software/tools/gcc-arm-10.2-2020.11-aarch64-arm-none-linux-gnueab/bin） 
+# 制作开发板对应的配置文件
+# defconfig：一般位于linux-4.15.1/arch/$ARCH/configs/这个目录下
+make x86_64_defconfig
+#配置内核，通过图形化界面，（`空格`：进行选中），可以配置内核的块设备大小等
+make menuconfig
+# 使用make menuconfig如果是ubuntu要先安装libncurses5-dev，因为ubuntu默认没有安装menuconfig
+sudo apt-get install libncurses5-dev
+
+# make menuconfig 的配置项（配置支持ramdisk启动）
+General setup ----&gt;
+        ----&gt;   [*] Initial RAM filesystem and RAM disk (initramfs/initrd) support
+Device Drivers ----&gt;
+    [*] Block devices ----&gt;     # 表示把这个驱动编译到内核里
+        &lt;*&gt; RAM block device support
+        (65535) Default RAM disk size (kbytes)
+
+# 编译内核：编译完 Image的路径一般保存在 linux-4.15.1/arch/$ARCH/uboot/这个目录下
+make
+</code></pre>
+<blockquote>
+<p>amd 32位X86<br>
+amd64 64位X86<br>
+arm 32位ARM<br>
+arm64 64位ARM<br>
+<strong>注意</strong>：编译成静态链接库，可以不依赖任何动态链接库，可以方便移动到其他文件夹或平台</p>
+</blockquote>
+</li>
+<li>
+<p>编译内核源码</p>
+</li>
+<li>
+<p>安装内核</p>
+</li>
+<li>
+<p>重启机器，验证版本</p>
+</li>
+</ol>
+<h3 id="编译问题解决">编译问题解决</h3>
+<hr>
+<ol>
+<li>&lt;openssl/bio.h&gt; 头文件找不到
+<ul>
+<li>问题描述<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202305152048899.png" alt="" loading="lazy"></li>
+<li>解决方案<br>
+<code>sudo apt-get install libssl-dev</code><br>
+libssl-dev包含libraries, header files and manpages，他是openssl的一部分，而openssl对ssl进行了实现～</li>
+</ul>
+</li>
+</ol>
+<h2 id="busybox工具编译制作文件系统">busybox工具编译制作文件系统</h2>
+<h3 id="编译准备">编译准备</h3>
+<h4 id="linux-中的-busybox-是什么如何使用它摘自知乎">Linux 中的 BusyBox 是什么？如何使用它？(摘自知乎)</h4>
+<pre><code>BusyBox 是一个开源项目，它提供了大约 400 个常见 UNIX/Linux 命令的精简实现。
+
+BusyBox 实现删除了不常见的、很少使用的命令选项，一切都小于 1 MB，这个最小的图像是它在嵌入式系统和物联网领域以及云计算世界中流行的原因。
+
+不要看它的大小，BusyBox像经典编辑器一样具有 sed 和 awk 的范围（再次精简版），它也包含自己的 shell，它甚至包含一个可以作为 PID 1 启动的 init 命令，这意味着 BusyBox 可以配置为 Systemd、OpenRC 等的替代品。
+
+BusyBox 是 GNU Coreutils 的绝佳替代品，特别是在操作系统的小尺寸很重要的情况下。
+
+BusyBox 为您提供流行的 Linux 命令，如 mv、mkdir、ls 等，但它仅包含这些命令的常用选项。这种极简主义是 BusyBox 的 USP。
+
+&gt; 通俗来说：就是一种用来制作linux文件系统的工具
+</code></pre>
+<h4 id="下载">下载</h4>
+<p>busybox源码下载路径：<a href="https://www.busybox.net/">点击busybox源码下载</a><br>
+busybox编译根文件系统参考博客：<a href="https://blog.csdn.net/assiduous_me/article/details/120982546">点击此处查看</a></p>
+<h3 id="编译安装">编译安装</h3>
+<ol>
+<li>解压busybox源码<pre><code> tar -xvf busybox-1.30.0.tar.bz2
+</code></pre>
+</li>
+<li>配置busybox源码<pre><code>make menuconfig
+Settings
+     build options
+         [*] build busybox as a static binary (no shared libs)
+</code></pre>
+</li>
+<li>编译和安装<pre><code># 编译后的目录文件存放再 _install文件夹下面
+make &amp; make install
+</code></pre>
+<ul>
+<li>_install目录下的文件和命令通过软链接方式访问<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87%E7%BC%96%E8%BE%91_20230507231259.jpg" alt="" loading="lazy"></li>
+<li>编译后的文件系统目录详细说明</li>
+</ul>
+<blockquote></blockquote>
+</li>
+</ol>
+<h3 id="根文件系统配置制作">根文件系统配置制作</h3>
+<pre><code>&gt; 切换目录到：./busybox1.32.1/_install/
+</code></pre>
+<ol>
+<li>
+<p>文件系统目录创建（根据linux系统目录创建相应的文件夹）</p>
+<ul>
+<li>创建文需要的文件夹</li>
+</ul>
+<pre><code class="language-sh">     mkdir etc dev mnt
+     mkdir  -p proc sys tmp
+     mkdir etc/init.d或 mkdir -p etc/init.d
+</code></pre>
+<ul>
+<li>编辑系统必须的文件信息</li>
+</ul>
+<ol>
+<li>vim etc/fstab：编辑文件系统挂载目录信息<pre><code class="language-sh">    proc /proc proc defaults 0 0
+    tmpfs /tmp tmpfs defaults 0 0
+    sysfs /sys sysfs defaults 0 0
+</code></pre>
+</li>
+<li>vim etc/init.d/rcS：编辑 rcS文件<pre><code class="language-sh">echo -e &quot;Welcome to tinyLinux&quot;          # 提示信息
+/bin/mount
+echo -e &quot;Remounting the root filesystem&quot;    # 提示信息
+mount -o remount,rw /
+mkdir -p /dev/pts
+mount -t devpts devpts /dev/pts
+echo /sbin/mdev &gt; /proc/sys/kernel/hotplug
+mdev -s
+</code></pre>
+<ul>
+<li>设置rcS文件设置可执行权限</li>
+</ul>
+<pre><code class="language-sh">chmod 755 etc/init.d/rcS
+</code></pre>
+</li>
+<li>vim etc/inittab：编辑inittab文件<pre><code class="language-sh">    ::sysinit:/etc/init.d/rcS
+    ::respawn:-/bin/sh
+    ::askfirst:-/bin/sh
+    ::ctrlaltdel:/bin/umount -a -r
+</code></pre>
+<ul>
+<li>设置文件权限为可执行</li>
+</ul>
+<pre><code class="language-sh">chmod 755 etc/inittab
+</code></pre>
+</li>
+<li>添加设备节点和文件<pre><code class="language-sh">    cd dev/
+    # 创建控制台设备节点，c：字符设备；5：主设备号；1：次设备号
+    mknod console c 5 1   
+    # 创建空设备
+    mknod null c 1 3
+    # 创建tty终端设备；
+    mknod tty1 c 4 1
+    # 创建ttyS0终端设备
+    mknod ttyS0 c 4 64
+</code></pre>
+<ul>
+<li>终端，控制台等区别：<a href="https://www.zhihu.com/question/267699446">点击此处</a></li>
+</ul>
+</li>
+</ol>
+</li>
+<li>
+<p>制作根文件系统镜像文件（内核可以识别的）</p>
+<blockquote>
+<p>目录可以选择自定义目录，主要用于存放镜像文件路径</p>
+</blockquote>
+<ol>
+<li>先制作一个空的镜像文件；</li>
+<li>然后把此镜像文件格式化为ext3格式；</li>
+<li>然后把此镜像文件挂载，并把根文件系统复制到挂载目录；</li>
+<li>卸载该镜像文件；</li>
+<li>打包成gzip；</li>
+</ol>
+<pre><code class="language-sh">#!/bin/bash
+rm -rf rootfs.ext3
+rm -rf fs
+# 创建空的镜像文件
+dd if=/dev/zero of=./rootfs.ext3 bs=1M count=32
+
+# 格式化镜像文件为ext3
+mkfs.ext3 rootfs.ext3
+mkdir fs
+
+# 此镜像文件挂载
+mount -o loop rootfs.ext3 ./fs
+
+# 并把根文件系统复制到挂载目录
+cp -rf ./_install/* ./fs
+
+# 卸载该镜像文件
+umount ./fs
+
+# 打包成gzip
+gzip --best -c rootfs.ext3 &gt; rootfs.img.gz
+</code></pre>
+<p>最终生成的文件系统镜像名字为：rootfs.img.gz</p>
+</li>
+</ol>
+<h3 id="安装编译问题解决">安装编译问题解决</h3>
+<ol>
+<li>make过程中出现如下错误</li>
+</ol>
+<pre><code class="language-c">LINK    busybox_unstripped
+Static linking against glibc, can't use --gc-sections
+Trying libraries: crypt m resolv
+Failed: -Wl,--start-group  -lcrypt -lm -lresolv  -Wl,--end-group
+Output of:
+arm-none-linux-gnueabihf-gcc -Wall -Wshadow -Wwrite-strings -Wundef shell/built-in.o sysklogd/built-in.o util-linux/built-in.o util-linux/volume_id/built-in.o -Wl,--end-group -Wl,--start-group -lcrypt -lm -lresolv -Wl,--end-group
+/home/learn/software/tools/linux-gnueabihf/gcc-arm-10.3-2021.07-x86_64-arm-none-linux-gnueabihf/bin/../lib/gcc/
+/home/learn/software/tools/linux-gnueabihf/gcc-arm-10.3-2021.07-x86_64-arm-none-linux-gnueabihf/bin/../lib/gcc/arm-none-linux-gnueabihf/10.3.1/../../../../arm-none-linux-gnueabihf/bin/ld: util-linux/lib.a(rdate.o): in function `rdate_main':rdate.c:(.text.rdate_main+0x80): undefined reference to `stime'
+/home/learn/software/tools/linux-gnueabihf/gcc-arm-10.3-2021.07-x86_64-arm-none-linux-gnueabihf/bin/../lib/gcc/arm-none-linux-gnueabihf/10.3.1/../../../../arm-none-linux-gnueabihf/bin/ld: coreutils/lib.a(date.o): in function `date_main':&gt;date.c:(.text.date_main+0x152): undefined reference to `stime'
+collect2: error: ld returned 1 exit status
+Note: if build needs additional libraries, put them in CONFIG_EXTRA_LDLIBS.
+Example: CONFIG_EXTRA_LDLIBS=&quot;pthread dl tirpc audit pam&quot;
+make: *** [Makefile:718: busybox_unstripped] Error 1
+</code></pre>
+<ul>
+<li>解决方法：
+<blockquote>
+<p><code>glibc</code>在<code>2.31（ubuntu20.2）</code>中已经过时被移除了，如果想继续Ubuntu20.2以上版本配合busybox使用，请使用<code>busybox1.32</code>以上版本（针对此问题已经发布相应的补丁了）</p>
+</blockquote>
+</li>
+</ul>
+<ol start="2">
+<li>mount -o loop src dest 报如下错误</li>
+</ol>
+<pre><code class="language-sh">mount -o loop rootfs.ext3 ./fs 报错mount: ./fs: failed to setup loop device for /home/learn/software/busybox/busybox-1.32.1/rootfs.ext
+</code></pre>
+<ul>
+<li>问题原因<br>
+<code>dd if=/dev/zero of=./rootfs.ext3 bs=1M count=32</code> 此命令只是用0来填充初始化./rootfs.ext3文件，<code>./rootfs.ext3</code>此时不是一个块设备，如果用mount -o loop命令，则会报错；因为mount -o loop 在内部已经默认的将文件和 /dev/loop0 挂载，而/dev/loop0可能已经被其他设备占用，空间不足</li>
+<li>解决办法</li>
+</ul>
+<pre><code class="language-sh">    # 将rootfs.ext3转为块设备
+    losetup -f    # 列出第一个没有使用的设备块
+    losetup /dev/loop5 ./rootfs.ext3   # 将./rootfs.ext3转为块文件
+
+    # 卸载loop块的挂载
+    losetup -d /dev/loop1
+
+    # 查看设备块对应的设备块
+    lsblk|grep loop5 
+    或 losetup -a
+</code></pre>
+
+          <div class="toc-container"><ul class="markdownIt-TOC">
+<li>
+<ul>
+<li><a href="#%E5%86%85%E6%A0%B8%E7%BC%96%E8%AF%91%E5%87%86%E5%A4%87">内核编译准备</a><br>
+*
+<ul>
+<li><a href="#imx6ull%E5%86%85%E6%A0%B8%E8%B5%84%E6%96%99%E4%B8%8B%E8%BD%BD%E5%8F%82%E8%80%83%E5%8D%9A%E5%AE%A2">imx6ull内核资料下载参考博客</a></li>
+<li><a href="#linux-%E5%86%85%E6%A0%B8%E4%B8%8B%E8%BD%BD%E5%9C%B0%E5%9D%80">Linux 内核下载地址</a></li>
+<li><a href="#%E4%BA%A4%E5%8F%89%E7%BC%96%E8%AF%91%E5%B7%A5%E5%85%B7">交叉编译工具</a>
+<ul>
+<li><a href="#%E4%BA%A4%E5%8F%89%E7%BC%96%E8%AF%91%E5%B7%A5%E5%85%B7%E6%A6%82%E8%BF%B0">交叉编译工具概述：</a></li>
+</ul>
+</li>
+<li><a href="#%E7%BC%96%E8%AF%91%E6%93%8D%E4%BD%9C%E6%AD%A5%E9%AA%A4">编译操作步骤</a></li>
+<li><a href="#%E7%BC%96%E8%AF%91%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3">编译问题解决</a></li>
+</ul>
+</li>
+<li><a href="#busybox%E5%B7%A5%E5%85%B7%E7%BC%96%E8%AF%91%E5%88%B6%E4%BD%9C%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F">busybox工具编译制作文件系统</a>
+<ul>
+<li><a href="#%E7%BC%96%E8%AF%91%E5%87%86%E5%A4%87">编译准备</a>
+<ul>
+<li><a href="#linux-%E4%B8%AD%E7%9A%84-busybox-%E6%98%AF%E4%BB%80%E4%B9%88%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8%E5%AE%83%E6%91%98%E8%87%AA%E7%9F%A5%E4%B9%8E">Linux 中的 BusyBox 是什么？如何使用它？(摘自知乎)</a></li>
+<li><a href="#%E4%B8%8B%E8%BD%BD">下载</a></li>
+</ul>
+</li>
+<li><a href="#%E7%BC%96%E8%AF%91%E5%AE%89%E8%A3%85">编译安装</a></li>
+<li><a href="#%E6%A0%B9%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E9%85%8D%E7%BD%AE%E5%88%B6%E4%BD%9C">根文件系统配置制作</a></li>
+<li><a href="#%E5%AE%89%E8%A3%85%E7%BC%96%E8%AF%91%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3">安装编译问题解决</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+          
+          <hr />
+          <p class="next-post">下一篇：
+            <a href="https://xstarling.github.io/linux-partition/">
+              <span class="post-title">
+                linux磁盘分区&rarr;
+              </span>
+            </a>
+          </p>
+          
+          <div class="comment" style="text-align: center;">
+            
+
+            
+            
+            <script src='https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js'></script>
+
+<style>
+	div#vcomments{
+		width:100%;
+		max-width: 1000px;
+		padding: 2.5%
+	}
+</style>
+
+
+	<div id="vcomments"></div>
+
+<script>
+	new Valine({
+		el: '#vcomments',
+		appId: 'Y2b59ZcCnZeowrhGKsweiviD-gzGzoHsz',
+		appKey: 'BpGUAoWRmemmVYU1cqKSUoSO',
+		avatar: '',
+		pageSize: 5,
+		recordIp: false,
+		placeholder: '请留下你的建议...',
+		visitor: false,
+	});
+</script>
+
+            
+          </div>
+        </div>
+      </div>
+  </article>
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+            <li class="list-inline-item">
+              <a href="https://github.com/xstarling" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fab fa-github fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+            </li>
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <!-- <li class="list-inline-item">
+              <a href="https://xstarling.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li> -->
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>林星</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://xstarling.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://xstarling.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));</script>
+  <!-- 更新图片的url请求头路径 -->
+  <script src="https://xstarling.github.io/media/scripts/imagePathScript.js"></script>
+  <input id="oldimagepath" name="oldimagepath" value="https://33373sl116.zicp.fun/image-blog" type="hidden" />
+  <input id="newimagepath" name="newimagepath" value="https://33373sl116.zicp.fun/image-blog" type="hidden" />
+  
+  <div id="landlord-parent">
+    <div id="landlord">
+        <div class="message" style="opacity:0"></div>
+        <canvas id="live2d" width="240" height="250" class="live2d"></canvas>
+    </div>
+</div>
+
+<script type="text/javascript">
+    if (/(iPhone|iPad|iPod|iOS|Android)/i.test(navigator.userAgent)) {
+        //移动端
+        console.log("------ 移动端");
+    } else {
+        console.log("------ PC端 " + navigator.userAgent);
+
+        addScript("https://cdn.jsdelivr.net/gh/850552586/ericamcdn@0.1/js/live2d.js", () => {
+            // 加载完成后再loadlive2d
+            loadlive2d("live2d", "https://xstarling.github.io/media/live2d/assets/hijiki.model.json");
+        });
+
+        var home_Path = "https://xstarling.github.io/";
+        addScript("https://xstarling.github.io/media/live2d/js/message.js", () => { });
+    }
+
+    // 插入js文件，完成后callback
+    function addScript(jsfile, callback) {
+        var landlord_parent = document.getElementById("landlord-parent");
+        var script = document.createElement("script");
+        script.type = "text/javascript";
+        script.src = jsfile;
+        landlord_parent.appendChild(script);
+        script.onload = script.onreadystatechange = function () {
+            if (!this.readyState || this.readyState === "loaded" || this.readyState === "complete") {
+                script.onload = script.onreadystatechange = null;
+                if (callback && typeof callback == "function") {
+                    callback(); //window[callback]();如果传递字符串过来 调用window['函数名']() 调用方法
+                }
+            }
+        };
+    }
+</script>
+  
+  <script src="https://xstarling.github.io/media/scripts/tocScript.js"></script>
+
+</body>
+
+</html>

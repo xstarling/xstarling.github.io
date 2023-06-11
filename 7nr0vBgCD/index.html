@@ -1,0 +1,1226 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta content="yes" name="apple-mobile-web-app-capable" />
+<meta content="black" name="apple-mobile-web-app-status-bar-style" />
+<meta name="referrer" content="never">
+<meta name="keywords" content="">
+<meta name="description" content="欢迎访问[林星]的个人博客">
+<meta name="author" content="kveln">
+<title>uboot编译过程学习 | 林星</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css">
+<link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+<link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+<link
+  href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800'
+  rel='stylesheet' type='text/css'>
+<link rel="alternate" type="application/rss+xml" title="uboot编译过程学习 | 林星 » Feed"
+  href="https://xstarling.github.io/atom.xml">
+<link rel="stylesheet"
+  href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+<link href="https://xstarling.github.io/styles/main.css" rel="stylesheet">
+<script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets/highlight.min.js"></script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/850552586/ericamcdn@0.1/css/live2d.css">
+
+<script>hljs.initHighlightingOnLoad();</script>
+
+  <meta property="og:description" content="uboot编译过程学习" />
+  <meta property="og:url" content="https://xstarling.github.io/7nr0vBgCD/" />
+  <meta property="og:locale" content="zh-CN" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="林星" />
+  <!-- <script src="../assets/styles/scripts/tocScript.js"></script> -->
+</head>
+
+<body>
+  <!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+  <div class="container">
+    <a class="navbar-brand" href="https://xstarling.github.io">林星</a>
+    <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse"
+      data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false"
+      aria-label="Toggle navigation">
+      Menu
+      <i class="fas fa-bars"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarResponsive">
+      <ul class="navbar-nav ml-auto">
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/">首页</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/archives">归档</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/tags">标签</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/friends">友链</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/about-starling">关于</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          <div class="gridea-search-container">
+            <form id="gridea-search-form" style="position: relative" data-update="1686458398465"
+              action="/search/index.html">
+              <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+              <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+  <!-- Page Header -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+  <div class="container">
+    <a class="navbar-brand" href="https://xstarling.github.io">林星</a>
+    <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse"
+      data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false"
+      aria-label="Toggle navigation">
+      Menu
+      <i class="fas fa-bars"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarResponsive">
+      <ul class="navbar-nav ml-auto">
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/">首页</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/archives">归档</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/tags">标签</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/friends">友链</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/about-starling">关于</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          <div class="gridea-search-container">
+            <form id="gridea-search-form" style="position: relative" data-update="1686458398465"
+              action="/search/index.html">
+              <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+              <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+<header class="masthead" style="background-image: url('https://xstarling.github.io/media/images/home-bg.jpg')">
+  <div class="overlay"></div>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-md-10 mx-auto">
+        
+          <!-- 没Title为其他页面Header -->
+          
+            <!-- 没Title并且有headerType为Post：文章Header -->
+            <div class="post-heading">
+              <span class="tags">
+                
+              </span>
+              <h1>uboot编译过程学习</h1>
+              <span class="meta">
+                Posted on
+                2023-05-22，22 min read
+              </span>
+            </div>
+          
+        
+      </div>
+    </div>
+  </div>
+</header>
+  <!-- Post Content -->
+  <article id="post-content-article">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto post-content-container">
+          
+          <h1 id="1-配置u-boot的过程分析">1. 配置u-boot的过程分析</h1>
+<p>uboot下载地址：<a href="https://ftp.denx.de/pub/u-boot/">点击此处</a><br>
+uboot参考文档：<a href="https://elinux.org/index.php?title=U-Boot&amp;action=edit">点击此处</a><br>
+查看linux目录：tree . -d &gt; uboot-arch.txt 命令</p>
+<h2 id="11-uboot源码目录结构">1.1 uboot源码目录结构</h2>
+<pre><code class="language-sh"> ├── api
+ ├── arch
+ │   ├── arm                     //架构相关
+ │   │   ├── cpu
+ │   │   │   ├── armv7
+ │   │   │   │   ├── mx6
+ │   │   ├── dts
+ │   │   │   └── include
+ │   │   │       └── dt-bindings -&gt; ../../../../include/dt-bindings
+ │   │   ├── imx-common
+ │   │   ├── lib
+ │   │   ├── mach-rockchip
+ │   │   │   ├── rk3036
+ │   │   │   ├── rk3288
+ │   │   │   └── rk3399
+ │       └── lib
+ ├── board                       //单板相关
+ │   ├── freescale
+ │   │   ├── common
+ │   │   │   └── p_corenet
+ │   │   ├── corenet_ds
+ │   │   ├── mx6ul_14x14_ddr3_arm2
+ │   │   ├── mx6ul_14x14_evk
+ │   │   ├── mx6ul_14x14_lpddr2_arm2
+ │   │   ├── mx6ull_ddr3_arm2
+ │   │   ├── mx6ullevk
+ ├── cmd             //通用命令
+ │   ├── fastboot
+ │   └── mvebu
+ ├── common      //通用的
+ │   ├── eeprom
+ │   ├── init
+ │   └── spl
+ ├── configs
+ ├── disk
+ ├── doc             //参考文档
+ ├── drivers         //各类驱动
+ ├── dts
+ ├── examples
+ │   ├── api
+ │   └── standalone
+ ├── fs              //文件系统
+ │   ├── cbfs
+ │   ├── cramfs
+ │   ├── ext4
+ │   ├── fat
+ │   ├── jffs2
+ │   ├── reiserfs
+ │   ├── sandbox
+ │   ├── ubifs
+ │   ├── yaffs2
+ │   └── zfs
+ ├── include
+ ├── lib                 //库
+ ├── Licenses
+ ├── net              //网络协议（不是网卡驱动）
+ ├── post
+ ├── scripts
+ ├── test
+ └── tools
+</code></pre>
+<h2 id="12-makefile技巧与分析">1.2 Makefile技巧与分析</h2>
+<ol>
+<li>包含其他同级的Makefile文件（可以直接使用）：include a_Makefile
+<ul>
+<li>include a_Makefile：强制包含，没有报错</li>
+<li>-include c_Makefile：表示有就包含，没有就不管</li>
+</ul>
+</li>
+<li>打印Makefile的规则和变量：make -p</li>
+<li>把make命令规则和变量存入文件：make -p &gt; 1.txt</li>
+<li>执行<code>vi 1.txt</code>，使用vi命令删除注释：<code>:g/^# /d</code>   (^：表示首行)</li>
+</ol>
+<h2 id="13-uboot默认配置">1.3. uboot默认配置</h2>
+<h3 id="131-默认配置的过程">1.3.1 默认配置的过程</h3>
+<p>IMX6ULL：<code>make mx6ull_14x14_evk_defconfig</code><br>
+STM32MP157：<code>make stm32mp15_trusted_defconfig</code><br>
+执行过程：</p>
+<ul>
+<li>制作工具：scripts/kconfig/conf</li>
+<li>把默认配置信息写入&quot;.config&quot;<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202305231337451.png" alt="deconfig文件配置流程" loading="lazy"></li>
+<li>分析过程<pre><code class="language-sh">mx6ull_14x14_evk_defconfig: scripts/kconfig/conf
+        $(Q)$&lt; $(silent) --defconfig=arch/$(SRCARCH)/configs/$@ $(kconfig)     
+</code></pre>
+</li>
+<li>就是<pre><code class="language-sh">UBOOTVERSION=2017.03   #设置uboot版本号
+scripts/kconfig/conf --defconfig=arch/../configs/mx6ull_14x14_evk_defconfig kconfig
+</code></pre>
+</li>
+</ul>
+<h3 id="132-conf命令概述">1.3.2 conf命令概述</h3>
+<p>分析scripts/kconfig/conf.c<br>
+<code>make mx6ull_14x14_evk_defconfig V=1</code>  #打印更多详细信息<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202305232254233.png" alt="make执行的详细信息" loading="lazy"><br>
+<strong>源码分析</strong></p>
+<pre><code class="language-sh">defconfig_file = &quot;arch/../configs/mx6ull_14x14_evk_defconfig&quot;;
+name = &quot;Kconfig&quot;
+
+conf_parse(name);   //解析uboot根目录下的kconfig文件
+
+conf_read(defconfig_file);      //读取配置文件
+
+conf_set_all_new_symbols(def_default);     //设置new_symbols为默认值
+
+conf_write(NULL);   //写到.config文件
+</code></pre>
+<ul>
+<li>Kconfig: 这是一个通用文件，里面规定了一些依赖，比如：
+<ul>
+<li>如果是ARM架构，就默认选择A，B，C配置</li>
+<li>如果是RISC-V架构，就默认选择a，b，c配置</li>
+</ul>
+</li>
+<li>defconfig_file：这是厂家提供的，里面定义了
+<ul>
+<li>ARM架构</li>
+<li>自己的一些配置项</li>
+</ul>
+</li>
+<li>怎么处理呢？
+<ul>
+<li>使用defconfig_file的内容去解析Kconfig，把各个依赖的配置项也写入.config</li>
+<li>其他未涉及的配置项，给他们指定默认值</li>
+<li>写入.config</li>
+</ul>
+</li>
+</ul>
+<h3 id="133-kconfdefconfig和config文件关系图">1.3.3 kconf，defconfig和.config文件关系图</h3>
+<figure data-type="image" tabindex="1"><img src="https://33373sl116.zicp.fun:443/image-blog/202305242125156.png" alt="kconf，defconfig和.config文件关系图" loading="lazy"></figure>
+<blockquote>
+<p>.config：<br>
+①用来控制哪些目录/文件被编译<br>
+②会生成一个头文件，标记哪些.h文件会被编译到.c文件中</p>
+</blockquote>
+<h1 id="2-uboot-编译">2. uboot 编译</h1>
+<h2 id="21-uboot编译过程">2.1 uboot编译过程</h2>
+<pre><code class="language-sh">IMX6ULL:
+# 配置单板开发的编译工具链
+export ARCH=arm
+export CROSS_COMPILE=arm-linux-gnueabihf-
+# 删除之前编译的所有依赖
+make distclean
+# 配置单板编译的内容
+make mx6ull_14x14_evk_defconfig
+# 编译
+make
+</code></pre>
+<p>make过程</p>
+<ul>
+<li>检查、更新头文件，如：include/config.h、u-boot.cfg<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202305242203075.png" alt="make命令执行输出" loading="lazy"></li>
+<li>制作工具</li>
+<li>交叉编译
+<ul>
+<li>编译哪些目录，文件？</li>
+<li>.c文件可能需要使用.config的配置值，它可以引用config.h</li>
+</ul>
+</li>
+</ul>
+<h2 id="22-配置过程详细分析">2.2 配置过程详细分析</h2>
+<p>uboot编译参考资料：<a href="https://www.cnblogs.com/jianhua1992/archive/2022/11/02/16852774.html">点击此处</a><br>
+kconfig语法参考资料：<a href="https://www.rt-thread.org/document/site/#/development-tools/build-config-system/Kconfig">点击此处</a></p>
+<p><strong>Makefile的remake</strong></p>
+<pre><code class="language-sh">all:
+    @echo &quot;hello world&quot;
+    @echo A=${A}
+-include test
+test:
+    @echo create test file
+    @echo &quot;A=1&quot; &gt; test
+</code></pre>
+<ul>
+<li>先执行<code>-include test</code>并执行关联的test文件，然后再进行<code>make</code>编译整个文件</li>
+</ul>
+<h3 id="221-makefile的精简代码">2.2.1 Makefile的精简代码</h3>
+<pre><code class="language-shell">PHONY := _all
+_all:
+
+_all: all
+
+KCONFIG_CONFIG	?= .config
+
+# 定义一些常用变量
+# 比如
+# build := -f $(srctree)/scripts/Makefile.build obj
+include scripts/Kbuild.include
+
+# 定义交叉编译工具链
+CC		= $(CROSS_COMPILE)gcc
+
+-include include/config/auto.conf
+-include include/config/auto.conf.cmd
+$(KCONFIG_CONFIG) include/config/auto.conf.cmd: ;
+
+include/config/%.conf: $(KCONFIG_CONFIG) include/config/auto.conf.cmd
+	$(Q)$(MAKE) -f $(srctree)/Makefile silentoldconfig
+	$(Q)$(MAKE) -f $(srctree)/scripts/Makefile.autoconf || \
+		{ rm -f include/config/auto.conf; false; }
+	$(Q)touch include/config/auto.conf
+
+-include include/autoconf.mk
+-include include/autoconf.mk.dep
+
+# 里面又包含架构相关、CPU相关的文件
+# sinclude $(srctree)/arch/$(ARCH)/config.mk      # include architecture dependend rules
+# sinclude $(srctree)/$(CPUDIR)/config.mk         # include  CPU  specific rules
+include config.mk
+
+# 架构相关参数、相关文件、库
+# head-y := arch/arm/cpu/$(CPU)/start.o
+# libs-y += arch/arm/cpu/$(CPU)/
+include arch/$(ARCH)/Makefile  
+
+# 确定链接脚本
+ifndef LDSCRIPT
+	ifeq ($(wildcard $(LDSCRIPT)),)
+		LDSCRIPT := $(srctree)/board/$(BOARDDIR)/u-boot.lds
+	endif
+	ifeq ($(wildcard $(LDSCRIPT)),)
+		LDSCRIPT := $(srctree)/$(CPUDIR)/u-boot.lds
+	endif
+	ifeq ($(wildcard $(LDSCRIPT)),)
+		LDSCRIPT := $(srctree)/arch/$(ARCH)/cpu/u-boot.lds
+	endif
+endif
+
+# 默认要处理的库的路径
+libs-y += lib/
+libs-$(HAVE_VENDOR_COMMON_LIB) += board/$(VENDOR)/common/
+libs-$(CONFIG_OF_EMBED) += dts/
+libs-y += fs/
+libs-y += net/
+libs-y += disk/
+libs-y += drivers/
+
+# 取决于配置的库的路径
+libs-$(CONFIG_FMAN_ENET) += drivers/net/fm/
+libs-$(CONFIG_SYS_FSL_DDR) += drivers/ddr/fsl/
+libs-$(CONFIG_SYS_FSL_MMDC) += drivers/ddr/fsl/
+libs-$(CONFIG_ALTERA_SDRAM) += drivers/ddr/altera/
+
+u-boot-init := $(head-y)
+u-boot-main := $(libs-y)
+
+u-boot-dirs	:= $(patsubst %/,%,$(filter %/, $(libs-y))) tools examples
+
+$(sort $(u-boot-init) $(u-boot-main)): $(u-boot-dirs) ;
+
+$(u-boot-dirs): prepare scripts
+	$(Q)$(MAKE) $(build)=$@
+
+# all目标要生成的依赖
+ALL-y += u-boot.srec u-boot.bin u-boot.sym System.map binary_size_check
+
+all:		$(ALL-y)
+
+u-boot.hex u-boot.srec: u-boot FORCE
+        $(call if_changed,objcopy)
+
+u-boot:	$(u-boot-init) $(u-boot-main) u-boot.lds FORCE
+	$(call if_changed,u-boot__)
+ifeq ($(CONFIG_KALLSYMS),y)
+	$(call cmd,smap)
+	$(call cmd,u-boot__) common/system_map.o
+endif
+</code></pre>
+<p>Makefile：</p>
+<pre><code class="language-shell">ifeq ($(KBUILD_SRC),)
+
+
+# That's our default target when none is given on the command line
+PHONY := _all
+_all:
+
+endif # ifeq ($(KBUILD_SRC),)
+
+# We process the rest of the Makefile if this is the final invocation of make
+ifeq ($(skip-makefile),)
+
+PHONY += all
+_all: all
+
+HOSTCC       = cc
+
+# Decide whether to build built-in, modular, or both.
+# Normally, just do built-in.
+
+KBUILD_MODULES :=
+KBUILD_BUILTIN := 1
+
+# 引入很多变量, 
+# 比如:
+# build := -f $(srctree)/scripts/Makefile.build obj
+include scripts/Kbuild.include
+
+# 定义交叉编译工具链
+AS		= $(CROSS_COMPILE)as
+CC		= $(CROSS_COMPILE)gcc
+CPP		= $(CC) -E
+
+
+version_h := include/generated/version_autogenerated.h
+timestamp_h := include/generated/timestamp_autogenerated.h
+
+no-dot-config-targets := clean clobber mrproper distclean \
+			 help %docs check% coccicheck \
+			 ubootversion backup tests
+
+config-targets := 0
+mixed-targets  := 0
+dot-config     := 1
+
+
+ifeq ($(mixed-targets),1)
+else
+ifeq ($(config-targets),1)
+else
+PHONY += scripts
+scripts: scripts_basic include/config/auto.conf
+	$(Q)$(MAKE) $(build)=$(@)
+
+ifeq ($(dot-config),1)
+-include include/config/auto.conf
+-include include/config/auto.conf.cmd
+# To avoid any implicit rule to kick in, define an empty command
+$(KCONFIG_CONFIG) include/config/auto.conf.cmd: ;
+
+# If .config is newer than include/config/auto.conf, someone tinkered
+# with it and forgot to run make oldconfig.
+# if auto.conf.cmd is missing then we are probably in a cleaned tree so
+# we execute the config step to be sure to catch updated Kconfig files
+include/config/%.conf: $(KCONFIG_CONFIG) include/config/auto.conf.cmd
+	$(Q)$(MAKE) -f $(srctree)/Makefile silentoldconfig
+	@# If the following part fails, include/config/auto.conf should be
+	@# deleted so &quot;make silentoldconfig&quot; will be re-run on the next build.
+	$(Q)$(MAKE) -f $(srctree)/scripts/Makefile.autoconf || \
+		{ rm -f include/config/auto.conf; false; }
+	@# include/config.h has been updated after &quot;make silentoldconfig&quot;.
+	@# We need to touch include/config/auto.conf so it gets newer
+	@# than include/config.h.
+	@# Otherwise, 'make silentoldconfig' would be invoked twice.
+	$(Q)touch include/config/auto.conf
+
+-include include/autoconf.mk
+-include include/autoconf.mk.dep
+
+</code></pre>
+<h3 id="222-配置文件进一步处理">2.2.2 配置文件进一步处理</h3>
+<p>前面生成了.config，但是它不是最终版本的配置文件。</p>
+<p>顶层Makefile会包含2个配置文件：include/config/auto.conf、include/autoconf.mk。</p>
+<p>u-boot中有非常多的配置文件：</p>
+<ul>
+<li>
+<p>.config：来自单板的默认配置、Kconfig</p>
+</li>
+<li>
+<p>include/config/auto.conf：来自.config，去掉了很多注释</p>
+</li>
+<li>
+<p>u-boot.cfg：它的内容跟头文件类似，来自</p>
+<ul>
+<li>
+<p>.config</p>
+</li>
+<li>
+<p>头文件include/common.h，又包含了&quot;#include &lt;config.h&gt;&quot;，config.h内容如下:</p>
+<pre><code class="language-c">/* Automatically generated - do not edit */
+#define CONFIG_IMX_CONFIG       board/freescale/mx6ullevk/imximage.cfg
+#define CONFIG_BOARDDIR board/freescale/mx6ullevk
+#include &lt;config_defaults.h&gt;
+#include &lt;config_uncmd_spl.h&gt;
+#include &lt;configs/mx6ullevk.h&gt;
+#include &lt;asm/config.h&gt;
+#include &lt;linux/kconfig.h&gt;
+#include &lt;config_fallbacks.h&gt;
+</code></pre>
+</li>
+</ul>
+</li>
+<li>
+<p>include/autoconf.mk：来自u-boot.cfg，但是移除include/config/auto.conf的内容以免重复</p>
+</li>
+</ul>
+<p>需要进一步处理：</p>
+<pre><code class="language-shell">include/config/%.conf: $(KCONFIG_CONFIG) include/config/auto.conf.cmd
+	$(Q)$(MAKE) -f $(srctree)/Makefile silentoldconfig
+	$(Q)$(MAKE) -f $(srctree)/scripts/Makefile.autoconf || \
+		{ rm -f include/config/auto.conf; false; }
+	$(Q)touch include/config/auto.conf
+</code></pre>
+<p>上述规则的命令里，有2个操作：</p>
+<pre><code class="language-shell">$(Q)$(MAKE) -f $(srctree)/Makefile silentoldconfig
+$(Q)$(MAKE) -f $(srctree)/scripts/Makefile.autoconf
+</code></pre>
+<p>第1个操作相当于：make silentoldconfig，生成了文件</p>
+<ul>
+<li>include/config/auto.conf：来自.config，去掉了很多注释</li>
+<li>include/config/auto.conf.cmd：auto.conf的依赖规则</li>
+<li>include/generated/autoconf.h：内容跟auto.conf类似，是C语言的头文件</li>
+<li>include/config/tristate.conf：空文件</li>
+<li>include/generated/autoksyms.h：空文件</li>
+</ul>
+<pre><code class="language-shell">make silentoldconfig
+
+%config: scripts_basic outputmakefile FORCE
+        $(Q)$(MAKE) $(build)=scripts/kconfig $@
+
+进入scripts/kconfig是它的Makefile: 
+silentoldconfig: $(obj)/conf
+        $(Q)mkdir -p include/config include/generated
+        $(Q)test -e include/generated/autoksyms.h || \
+            touch   include/generated/autoksyms.h
+        $&lt; $(silent) --$@ $(Kconfig)
+
+scripts/kconfig/conf分析：
+scripts/kconfig/conf  --silentoldconfig Kconfig
+1. sync_kconfig = 1
+2. name = &quot;Kconfig&quot;, conf_parse(name);
+3. name = conf_get_configname(); = &quot;.config&quot;
+4. conf_read(NULL);  # 
+</code></pre>
+<p>第2个操作相当于<code>make -f scripts/Makefile.autoconf</code>，会生成一系列头文件：</p>
+<ul>
+<li><code>ln -fsn arch-mx6 arch/arm/include/asm/arch</code></li>
+<li>include/autoconf.mk, {spl,tpl}/include/autoconf.mk</li>
+<li>include/config.h</li>
+</ul>
+<p><code>scripts/Makefile.autoconf</code>分析：</p>
+<pre><code class="language-shell">__all: include/autoconf.mk include/autoconf.mk.dep
+
+include include/config/auto.conf
+include scripts/Kbuild.include
+
+CC              = $(CROSS_COMPILE)gcc
+CPP             = $(CC) -E
+
+include config.mk
+
+include/autoconf.mk.dep: include/config.h FORCE
+        $(call cmd,autoconf_dep)
+
+u-boot.cfg: include/config.h FORCE
+        $(call cmd,u_boot_cfg)
+
+include/autoconf.mk: u-boot.cfg
+        $(call cmd,autoconf)
+
+include/config.h: scripts/Makefile.autoconf create_symlink FORCE
+        $(call filechk,config_h)
+
+create_symlink:
+ifdef CONFIG_CREATE_ARCH_SYMLINK
+ifneq ($(KBUILD_SRC),)
+        $(Q)mkdir -p include/asm
+        $(Q)if [ -d $(KBUILD_SRC)/arch/$(ARCH)/mach-$(SOC)/include/mach ]; then \
+                dest=arch/$(ARCH)/mach-$(SOC)/include/mach;                     \
+        else                                                                    \
+                dest=arch/$(ARCH)/include/asm/arch-$(if $(SOC),$(SOC),$(CPU));  \
+        fi;                                                                     \
+        ln -fsn $(KBUILD_SRC)/$$dest include/asm/arch
+else
+        $(Q)if [ -d arch/$(ARCH)/mach-$(SOC)/include/mach ]; then       \
+                dest=../../mach-$(SOC)/include/mach;                    \
+        else                                                            \
+                dest=arch-$(if $(SOC),$(SOC),$(CPU));                   \
+        fi;                                                             \
+        ln -fsn $$dest arch/$(ARCH)/include/asm/arch
+endif
+endif
+</code></pre>
+<h3 id="223-配置过程总结">2.2.3 配置过程总结</h3>
+<figure data-type="image" tabindex="2"><img src="https://33373sl116.zicp.fun:443/image-blog/202305242228329.png" alt="" loading="lazy"></figure>
+<h2 id="23-编译过程详细分析imx6ull">2.3 编译过程详细分析(IMX6ULL)</h2>
+<h3 id="231-结论">2.3.1 结论</h3>
+<p>以IMX6ULL为例，先说结论：</p>
+<figure data-type="image" tabindex="3"><img src="https://33373sl116.zicp.fun:443/image-blog/202305242231347.png" alt="" loading="lazy"></figure>
+<p>细节如下：</p>
+<ul>
+<li>
+<p>执行make命令时，要编译得到哪些文件由<code>ALL-y</code>决定</p>
+<ul>
+<li>
+<p>规则如下</p>
+<pre><code class="language-shell">include config.mk              # 里面会包含arch/arm/config.mk(含有ALL-y += u-boot-dtb.imx)
+
+_all : all
+
+# Always append ALL so that arch config.mk's can add custom ones
+ALL-y += u-boot.srec u-boot.bin u-boot.sym System.map binary_size_check
+
+ALL-$(CONFIG_OF_SEPARATE) += u-boot.dtb
+
+all:            $(ALL-y)
+</code></pre>
+</li>
+<li>
+<p><code>ALL-y</code>的值为：</p>
+<pre><code class="language-shell">checkarmreloc u-boot-dtb.imx u-boot.srec u-boot.bin u-boot.sym System.map binary_size_check u-boot.dtb
+</code></pre>
+</li>
+</ul>
+</li>
+<li>
+<p>u-boot-dtb.imx依赖于u-boot-dtb.bin，u-boot-dtb.bin又依赖于u-boot-nodtb.bin和dts/dt.dtb</p>
+</li>
+<li>
+<p>各类u-boot文件都依赖于u-boot，先编译得到u-boot，它由<code>u-boot-init</code>、<code>u-boot-main</code>两部分链接而成</p>
+<ul>
+<li>
+<p>u-boot-init为：arch/arm/cpu/armv7/start.o</p>
+</li>
+<li>
+<p>u-boot-main为：lib/built-in.o  fs/built-in.o  net/built-in.o 等等</p>
+</li>
+<li>
+<p>如何编译各个built-in.o，以lib/built-in.o为例</p>
+<ul>
+<li>执行: ``make -f ./scripts/Makefile.build obj=lib`</li>
+<li>会包含lib/Makefile，里面定义了<code>obj-y</code></li>
+<li>使用Makefile.build的规则把各个obj-y编译、链接为built-in.o</li>
+</ul>
+</li>
+<li>
+<p>使用如下的命令链接得到u-boot：</p>
+<pre><code class="language-shell">quiet_cmd_u-boot__ ?= LD      $@
+      cmd_u-boot__ ?= $(LD) $(LDFLAGS) $(LDFLAGS_u-boot) -o $@ \
+      -T u-boot.lds $(u-boot-init)                             \
+      --start-group $(u-boot-main) --end-group                 \
+      $(PLATFORM_LIBS) -Map u-boot.map
+</code></pre>
+</li>
+</ul>
+</li>
+<li>
+<p>再编译得到设备树文件: <code>make -f ./scripts/Makefile.build obj=dts dtbs</code></p>
+<ul>
+<li>
+<p>顶层Makefile如下：</p>
+<pre><code class="language-shell"></code></pre>
+</li>
+</ul>
+<p>dts/dt.dtb: checkdtc u-boot<br>
+<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo>(</mo><mi>Q</mi><mo>)</mo></mrow><annotation encoding="application/x-tex">(Q)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord mathdefault">Q</span><span class="mclose">)</span></span></span></span>(MAKE) $(build)=dts dtbs</p>
+<pre><code>
+* scripts/Makefile.build中，会包含 dts/Makefile
+
+```shell
+DTB := arch/$(ARCH)/dts/$(DEVICE_TREE).dtb
+
+$(DTB): arch-dtbs
+$(obj)/dt.dtb: $(DTB) FORCE
+      $(call if_changed,shipped)
+targets += dt.dtb
+
+$(DTB): arch-dtbs
+	  $(Q)test -e $@ || (                                             \
+	  echo &gt;&amp;2;                                                       \
+	  echo &gt;&amp;2 &quot;Device Tree Source is not correctly specified.&quot;;      \
+	  echo &gt;&amp;2 &quot;Please define 'CONFIG_DEFAULT_DEVICE_TREE'&quot;;          \
+	  echo &gt;&amp;2 &quot;or build with 'DEVICE_TREE=&lt;device_tree&gt;' argument&quot;;  \
+	  echo &gt;&amp;2;                                                       \
+	  /bin/false)
+
+arch-dtbs:
+	  $(Q)$(MAKE) $(build)=arch/$(ARCH)/dts dtbs
+
+.SECONDARY: $(obj)/dt.dtb.S
+
+obj-$(CONFIG_OF_EMBED) := dt.dtb.o
+
+dtbs: $(obj)/dt.dtb
+	  @:
+</code></pre>
+</li>
+<li>
+<p>最后把u-boot、设备树打包: <code>make -f ./scripts/Makefile.build obj=arch/arm/imx-common u-boot-dtb.imx</code></p>
+<pre><code class="language-shell">include config.mk              # 里面会包含arch/arm/config.mk(含有ALL-y += u-boot-dtb.imx)
+
+%.imx: %.bin
+      $(Q)$(MAKE) $(build)=arch/arm/imx-common $@
+</code></pre>
+</li>
+</ul>
+<h3 id="232-顶层makefile">2.3.2 顶层Makefile</h3>
+<p>顶层Makefile里：</p>
+<ul>
+<li>包含架构相关的Makefile，里面指定了第1个文件（head-y）</li>
+<li>指定了要编译哪些子目录（libs-y）。</li>
+</ul>
+<p>从顶层Makefile开始分析：</p>
+<pre><code class="language-shell">include config.mk              # 里面会包含arch/arm/config.mk(含有ALL-y += u-boot-dtb.imx)
+include arch/$(ARCH)/Makefile  # arch/arm/Makefile, 里面含有head-y libs-y
+
+libs-y += lib/
+libs-$(HAVE_VENDOR_COMMON_LIB) += board/$(VENDOR)/common/
+libs-$(CONFIG_OF_EMBED) += dts/
+libs-y += fs/
+libs-y += net/
+libs-y += disk/
+libs-y += drivers/
+libs-y += drivers/dma/
+libs-y += drivers/gpio/
+libs-y += drivers/i2c/
+libs-y += drivers/mmc/
+
+libs-y += $(if $(BOARDDIR),board/$(BOARDDIR)/)
+
+libs-y := $(sort $(libs-y))
+
+u-boot-dirs     := $(patsubst %/,%,$(filter %/, $(libs-y))) tools examples
+
+u-boot-alldirs  := $(sort $(u-boot-dirs) $(patsubst %/,%,$(filter %/, $(libs-))))
+
+libs-y          := $(patsubst %/, %/built-in.o, $(libs-y))
+
+u-boot-init := $(head-y)
+u-boot-main := $(libs-y)
+
+ALL-y += u-boot.srec u-boot.bin u-boot.sym System.map binary_size_check
+</code></pre>
+<p>对于<code>arch/arm/Makefile</code>：</p>
+<pre><code class="language-shell">head-y := arch/arm/cpu/$(CPU)/start.o
+
+libs-y += arch/arm/cpu/$(CPU)/
+libs-y += arch/arm/cpu/
+libs-y += arch/arm/lib/
+</code></pre>
+<p>所以，顶层Makefile包含了<code>arch/arm/Makefile</code>，确定了head-y为<code>arch/arm/cpu/armv7/start.o</code>。</p>
+<p>还定义了libs-y变量，它里面含有多个目录。</p>
+<h3 id="233-编译子目录">2.3.3 编译子目录</h3>
+<p>顶层Makefile里定义了libs-y，会进入里面每一目录，使用它的Makefile进行编译：</p>
+<pre><code class="language-shell">u-boot-main := $(libs-y)
+
+$(sort $(u-boot-init) $(u-boot-main)): $(u-boot-dirs) ;
+
+u-boot-dirs     := $(patsubst %/,%,$(filter %/, $(libs-y))) tools examples
+
+$(u-boot-dirs): prepare scripts
+        # make -f $(srctree)/scripts/Makefile.build obj=arch/arm/cpu/arm7
+        $(Q)$(MAKE) $(build)=$@   
+</code></pre>
+<p>比如：u-boot-main里面含有一个目录&quot;arch/arm/cpu/armv7/&quot;，在u-boot-dirs中它末尾的&quot;/&quot;被取消，就变成：arch/arm/cpu/armv7。</p>
+<p>然后使用scripts/Makefile.build进行处理：<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo>(</mo><mi>Q</mi><mo>)</mo></mrow><annotation encoding="application/x-tex">(Q)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord mathdefault">Q</span><span class="mclose">)</span></span></span></span>(MAKE) <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo>(</mo><mi>b</mi><mi>u</mi><mi>i</mi><mi>l</mi><mi>d</mi><mo>)</mo><mo>=</mo></mrow><annotation encoding="application/x-tex">(build)=</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord mathdefault">b</span><span class="mord mathdefault">u</span><span class="mord mathdefault">i</span><span class="mord mathdefault" style="margin-right:0.01968em;">l</span><span class="mord mathdefault">d</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span></span></span></span>@ ，展开就是：</p>
+<pre><code class="language-shell">make -f scripts/Makefile.build obj=arch/arm/cpu/armv7/
+</code></pre>
+<p>scripts/Makefile.build是编译u-boot源码的关键：</p>
+<pre><code>src := $(patsubst $(prefix)/%,%,$(obj))  # obj=arch/arm/cpu/arm7/, src=arch/arm/cpu/armv7
+
+# 第1个目标
+__build:
+
+# The filename Kbuild has precedence over Makefile
+kbuild-dir := $(if $(filter /%,$(src)),$(src),$(srctree)/$(src))
+kbuild-file := $(if $(wildcard $(kbuild-dir)/Kbuild),$(kbuild-dir)/Kbuild,$(kbuild-dir)/Makefile)
+include $(kbuild-file)  # 包含 arch/arm/cpu/arm7/Makefile
+
+ifneq ($(strip $(lib-y) $(lib-m) $(lib-)),)
+lib-target := $(obj)/lib.a  # 如果包含的arch/arm/cpu/armv7/Makefile里定义了lib-y
+endif
+
+ifneq ($(strip $(obj-y) $(obj-m) $(obj-) $(subdir-m) $(lib-target)),)
+builtin-target := $(obj)/built-in.o # 如果包含的arch/arm/cpu/armv7/Makefile里定义了obj-y
+endif
+
+
+__build: $(if $(KBUILD_BUILTIN),$(builtin-target) $(lib-target) $(extra-y)) \
+         $(if $(KBUILD_MODULES),$(obj-m) $(modorder-target)) \
+         $(subdir-ym) $(always)
+        @:
+
+
+# Built-in and composite module parts
+$(obj)/%.o: $(src)/%.c $(recordmcount_source) FORCE
+        $(call cmd,force_checksrc)
+        $(call if_changed_rule,cc_o_c)
+        
+
+ifdef builtin-target
+quiet_cmd_link_o_target = LD      $@
+# If the list of objects to link is empty, just create an empty built-in.o
+cmd_link_o_target = $(if $(strip $(obj-y)),\
+                      $(LD) $(ld_flags) -r -o $@ $(filter $(obj-y), $^) \
+                      $(cmd_secanalysis),\
+                      rm -f $@; $(AR) rcs$(KBUILD_ARFLAGS) $@)
+
+$(builtin-target): $(obj-y) FORCE
+        $(call if_changed,link_o_target)
+
+targets += $(builtin-target)
+endif # builtin-target
+</code></pre>
+<h3 id="234-链接得到u-boot">2.3.4 链接得到u-boot</h3>
+<p>顶层Makefile里：</p>
+<pre><code class="language-shell">libs-y          := $(patsubst %/, %/built-in.o, $(libs-y))
+
+u-boot-init := $(head-y)
+u-boot-main := $(libs-y)
+
+# Rule to link u-boot
+# May be overridden by arch/$(ARCH)/config.mk
+quiet_cmd_u-boot__ ?= LD      $@
+      cmd_u-boot__ ?= $(LD) $(LDFLAGS) $(LDFLAGS_u-boot) -o $@ \
+      -T u-boot.lds $(u-boot-init)                             \
+      --start-group $(u-boot-main) --end-group                 \
+      $(PLATFORM_LIBS) -Map u-boot.map
+
+quiet_cmd_smap = GEN     common/system_map.o
+cmd_smap = \
+        smap=`$(call SYSTEM_MAP,u-boot) | \
+                awk '$$2 ~ /[tTwW]/ {printf $$1 $$3 &quot;\\\\000&quot;}'` ; \
+        $(CC) $(c_flags) -DSYSTEM_MAP=&quot;\&quot;$${smap}\&quot;&quot; \
+                -c $(srctree)/common/system_map.c -o common/system_map.o
+
+u-boot: $(u-boot-init) $(u-boot-main) u-boot.lds FORCE
+        $(call if_changed,u-boot__)
+ifeq ($(CONFIG_KALLSYMS),y)
+        $(call cmd,smap)
+        $(call cmd,u-boot__) common/system_map.o
+endif
+</code></pre>
+<p>就是把head-y和各个libs-y下的built-in.o链接得到u-boot。</p>
+<h3 id="235-映像文件的依赖">2.3.5 映像文件的依赖</h3>
+<p>对于IMX6ULL，要使用的是u-boot-dtb.imx，它含有u-boot和设备树。</p>
+<p>在顶层Makefile里：</p>
+<pre><code class="language-shell">include config.mk              # 里面会包含arch/arm/config.mk(含有ALL-y += u-boot-dtb.imx)
+
+%.imx: %.bin
+        $(Q)$(MAKE) $(build)=arch/arm/imx-common $@
+</code></pre>
+<p>u-boot-dtb.imx依赖于u-boot-dtb.bin，u-boot-dtb.bin又依赖于u-boot-nodtb.bin和dts/dt.dtb。</p>
+<p>在顶层Makefile里：</p>
+<pre><code class="language-shell">u-boot-dtb.bin: u-boot-nodtb.bin dts/dt.dtb FORCE
+        $(call if_changed,cat)
+
+u-boot-nodtb.bin: u-boot FORCE
+        $(call if_changed,objcopy)
+        $(call DO_STATIC_RELA,$&lt;,$@,$(CONFIG_SYS_TEXT_BASE))
+        $(BOARD_SIZE_CHECK)
+</code></pre>
+<p>所以，编译出u-boot后，会先制作u-boot-nodtb.bin；然后编译dts/dt.dtb；最后生成u-boot-dtb.bin、imx文件：</p>
+<figure data-type="image" tabindex="4"><img src="https://33373sl116.zicp.fun:443/image-blog/202305242231347.png" alt="" loading="lazy"></figure>
+<h3 id="236-编译设备树">2.3.6 编译设备树</h3>
+<p>顶层Makefile里：</p>
+<pre><code class="language-shell">dts/dt.dtb: checkdtc u-boot
+	  # make -f $(srctree)/scripts/Makefile.build obj=dts  dtbs
+      $(Q)$(MAKE) $(build)=dts dtbs
+</code></pre>
+<p>需要用到scripts/Makefile.build中，它会包含 dts/Makefile， dts/Makefile中含有dtbs目标：</p>
+<pre><code class="language-shell">DEVICE_TREE ?= $(CONFIG_DEFAULT_DEVICE_TREE:&quot;%&quot;=%)
+DTB := arch/$(ARCH)/dts/$(DEVICE_TREE).dtb # 就是 arch/arm/dts/imx6ull-14x14-evk.dtb
+
+$(obj)/dt.dtb: $(DTB) FORCE
+        $(call if_changed,shipped)
+
+targets += dt.dtb
+
+$(DTB): arch-dtbs
+        $(Q)test -e $@ || (                                             \
+        echo &gt;&amp;2;                                                       \
+        echo &gt;&amp;2 &quot;Device Tree Source is not correctly specified.&quot;;      \
+        echo &gt;&amp;2 &quot;Please define 'CONFIG_DEFAULT_DEVICE_TREE'&quot;;          \
+        echo &gt;&amp;2 &quot;or build with 'DEVICE_TREE=&lt;device_tree&gt;' argument&quot;;  \
+        echo &gt;&amp;2;                                                       \
+        /bin/false)
+
+arch-dtbs:
+        $(Q)$(MAKE) $(build)=arch/$(ARCH)/dts dtbs
+
+.SECONDARY: $(obj)/dt.dtb.S
+
+obj-$(CONFIG_OF_EMBED) := dt.dtb.o
+
+dtbs: $(obj)/dt.dtb
+        @:
+</code></pre>
+<p>最后会使用<code>$(Q)$(MAKE) $(build)=arch/$(ARCH)/dts dtbs</code>来处理，进入：使用arch/arm/dts/Makefile，里面定了dtb-y：</p>
+<pre><code class="language-shell">dtb-$(CONFIG_MX6) += imx6ul-14x14-ddr3-arm2.dtb \
+        imx6ul-14x14-ddr3-arm2-emmc.dtb \
+        imx6ul-14x14-ddr3-arm2-gpmi-weim.dtb \
+        imx6ul-14x14-lpddr2-arm2.dtb \
+        imx6ul-14x14-evk.dtb \
+        imx6ul-14x14-evk-emmc.dtb \
+
+PHONY += dtbs
+dtbs: $(addprefix $(obj)/, $(dtb-y))
+        @:
+</code></pre>
+<p>要编译出各类dtb文件，用到scripts/Makefile.lib，规则如下：</p>
+<pre><code class="language-shell">quiet_cmd_dtc = DTC     $@
+# Modified for U-Boot
+# Bring in any U-Boot-specific include after the '/dts-v1/;' header
+cmd_dtc = mkdir -p $(dir ${dtc-tmp}) ; \
+        cat $&lt; $(if $(u_boot_dtsi),\
+                | sed '/^\/ {$$/{x;s%$$%\#include \&quot;$(u_boot_dtsi)\&quot;%;G;}') | \
+                $(CPP) $(dtc_cpp_flags) -x assembler-with-cpp -o $(dtc-tmp) - ; \
+        $(DTC) -O dtb -o $@ -b 0 \
+                -i $(dir $&lt;) $(DTC_FLAGS) \
+                -d $(depfile).dtc.tmp $(dtc-tmp) ; \
+        cat $(depfile).pre.tmp $(depfile).dtc.tmp &gt; $(depfile)
+
+$(obj)/%.dtb: $(src)/%.dts FORCE
+        $(call if_changed_dep,dtc)
+</code></pre>
+<h3 id="237-制作映像文件">2.3.7 制作映像文件</h3>
+<p>当制作出设备树文件后，在顶层Makefile里有如下规则，进而制作出u-boot-dtb.bin：</p>
+<pre><code class="language-shell">u-boot-dtb.bin: u-boot-nodtb.bin dts/dt.dtb FORCE
+        $(call if_changed,cat)
+</code></pre>
+<p>回到顶层Makefile，看看如何制作imx映像文件：</p>
+<pre><code class="language-shell">include config.mk              # 里面会包含arch/arm/config.mk(含有ALL-y += u-boot-dtb.imx)
+
+%.imx: %.bin
+        $(Q)$(MAKE) $(build)=arch/arm/imx-common $@
+</code></pre>
+<p>现在u-boot-dtb.imx的依赖文件u-boot-dtb.bin已经生成了，将会使用arch/arm/imx-common/Makefile来生产imx文件：</p>
+<pre><code class="language-shell">u-boot.imx: u-boot.bin $(IMX_CONFIG) $(PLUGIN).bin FORCE
+        $(call if_changed,mkimage)
+</code></pre>
+<p>最后会使用如下命令生产imx映像文件：</p>
+<pre><code class="language-shell">./tools/mkimage -n board/freescale/mx6ullevk/imximage.cfg.cfgtmp -T imximage -e 0x87800000 -d u-boot-dtb.bin u-boot-dtb.imx
+</code></pre>
+
+          <div class="toc-container"><ul class="markdownIt-TOC">
+<li><a href="#1-%E9%85%8D%E7%BD%AEu-boot%E7%9A%84%E8%BF%87%E7%A8%8B%E5%88%86%E6%9E%90">1. 配置u-boot的过程分析</a>
+<ul>
+<li><a href="#11-uboot%E6%BA%90%E7%A0%81%E7%9B%AE%E5%BD%95%E7%BB%93%E6%9E%84">1.1 uboot源码目录结构</a></li>
+<li><a href="#12-makefile%E6%8A%80%E5%B7%A7%E4%B8%8E%E5%88%86%E6%9E%90">1.2 Makefile技巧与分析</a></li>
+<li><a href="#13-uboot%E9%BB%98%E8%AE%A4%E9%85%8D%E7%BD%AE">1.3. uboot默认配置</a>
+<ul>
+<li><a href="#131-%E9%BB%98%E8%AE%A4%E9%85%8D%E7%BD%AE%E7%9A%84%E8%BF%87%E7%A8%8B">1.3.1 默认配置的过程</a></li>
+<li><a href="#132-conf%E5%91%BD%E4%BB%A4%E6%A6%82%E8%BF%B0">1.3.2 conf命令概述</a></li>
+<li><a href="#133-kconfdefconfig%E5%92%8Cconfig%E6%96%87%E4%BB%B6%E5%85%B3%E7%B3%BB%E5%9B%BE">1.3.3 kconf，defconfig和.config文件关系图</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#2-uboot-%E7%BC%96%E8%AF%91">2. uboot 编译</a>
+<ul>
+<li><a href="#21-uboot%E7%BC%96%E8%AF%91%E8%BF%87%E7%A8%8B">2.1 uboot编译过程</a></li>
+<li><a href="#22-%E9%85%8D%E7%BD%AE%E8%BF%87%E7%A8%8B%E8%AF%A6%E7%BB%86%E5%88%86%E6%9E%90">2.2 配置过程详细分析</a>
+<ul>
+<li><a href="#221-makefile%E7%9A%84%E7%B2%BE%E7%AE%80%E4%BB%A3%E7%A0%81">2.2.1 Makefile的精简代码</a></li>
+<li><a href="#222-%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E8%BF%9B%E4%B8%80%E6%AD%A5%E5%A4%84%E7%90%86">2.2.2 配置文件进一步处理</a></li>
+<li><a href="#223-%E9%85%8D%E7%BD%AE%E8%BF%87%E7%A8%8B%E6%80%BB%E7%BB%93">2.2.3 配置过程总结</a></li>
+</ul>
+</li>
+<li><a href="#23-%E7%BC%96%E8%AF%91%E8%BF%87%E7%A8%8B%E8%AF%A6%E7%BB%86%E5%88%86%E6%9E%90imx6ull">2.3 编译过程详细分析(IMX6ULL)</a>
+<ul>
+<li><a href="#231-%E7%BB%93%E8%AE%BA">2.3.1 结论</a></li>
+<li><a href="#232-%E9%A1%B6%E5%B1%82makefile">2.3.2 顶层Makefile</a></li>
+<li><a href="#233-%E7%BC%96%E8%AF%91%E5%AD%90%E7%9B%AE%E5%BD%95">2.3.3 编译子目录</a></li>
+<li><a href="#234-%E9%93%BE%E6%8E%A5%E5%BE%97%E5%88%B0u-boot">2.3.4 链接得到u-boot</a></li>
+<li><a href="#235-%E6%98%A0%E5%83%8F%E6%96%87%E4%BB%B6%E7%9A%84%E4%BE%9D%E8%B5%96">2.3.5 映像文件的依赖</a></li>
+<li><a href="#236-%E7%BC%96%E8%AF%91%E8%AE%BE%E5%A4%87%E6%A0%91">2.3.6 编译设备树</a></li>
+<li><a href="#237-%E5%88%B6%E4%BD%9C%E6%98%A0%E5%83%8F%E6%96%87%E4%BB%B6">2.3.7 制作映像文件</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+          
+          <hr />
+          <p class="next-post">下一篇：
+            <a href="https://xstarling.github.io/wq0nSn5jN/">
+              <span class="post-title">
+                linux中VFS&rarr;
+              </span>
+            </a>
+          </p>
+          
+          <div class="comment" style="text-align: center;">
+            
+
+            
+            
+            <script src='https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js'></script>
+
+<style>
+	div#vcomments{
+		width:100%;
+		max-width: 1000px;
+		padding: 2.5%
+	}
+</style>
+
+
+	<div id="vcomments"></div>
+
+<script>
+	new Valine({
+		el: '#vcomments',
+		appId: 'Y2b59ZcCnZeowrhGKsweiviD-gzGzoHsz',
+		appKey: 'BpGUAoWRmemmVYU1cqKSUoSO',
+		avatar: '',
+		pageSize: 5,
+		recordIp: false,
+		placeholder: '请留下你的建议...',
+		visitor: false,
+	});
+</script>
+
+            
+          </div>
+        </div>
+      </div>
+  </article>
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+            <li class="list-inline-item">
+              <a href="https://github.com/xstarling" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fab fa-github fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+            </li>
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <!-- <li class="list-inline-item">
+              <a href="https://xstarling.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li> -->
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>林星</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://xstarling.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://xstarling.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));</script>
+  <!-- 更新图片的url请求头路径 -->
+  <script src="https://xstarling.github.io/media/scripts/imagePathScript.js"></script>
+  <input id="oldimagepath" name="oldimagepath" value="https://33373sl116.zicp.fun/image-blog" type="hidden" />
+  <input id="newimagepath" name="newimagepath" value="https://33373sl116.zicp.fun/image-blog" type="hidden" />
+  
+  <div id="landlord-parent">
+    <div id="landlord">
+        <div class="message" style="opacity:0"></div>
+        <canvas id="live2d" width="240" height="250" class="live2d"></canvas>
+    </div>
+</div>
+
+<script type="text/javascript">
+    if (/(iPhone|iPad|iPod|iOS|Android)/i.test(navigator.userAgent)) {
+        //移动端
+        console.log("------ 移动端");
+    } else {
+        console.log("------ PC端 " + navigator.userAgent);
+
+        addScript("https://cdn.jsdelivr.net/gh/850552586/ericamcdn@0.1/js/live2d.js", () => {
+            // 加载完成后再loadlive2d
+            loadlive2d("live2d", "https://xstarling.github.io/media/live2d/assets/hijiki.model.json");
+        });
+
+        var home_Path = "https://xstarling.github.io/";
+        addScript("https://xstarling.github.io/media/live2d/js/message.js", () => { });
+    }
+
+    // 插入js文件，完成后callback
+    function addScript(jsfile, callback) {
+        var landlord_parent = document.getElementById("landlord-parent");
+        var script = document.createElement("script");
+        script.type = "text/javascript";
+        script.src = jsfile;
+        landlord_parent.appendChild(script);
+        script.onload = script.onreadystatechange = function () {
+            if (!this.readyState || this.readyState === "loaded" || this.readyState === "complete") {
+                script.onload = script.onreadystatechange = null;
+                if (callback && typeof callback == "function") {
+                    callback(); //window[callback]();如果传递字符串过来 调用window['函数名']() 调用方法
+                }
+            }
+        };
+    }
+</script>
+  
+  <script src="https://xstarling.github.io/media/scripts/tocScript.js"></script>
+
+</body>
+
+</html>

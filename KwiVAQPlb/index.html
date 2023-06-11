@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta content="yes" name="apple-mobile-web-app-capable" />
+<meta content="black" name="apple-mobile-web-app-status-bar-style" />
+<meta name="referrer" content="never">
+<meta name="keywords" content="">
+<meta name="description" content="欢迎访问[林星]的个人博客">
+<meta name="author" content="kveln">
+<title>gdb调试 | 林星</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css">
+<link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+<link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+<link
+  href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800'
+  rel='stylesheet' type='text/css'>
+<link rel="alternate" type="application/rss+xml" title="gdb调试 | 林星 » Feed"
+  href="https://xstarling.github.io/atom.xml">
+<link rel="stylesheet"
+  href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+<link href="https://xstarling.github.io/styles/main.css" rel="stylesheet">
+<script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets/highlight.min.js"></script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/850552586/ericamcdn@0.1/css/live2d.css">
+
+<script>hljs.initHighlightingOnLoad();</script>
+
+  <meta property="og:description" content="gdb调试" />
+  <meta property="og:url" content="https://xstarling.github.io/KwiVAQPlb/" />
+  <meta property="og:locale" content="zh-CN" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="林星" />
+  <!-- <script src="../assets/styles/scripts/tocScript.js"></script> -->
+</head>
+
+<body>
+  <!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+  <div class="container">
+    <a class="navbar-brand" href="https://xstarling.github.io">林星</a>
+    <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse"
+      data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false"
+      aria-label="Toggle navigation">
+      Menu
+      <i class="fas fa-bars"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarResponsive">
+      <ul class="navbar-nav ml-auto">
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/">首页</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/archives">归档</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/tags">标签</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/friends">友链</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/about-starling">关于</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          <div class="gridea-search-container">
+            <form id="gridea-search-form" style="position: relative" data-update="1686458398465"
+              action="/search/index.html">
+              <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+              <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+  <!-- Page Header -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+  <div class="container">
+    <a class="navbar-brand" href="https://xstarling.github.io">林星</a>
+    <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse"
+      data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false"
+      aria-label="Toggle navigation">
+      Menu
+      <i class="fas fa-bars"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarResponsive">
+      <ul class="navbar-nav ml-auto">
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/">首页</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/archives">归档</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/tags">标签</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/friends">友链</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/about-starling">关于</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          <div class="gridea-search-container">
+            <form id="gridea-search-form" style="position: relative" data-update="1686458398465"
+              action="/search/index.html">
+              <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+              <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+<header class="masthead" style="background-image: url('https://xstarling.github.io/media/images/home-bg.jpg')">
+  <div class="overlay"></div>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-md-10 mx-auto">
+        
+          <!-- 没Title为其他页面Header -->
+          
+            <!-- 没Title并且有headerType为Post：文章Header -->
+            <div class="post-heading">
+              <span class="tags">
+                
+              </span>
+              <h1>gdb调试</h1>
+              <span class="meta">
+                Posted on
+                2023-06-09，11 min read
+              </span>
+            </div>
+          
+        
+      </div>
+    </div>
+  </div>
+</header>
+  <!-- Post Content -->
+  <article id="post-content-article">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto post-content-container">
+          
+          <h2 id="1-gdb基本命令">1. gdb基本命令</h2>
+<h3 id="11-gdb安装">1.1 gdb安装</h3>
+<ul>
+<li>安装命令：</li>
+</ul>
+<pre><code class="language-shell">sudo apt install gdb
+</code></pre>
+<ul>
+<li>注意<br>
+注意，如果服务器没有安装gdb，上面命令自动安装最新的gdb。</li>
+</ul>
+<h3 id="12-gdb调试准备">1.2 gdb调试准备</h3>
+<p>用gcc编译源程序的时候，编译后的可执行文件<strong>默认不包括源程序代码</strong>，如果你打算编译后的程序可以被调试，编译的时候要加<code>-g</code>的参数。<br>
+例如：</p>
+<pre><code class="language-shell">gcc -g -o test test.c
+</code></pre>
+<p>在命令行输入如下命令，即可进入gdb调试</p>
+<pre><code class="language-shell">gdb test
+</code></pre>
+<h3 id="13-基本调试命令">1.3 基本调试命令</h3>
+<table>
+<thead>
+<tr>
+<th>命令名称</th>
+<th>命令缩写</th>
+<th>命令说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>run</td>
+<td>r</td>
+<td>运行一个待调试的程序</td>
+</tr>
+<tr>
+<td>continue</td>
+<td>c</td>
+<td>让暂停的程序继续运行</td>
+</tr>
+<tr>
+<td>next</td>
+<td>n</td>
+<td>运行到下一行</td>
+</tr>
+<tr>
+<td>step</td>
+<td>s</td>
+<td>单步执行，遇到函数会进入</td>
+</tr>
+<tr>
+<td>until</td>
+<td>u</td>
+<td>运行到指定行停下来</td>
+</tr>
+<tr>
+<td>finish</td>
+<td>fi</td>
+<td>结束当前调用函数，回到上一层调用函数处</td>
+</tr>
+<tr>
+<td>return</td>
+<td>return</td>
+<td>结束当前调用函数并返回指定值，到上一层函数调用处</td>
+</tr>
+<tr>
+<td>jump</td>
+<td>j</td>
+<td>将当前程序执行流跳转到指定行或地址</td>
+</tr>
+<tr>
+<td>print</td>
+<td>p</td>
+<td>打印变量或寄存器值</td>
+</tr>
+<tr>
+<td>backtrace</td>
+<td>bt</td>
+<td>查看当前线程的调用堆栈</td>
+</tr>
+<tr>
+<td>frame</td>
+<td>f</td>
+<td>切换到当前调用线程的指定堆栈</td>
+</tr>
+<tr>
+<td>thread</td>
+<td>thread</td>
+<td>切换到指定线程</td>
+</tr>
+<tr>
+<td>break</td>
+<td>b</td>
+<td>添加断点</td>
+</tr>
+<tr>
+<td>tbreak</td>
+<td>tb</td>
+<td>添加临时断点</td>
+</tr>
+<tr>
+<td>delete</td>
+<td>d</td>
+<td>删除断点</td>
+</tr>
+<tr>
+<td>enable</td>
+<td>enable</td>
+<td>启用某个断点</td>
+</tr>
+<tr>
+<td>disable</td>
+<td>disable</td>
+<td>禁用某个断点</td>
+</tr>
+<tr>
+<td>watch</td>
+<td>watch</td>
+<td>监视某一个变量或内存地址的值是否发生变化</td>
+</tr>
+<tr>
+<td>list</td>
+<td>l</td>
+<td>显示源码</td>
+</tr>
+<tr>
+<td>info</td>
+<td>i</td>
+<td>查看断点 / 线程等信息</td>
+</tr>
+<tr>
+<td>ptype</td>
+<td>ptype</td>
+<td>查看变量类型</td>
+</tr>
+<tr>
+<td>disassemble</td>
+<td>dis</td>
+<td>查看汇编代码</td>
+</tr>
+<tr>
+<td>set args</td>
+<td>set args</td>
+<td>设置程序启动命令行参数</td>
+</tr>
+<tr>
+<td>show args</td>
+<td>show args</td>
+<td>查看设置的命令行参数</td>
+</tr>
+</tbody>
+</table>
+<h2 id="2-调试core文件">2. 调试core文件</h2>
+<blockquote>
+<p>当程序挂掉时，系统缺省不会生成core文件。<br>
+core文件：有问题的程序运行后，产生“段错误 (核心已转储)”时生成的具有堆栈信息和调试信息的文件</p>
+</blockquote>
+<ul>
+<li>
+<p>配置core文件</p>
+<ol>
+<li>ulimit -a 查看系统参数；</li>
+<li>ulimit -c 查看core开关，如果为0表示关闭，不会生成core文件；</li>
+<li>ulimit -c [filesize]  设置core文件大小，当最小设置为4之后才会生成core文件</li>
+<li>ulimit -c unlimit 把core文件的大小设置为无限制；</li>
+<li>运行程序，生成core文件；</li>
+<li>gdb 程序名 core文件名。</li>
+</ol>
+</li>
+<li>
+<p>core文件命名和保存路径<br>
+①core文件有默认的名称和路径，但为了方便，我们通常会自己命名和指定保存路径；</p>
+</li>
+</ul>
+<p>②可以通过 <code>/proc/sys/kernel/core_pattern</code> 设置 core 文件名和保存路径，方法如下：</p>
+<p><code>echo &quot;/corefile/core-%e-%p-%t&quot; &gt; /proc/sys/kernel/core_pattern</code></p>
+<p>命名的参数列表：</p>
+<pre><code class="language-shell">     %p - insert pid into filename 添加pid 
+     %u - insert current uid into filename 添加当前uid 
+     %g - insert current gid into filename 添加当前gid 
+     %s - insert signal that caused the coredump into the filename 添加导致产生core的信号 
+     %t - insert UNIX time that the coredump occurred into filename 添加core文件生成时的unix时间 
+     %h - insert hostname where the coredump happened into filename 添加主机名 
+     %e - insert coredumping executable name into filename 添加命令名
+</code></pre>
+<ul>
+<li>调试core文件
+<ol>
+<li>方法1: gdb [exec file] [core file] 然后执行bt看堆栈信息</li>
+<li>方法2:gdb -c [core file],然后 file [exec file],最后再使用<code>bt</code>查看错误位置</li>
+</ol>
+</li>
+</ul>
+<p><strong>注意</strong>：<code>bt</code>：命令查看程序运行的栈</p>
+<h2 id="3-调试正在运行中的程序">3. 调试正在运行中的程序</h2>
+<ul>
+<li><strong>调试的流程</strong></li>
+</ul>
+<ol>
+<li>ps查看程序的进程ID<br>
+<code>ps -aux| grep test</code></li>
+<li>启动gdb调试程序<br>
+<strong>方式0</strong>：之间通过程序名和pid<br>
+<code> gdb 程序名称 -p 进程ID</code><br>
+<strong>方式1</strong>：通过–-pid参数来绑定指定的进程程序。<br>
+<code> gdb --pid 25552</code><br>
+<strong>方式2</strong>：通过程序和进程号来绑定。<br>
+<code> gdb test 25552</code><br>
+<strong>方式3</strong>：先启动gdb后，通过attach来绑定pid<br>
+<code> gdb attach 25552</code></li>
+<li>查看程序的栈信息<br>
+<code>bt</code></li>
+<li>使用gdb的普通调试命令进行程序调试</li>
+</ol>
+<ul>
+<li><strong>调试命令 (缩写) 作用</strong></li>
+</ul>
+<pre><code class="language-c">(gdb) break (b) 在源代码指定的某一行设置断点，其中xxx用于指定具体打断点位置
+(gdb) run (r） 执行被调试的程序，其会自动在第一个断点处暂停执行。
+(gdb) continue (c） 当程序在某一断点处停止后，用该指令可以继续执行，直至遇到断点或者程序结束。
+(gdb) next (n) 令程序一行代码一行代码的执行。
+(gdb) step（s） 如果有调用函数，进入调用的函数内部；否则，和 next 命令的功能一样。
+(gdb) until (u)
+(gdb) until (u) location 当你厌倦了在一个循环体内单步跟踪时，单纯使用 until 命令，可以运行程序直到退出循环体。
+until n 命令中，n 为某一行代码的行号，该命令会使程序运行至第 n 行代码处停止。
+(gdb) print (p） 打印指定变量的值，其中 xxx 指的就是某一变量名。
+(gdb) list (l) 显示源程序代码的内容，包括各行代码所在的行号。
+(gdb) finish（fi） 结束当前正在执行的函数，并在跳出函数后暂停程序的执行。
+(gdb) return（return） 结束当前调用函数并返回指定值，到上一层函数调用处停止程序执行。
+(gdb) jump（j) 使程序从当前要执行的代码处，直接跳转到指定位置处继续执行后续的代码。
+(gdb) quit (q) 终止调试。
+(gdb) Backtrace(bt) 查看堆栈。
+(gdb) info threads 显示当前可调试的所有线程
+(gdb) thread ID 切换当前调试的线程为指定ID的线程
+(gdb) attach process-id 在gdb状态下，开始调试一个正在运行的进程
+(gdb) thread apply all command 所有线程执行command
+
+</code></pre>
+<h2 id="4-调试多进程服务程序">4. 调试多进程服务程序</h2>
+<blockquote>
+<p>调试父进程：set follow-fork-mode parent （缺省）<br>
+调试子进程：set follow-fork-mode child<br>
+设置调试模式：set detach-on-fork [on|off]，缺省是on<br>
+标识调试当前进程的时候，其他的进程继续运行，如果用off调试当前进程的时候，其他的进程被gdb挂起<br>
+查看调试的进程：info inferiors    （*：表示当前调试进程）<br>
+切换当前调试的进程：inferior  进程ID</p>
+</blockquote>
+<ul>
+<li>常用命令表格</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>命令</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>follow-fork-mode</td>
+<td>set follow-fork-mode [parent|child]<br> parent：gdb默认调试的是父进程，如果参数是parent则fork之后继续调试父进程，子进程不受影响 <br> child：如果想调试子进程，则修改参数为child，set follow-fork-mode child之后调试子进程，父进程不受影响。</td>
+</tr>
+<tr>
+<td>show follow-fork-mode</td>
+<td>查看当前调试的fork进程的模式</td>
+</tr>
+<tr>
+<td>detach-on-fork</td>
+<td>该参数表明gdb在fork之后是否断开(detach)某个进程的调试，或者交给gdb控制.<br>set detach-on-fork [on|off]<br> on：断开调试follow-fork-mode调试的指定进程<br> off：gdb将控制父进程和子进程。follow-fork-mode指定的进程将被调试，另一个进程置于暂停（suspended）状态。</td>
+</tr>
+<tr>
+<td>show detach-on-fork</td>
+<td>查看detach-on-fork模式<br> gdb将每一个被调试进程的执行状态记录在一个名为inferior的结构中。一般情况下一个inferior对应一个进程，每个不同的inferior有不同的地址空间。inferior有时候会在进程没有启动的时候就存在。</td>
+</tr>
+<tr>
+<td>info inferiors</td>
+<td>查询正在调试的进程,gdb会为他们分配唯一的Num号，其中前面带'*'号的就是正在调试的进程</td>
+</tr>
+<tr>
+<td>inferior <inferior num></td>
+<td>切换调试的进程为inferior num的进程处<br> add-inferior [-copies n] [-exec executable] <br>添加n个新的调试进程，可以用file executable来分配给inferior可执行文件。如果不指定n，则只增加一个inferior；如果不指定executable，则执行程序留空，增加后可使用file命令重新指定执行程序；这时候创建的inferior其关联的进程并没启动。</td>
+</tr>
+<tr>
+<td>clone-inferior [-copies n] [infno]</td>
+<td>复制n个编号是infno的inferior。如果不指定n的话，就只复制一个inferior；如果不指定infno，则就复制正在调试的inferior。</td>
+</tr>
+<tr>
+<td>detach inferior infno</td>
+<td>断开(detach)掉编号是infno的inferior。值得注意的是这个inferior还存在，可以再次用run命令执行它。</td>
+</tr>
+<tr>
+<td>kill inferior infno</td>
+<td>kill掉infno号inferior。值得注意的是这个inferior仍然存在，可以再次用run等命令执行它。</td>
+</tr>
+<tr>
+<td>remove-inferior infno</td>
+<td>删除一个infno号的inferior。删除前需要先kill或者detach这个inferior，因为当一个inferior正在运行时不能被删除.</td>
+</tr>
+<tr>
+<td>set schedule-multiple [on|off]</td>
+<td>off：只有当前inferior会执行。 <br> on：全部是执行状态的inferior都会执行。</td>
+</tr>
+<tr>
+<td>show schedule-multiple</td>
+<td>查看schedule-multiple的状态。</td>
+</tr>
+<tr>
+<td>set follow-exec-mode [new|same]</td>
+<td>same：当发生exec的时候，在执行exec的inferior上控制子进程。 <br> new：新建一个inferior给执行起来的子进程。而父进程的inferior仍然保留，当前保留的inferior的程序状态是没有执行。</td>
+</tr>
+<tr>
+<td>show follow-exec-mode</td>
+<td>查看follow-exec-mode设置的模式。</td>
+</tr>
+<tr>
+<td>set print inferior-events [on|off]</td>
+<td>用来打开和关闭inferior状态的提示信息。</td>
+</tr>
+<tr>
+<td>show print inferior-events</td>
+<td>查看print inferior-events设置的状态。</td>
+</tr>
+<tr>
+<td>maint info program-spaces</td>
+<td>用来显示当前gdb管理的地址空间的数目。</td>
+</tr>
+</tbody>
+</table>
+<h2 id="5-调试多线程服务程序">5. 调试多线程服务程序</h2>
+<ul>
+<li>查看线程状态<br>
+<strong>在shell中执行</strong>：</li>
+</ul>
+<blockquote>
+<p>查看当前运行的进程：ps aux | grep 进程名称<br>
+查看当前运行的轻量级进程：ps -aL | grep 进程名称<br>
+查看主线程和子线程的关系：pstree -p 主线程ID</p>
+</blockquote>
+<p><strong>在gdb中执行</strong>：</p>
+<blockquote>
+<p>查看线程：info threads<br>
+切换线程：thread 线程ID<br>
+只运行当前线程：set scheduler-locking on<br>
+运行全部的线程：set scheduler-locking off<br>
+指定某线程执行某gdb命令：thread apply 线程ID cmd命令<br>
+全部的线程执行某gdb命令：thread apply all cmd命令</p>
+</blockquote>
+<ul>
+<li>多线程调试命令</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>命令</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>info threads</td>
+<td>显示当前可调试的所有线程，每个线程会有一个GDB为其分配的ID，后面操作线程的时候会用到这个ID。 前面有*的是当前调试的线程</td>
+</tr>
+<tr>
+<td>thread ID(1,2,3…)</td>
+<td>切换当前调试的线程为指定ID的线程</td>
+</tr>
+<tr>
+<td>break thread_test.c:123 thread all<br>（例：在相应函数的位置设置断点break pthread_run1）</td>
+<td>在所有线程中相应的行上设置断点</td>
+</tr>
+<tr>
+<td>thread apply ID1 ID2 command</td>
+<td>让一个或者多个线程执行GDB命令command</td>
+</tr>
+<tr>
+<td>thread apply all command</td>
+<td>让所有被调试线程执行GDB命令command</td>
+</tr>
+<tr>
+<td>set scheduler-locking 选项 command</td>
+<td>设置线程是以什么方式来执行命令<br><strong>set scheduler-locking off</strong>: 不锁定任何线程，也就是所有线程都执行，这是默认值<br><strong>set scheduler-locking on</strong>：只有当前被调试程序会执行<br><strong>set scheduler-locking on step</strong>：在单步的时候，除了next过一个函数的情况(熟悉情况的人可能知道，这其实是一个设置断点然后continue的行为)以外，只有当前线程会执行</td>
+</tr>
+</tbody>
+</table>
+<h2 id="6-服务程序运行日志">6. 服务程序运行日志</h2>
+<p>freecplus开源框的日志工具：<a href="https://xie.infoq.cn/article/3c7b99b5c8b5663c61cc06204">freecplus-参考文档</a></p>
+
+          <div class="toc-container"><ul class="markdownIt-TOC">
+<li>
+<ul>
+<li><a href="#1-gdb%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4">1. gdb基本命令</a>
+<ul>
+<li><a href="#11-gdb%E5%AE%89%E8%A3%85">1.1 gdb安装</a></li>
+<li><a href="#12-gdb%E8%B0%83%E8%AF%95%E5%87%86%E5%A4%87">1.2 gdb调试准备</a></li>
+<li><a href="#13-%E5%9F%BA%E6%9C%AC%E8%B0%83%E8%AF%95%E5%91%BD%E4%BB%A4">1.3 基本调试命令</a></li>
+</ul>
+</li>
+<li><a href="#2-%E8%B0%83%E8%AF%95core%E6%96%87%E4%BB%B6">2. 调试core文件</a></li>
+<li><a href="#3-%E8%B0%83%E8%AF%95%E6%AD%A3%E5%9C%A8%E8%BF%90%E8%A1%8C%E4%B8%AD%E7%9A%84%E7%A8%8B%E5%BA%8F">3. 调试正在运行中的程序</a></li>
+<li><a href="#4-%E8%B0%83%E8%AF%95%E5%A4%9A%E8%BF%9B%E7%A8%8B%E6%9C%8D%E5%8A%A1%E7%A8%8B%E5%BA%8F">4. 调试多进程服务程序</a></li>
+<li><a href="#5-%E8%B0%83%E8%AF%95%E5%A4%9A%E7%BA%BF%E7%A8%8B%E6%9C%8D%E5%8A%A1%E7%A8%8B%E5%BA%8F">5. 调试多线程服务程序</a></li>
+<li><a href="#6-%E6%9C%8D%E5%8A%A1%E7%A8%8B%E5%BA%8F%E8%BF%90%E8%A1%8C%E6%97%A5%E5%BF%97">6. 服务程序运行日志</a></li>
+</ul>
+</li>
+</ul>
+</div>
+          
+          <hr />
+          <p class="next-post">下一篇：
+            <a href="https://xstarling.github.io/Bgv24BHxK/">
+              <span class="post-title">
+                嵌入式---知识盲点&rarr;
+              </span>
+            </a>
+          </p>
+          
+          <div class="comment" style="text-align: center;">
+            
+
+            
+            
+            <script src='https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js'></script>
+
+<style>
+	div#vcomments{
+		width:100%;
+		max-width: 1000px;
+		padding: 2.5%
+	}
+</style>
+
+
+	<div id="vcomments"></div>
+
+<script>
+	new Valine({
+		el: '#vcomments',
+		appId: 'Y2b59ZcCnZeowrhGKsweiviD-gzGzoHsz',
+		appKey: 'BpGUAoWRmemmVYU1cqKSUoSO',
+		avatar: '',
+		pageSize: 5,
+		recordIp: false,
+		placeholder: '请留下你的建议...',
+		visitor: false,
+	});
+</script>
+
+            
+          </div>
+        </div>
+      </div>
+  </article>
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+            <li class="list-inline-item">
+              <a href="https://github.com/xstarling" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fab fa-github fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+            </li>
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <!-- <li class="list-inline-item">
+              <a href="https://xstarling.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li> -->
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>林星</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://xstarling.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://xstarling.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));</script>
+  <!-- 更新图片的url请求头路径 -->
+  <script src="https://xstarling.github.io/media/scripts/imagePathScript.js"></script>
+  <input id="oldimagepath" name="oldimagepath" value="https://33373sl116.zicp.fun/image-blog" type="hidden" />
+  <input id="newimagepath" name="newimagepath" value="https://33373sl116.zicp.fun/image-blog" type="hidden" />
+  
+  <div id="landlord-parent">
+    <div id="landlord">
+        <div class="message" style="opacity:0"></div>
+        <canvas id="live2d" width="240" height="250" class="live2d"></canvas>
+    </div>
+</div>
+
+<script type="text/javascript">
+    if (/(iPhone|iPad|iPod|iOS|Android)/i.test(navigator.userAgent)) {
+        //移动端
+        console.log("------ 移动端");
+    } else {
+        console.log("------ PC端 " + navigator.userAgent);
+
+        addScript("https://cdn.jsdelivr.net/gh/850552586/ericamcdn@0.1/js/live2d.js", () => {
+            // 加载完成后再loadlive2d
+            loadlive2d("live2d", "https://xstarling.github.io/media/live2d/assets/hijiki.model.json");
+        });
+
+        var home_Path = "https://xstarling.github.io/";
+        addScript("https://xstarling.github.io/media/live2d/js/message.js", () => { });
+    }
+
+    // 插入js文件，完成后callback
+    function addScript(jsfile, callback) {
+        var landlord_parent = document.getElementById("landlord-parent");
+        var script = document.createElement("script");
+        script.type = "text/javascript";
+        script.src = jsfile;
+        landlord_parent.appendChild(script);
+        script.onload = script.onreadystatechange = function () {
+            if (!this.readyState || this.readyState === "loaded" || this.readyState === "complete") {
+                script.onload = script.onreadystatechange = null;
+                if (callback && typeof callback == "function") {
+                    callback(); //window[callback]();如果传递字符串过来 调用window['函数名']() 调用方法
+                }
+            }
+        };
+    }
+</script>
+  
+  <script src="https://xstarling.github.io/media/scripts/tocScript.js"></script>
+
+</body>
+
+</html>

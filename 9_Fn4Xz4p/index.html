@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta content="yes" name="apple-mobile-web-app-capable" />
+<meta content="black" name="apple-mobile-web-app-status-bar-style" />
+<meta name="referrer" content="never">
+<meta name="keywords" content="">
+<meta name="description" content="欢迎访问[林星]的个人博客">
+<meta name="author" content="kveln">
+<title>C基础知识 | 林星</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css">
+<link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+<link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+<link
+  href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800'
+  rel='stylesheet' type='text/css'>
+<link rel="alternate" type="application/rss+xml" title="C基础知识 | 林星 » Feed"
+  href="https://xstarling.github.io/atom.xml">
+<link rel="stylesheet"
+  href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+<link href="https://xstarling.github.io/styles/main.css" rel="stylesheet">
+<script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets/highlight.min.js"></script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/850552586/ericamcdn@0.1/css/live2d.css">
+
+<script>hljs.initHighlightingOnLoad();</script>
+
+  <meta property="og:description" content="C基础知识" />
+  <meta property="og:url" content="https://xstarling.github.io/9_Fn4Xz4p/" />
+  <meta property="og:locale" content="zh-CN" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="林星" />
+  <!-- <script src="../assets/styles/scripts/tocScript.js"></script> -->
+</head>
+
+<body>
+  <!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+  <div class="container">
+    <a class="navbar-brand" href="https://xstarling.github.io">林星</a>
+    <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse"
+      data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false"
+      aria-label="Toggle navigation">
+      Menu
+      <i class="fas fa-bars"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarResponsive">
+      <ul class="navbar-nav ml-auto">
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/">首页</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/archives">归档</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/tags">标签</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/friends">友链</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/about-starling">关于</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          <div class="gridea-search-container">
+            <form id="gridea-search-form" style="position: relative" data-update="1686458398465"
+              action="/search/index.html">
+              <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+              <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+  <!-- Page Header -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+  <div class="container">
+    <a class="navbar-brand" href="https://xstarling.github.io">林星</a>
+    <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse"
+      data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false"
+      aria-label="Toggle navigation">
+      Menu
+      <i class="fas fa-bars"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarResponsive">
+      <ul class="navbar-nav ml-auto">
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/">首页</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/archives">归档</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/tags">标签</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/friends">友链</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/about-starling">关于</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          <div class="gridea-search-container">
+            <form id="gridea-search-form" style="position: relative" data-update="1686458398465"
+              action="/search/index.html">
+              <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+              <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+<header class="masthead" style="background-image: url('https://xstarling.github.io/media/images/home-bg.jpg')">
+  <div class="overlay"></div>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-md-10 mx-auto">
+        
+          <!-- 没Title为其他页面Header -->
+          
+            <!-- 没Title并且有headerType为Post：文章Header -->
+            <div class="post-heading">
+              <span class="tags">
+                
+              </span>
+              <h1>C基础知识</h1>
+              <span class="meta">
+                Posted on
+                2023-05-26，8 min read
+              </span>
+            </div>
+          
+        
+      </div>
+    </div>
+  </div>
+</header>
+  <!-- Post Content -->
+  <article id="post-content-article">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto post-content-container">
+          
+          <h1 id="1-易混淆知识">1. 易混淆知识</h1>
+<h2 id="11-基础语法">1.1 基础语法</h2>
+<h3 id="111-a1a1a1a1a1的区别">1.1.1 <code>a+1，*(a+1)，*(&amp;a+1)，&amp;a+1，*(*(&amp;a+1))</code>的区别</h3>
+<ul>
+<li><code>a+1</code>：就是数组首地址加上一个元素所占的地址大小，结果是一个<strong>地址</strong>，这里int是4字节，则就是<code>1x4</code></li>
+<li><code>*(a+1)</code>：代表的是数组的第一个元素的<strong>值</strong>，不再是地址</li>
+<li><code>*(&amp;a+1)</code>：将&amp;a+1的地址取出来，这值是<code>地址的值</code></li>
+<li><code>&amp;a+1</code>：代表的是加上<strong>整个数组的大小</strong>，例如：数组长度为3，则&amp;a+1表示指向数组最后一个元素的下一个地址开始处，即这里的<code>+1</code>代表的是加上<code>3x4</code></li>
+<li><code>*(*(&amp;a+1)-1)</code>：取出<code>&amp;a+1</code>地址的前一个元素的值。（即数组的最后一个元素的值）</li>
+</ul>
+<h3 id="112-scanf函数的返回值">1.1.2 scanf()函数的返回值</h3>
+<ul>
+<li>
+<p>scanf 函数是有返回值的，它的返回值可以分成三种情况</p>
+<ul>
+<li>
+<p>正整数，表示正确输入参数的个数。<br>
+例如执行 scanf(“%d %d”, &amp;a, &amp;b);<br>
+如果用户输入”3 4”，可以正确输入，返回2（正确输入了两个变量）；<br>
+如果用户输入”3,4”，可以正确输入a，无法输入b，返回1（正确输入了一个变量）。</p>
+</li>
+<li>
+<p>0，表示用户的输入不匹配，无法正确输入任何值。如上例，用户如果输入”,3 4”，返回0。</p>
+</li>
+<li>
+<p>EOF，这是在 stdio.h 里面定义的常量（通常值为-1），表示输入流已经结束。在Windows下，用户按下CTRL+Z（会看到一个^Z字符）再按下回车（可能需要重复2次），就表示输入结束；Linux/Unix下使用CTRL+D表示输入结束。</p>
+</li>
+</ul>
+</li>
+<li>
+<p>scanf 的格式串里面，为什么%s 和 %c 中间需要空格呢？</p>
+<pre><code class="language-c">while (scanf(&quot;%s %c %c&quot;, str, &amp;oldchar, &amp;newchar) == 3)
+/* 或!= EOF , 但前者更好 */
+{
+    ; //处理
+}
+</code></pre>
+<blockquote>
+<p>因为如果没空格的话。。。oldchar输入的就是空格了= =.</p>
+</blockquote>
+</li>
+</ul>
+<p><strong>补充</strong></p>
+<blockquote>
+<p>printf 的返回值是输出的字符数，例如，printf(“1234”)的返回值是4，而printf(“1234\n”)的返回值是5。</p>
+</blockquote>
+<h3 id="113-const-和static区别">1.1.3 const 和static区别</h3>
+<ul>
+<li><strong>常量（const 类型）</strong><br>
+const类型的值是不能被修改的，但是，这个不能修改，意思是const 修饰的部分是不能被修改的。典型的应用是如下的两种：
+<ul>
+<li>const     int*     p; 这个声明的意思是：p 是一个指针，是指向const int 的一个指针。（p is a pointer, point to a const int）也就是说，p这个<strong>地址是可以改变</strong>的，但是，不管地址如何变，其<strong>指向的值是不变</strong>的。p = p + 1 是对的，但是 *p是不合法的，不能改变*p的值。</li>
+<li>int*    const      p; 同样是定义一个指针，意思是：p是一个const的int类型的指针。（p is a const pointer to int）也就是说，p是一个地址，但是这个<strong>地址不能被改变</strong>，但是里面的<strong>值 *p 是可以改变</strong>的。p = p+1 是错误的，因为p已经固定了，但是*p是合法的。</li>
+</ul>
+<blockquote>
+<p>const int* p：等价于（const int)* p，即：p是一个指针，指向（const int）类型<br>
+int* const p：等价于int* (const p)，即：p是一个常量指针（const p），指向int类型</p>
+</blockquote>
+</li>
+<li><strong>静态变量（static）</strong><br>
+静态变量分为全局的静态变量和局部的静态变量。静态变量的<strong>值是可以改变</strong>的！
+<ul>
+<li><strong>全局静态变量</strong>：这个比较简单，作用域内的所有函数都可以调用，一般可以用来做多线程程序的控制。</li>
+<li><strong>局部静态变量</strong>：在这个例子中，一共调用了func函数三次，每调用一次，i的值都会改变一次。</li>
+</ul>
+</li>
+</ul>
+<h3 id="114-结构体内存对齐和修改默认对齐数">1.1.4 结构体内存对齐和修改默认对齐数</h3>
+<p>参考视频链接：<a href="https://www.bilibili.com/video/BV1Vm4y1r7jY?p=137&amp;vd_source=9752c2c90782ff8bd76174dfbc76c933">鹏哥C语言</a></p>
+<ul>
+<li>结构体内存对齐<br>
+对齐规则：</li>
+</ul>
+<blockquote>
+<ol>
+<li>第一个成员在结构体变量偏移量为0的地址处。</li>
+<li>其他成员变量要对齐到某个数字（对齐数）的整数倍的地址处。<br>
+<strong>对齐数</strong> = 编译器默认的对齐数 与 该成员大小的 <strong>较小值</strong>。如：<code>vs中默认值为8</code>。</li>
+<li>结构体总体大小为最大对齐数（每个成员变量都有一个对齐数）的整数倍。</li>
+<li>如果嵌套了结构体的情况，嵌套的结构体对齐到<strong>自己的最大对齐数的整数倍处</strong>，结构体的整体大小就是所有最大对齐数（含嵌套结构体的对齐数）的整数倍。</li>
+</ol>
+</blockquote>
+<ul>
+<li>
+<p>为啥存在内存对齐？<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306080029910.png" alt="" loading="lazy"></p>
+</li>
+<li>
+<p>修改默认对齐数<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306080847474.png" alt="" loading="lazy"></p>
+</li>
+</ul>
+<h3 id="115-结构体和共用体区别">1.1.5 结构体和共用体区别</h3>
+<p>参考博客链接：<a href="https://blog.csdn.net/qq_40305944/article/details/116270391">嵌入式小刘-共用体和结构体的区别</a></p>
+<ul>
+<li>
+<p>共用体的特点<br>
+1）使用共用体变量的目的是希望用同一个内存段存放几种不同类型的数据，但请注意，在<strong>每一个瞬间只能存放其中一种</strong>，而不是同时存放几种；<br>
+2）能够<strong>访问</strong>的是共用体变量中<strong>最后一次被赋值的成员</strong>，在对一个新的成员赋值后原有的成员就失去作用。<br>
+3）共用体变量的地址和它各成员的地址都是<strong>同一个地址</strong>；<br>
+4）<strong>不能对共用体变量名赋值</strong>；不能企图引用变量名来得到一个值；不能在定义共用体变量时对它初始化；不能用共用体变量名作为函数参数。</p>
+</li>
+<li>
+<p>共用体变量的赋值<br>
+参考博客链接：<a href="https://blog.csdn.net/qq_43589855/article/details/84578455">KingSF5-共用体赋值</a></p>
+</li>
+</ul>
+<h3 id="116-文件打开的方式">1.1.6 文件打开的方式</h3>
+<table>
+<thead>
+<tr>
+<th>文件使用方式</th>
+<th>含义</th>
+<th>如果指定的文件不存在</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>r（只读）</td>
+<td>读取一个已经存在的文本文件</td>
+<td>出错</td>
+</tr>
+<tr>
+<td>w（只写）</td>
+<td>打开一个文本文件，输出数据，若文件存在则文件长度清为0，即该文件内容会消失</td>
+<td>建立新文件</td>
+</tr>
+<tr>
+<td>a （追加）</td>
+<td>向文本文件末尾添加数据，原来文件中的数据保留，新的数据添加到文件为，原文件EOF保留</td>
+<td>建立新文件</td>
+</tr>
+<tr>
+<td>rb（只读）</td>
+<td>读取一个二进制文件</td>
+<td>出错</td>
+</tr>
+<tr>
+<td>wb（只写）</td>
+<td>打开一个二进制文件，输出数据，若文件存在则文件长度清为0，即该文件内容会消失</td>
+<td>建立新文件</td>
+</tr>
+<tr>
+<td>ab （追加）</td>
+<td>向二进制文件尾添加数据</td>
+<td>建立新文件</td>
+</tr>
+<tr>
+<td>r+ （读写）</td>
+<td>对一个文本文件进行读写操作</td>
+<td>出错</td>
+</tr>
+<tr>
+<td>w+ （读写）</td>
+<td>对一个文本文件进行读写操作，若文件存在则文件长度清为0，即该文件内容会消失</td>
+<td>建立新文件</td>
+</tr>
+<tr>
+<td>a+（读写）</td>
+<td>向文本文件末尾添加数据，原来文件中的数据保留，新的数据添加到文件尾，原文件EOF不保留</td>
+<td>建立新文件</td>
+</tr>
+<tr>
+<td>rb+ （读写）</td>
+<td>读写一个二进制文件</td>
+<td>出错</td>
+</tr>
+<tr>
+<td>wb+ （读写）</td>
+<td>对一个二进制文件进行读写操作，若文件存在则文件长度清为0，即该文件内容会消失</td>
+<td>建立新文件</td>
+</tr>
+<tr>
+<td>ab+（读写）</td>
+<td>向二进制文件末尾添加数据，原来文件中的数据保留，新的数据添加到文件尾</td>
+<td>建立新文件</td>
+</tr>
+</tbody>
+</table>
+<h2 id="12-经典代码片段">1.2 经典代码片段</h2>
+<h3 id="121-统计二进制数中1的个数">1.2.1 统计二进制数中<code>1</code>的个数</h3>
+<pre><code class="language-c">int countOne(int x){
+    int count = 0;
+    while (x){
+        count++;
+        x = x &amp; (x-1);
+    }
+    return count;
+}
+</code></pre>
+<h3 id="122-编程代码大小端判断">1.2.2 编程代码大小端判断</h3>
+<p>参考视频链接：<a href="https://www.bilibili.com/video/BV1Vm4y1r7jY?p=146&amp;vd_source=9752c2c90782ff8bd76174dfbc76c933">比特鹏---联合</a></p>
+<pre><code class="language-c"># include&lt;stdio.h&gt;
+//方式一
+int  check_sys(){
+    int a = 1;
+    return *(char*)&amp;a;  //将a转为char类型指针，只能取一个字节，然后在去值返回
+}
+//方式二：共用体
+int check_sys(){
+    union {
+        char c;
+        int i;
+    }
+    u.i = 1;
+    return u.c;
+}
+
+int main(){
+    //int a = 1; //0x 00 00 00 01
+    //低------&gt;高
+    //01 00 00 00 -- 小端
+    //00 00 00 01 -- 大端
+    int ret = check_sys();
+    if(ret == 1){
+        printf(&quot;小端\n&quot;);
+    }else{
+        printf(&quot;大端\n&quot;);
+    }
+
+}
+</code></pre>
+<ul>
+<li>共用体字节对齐</li>
+</ul>
+<blockquote>
+<p>char arr[5] 等价于 char a,b,c,d,e;<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306101906110.png" alt="" loading="lazy"></p>
+</blockquote>
+<h2 id="13-c语言内存分区">1.3 c语言内存分区</h2>
+<p>内存分区示意图，详细请参考笔记：<a href="siyuan://blocks/20230526130845-mf1blib">点击此处</a><br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202305270008000.png" alt="c语言内存分区图" loading="lazy"></p>
+
+          <div class="toc-container"><ul class="markdownIt-TOC">
+<li><a href="#1-%E6%98%93%E6%B7%B7%E6%B7%86%E7%9F%A5%E8%AF%86">1. 易混淆知识</a>
+<ul>
+<li><a href="#11-%E5%9F%BA%E7%A1%80%E8%AF%AD%E6%B3%95">1.1 基础语法</a>
+<ul>
+<li><a href="#111-a1a1a1a1a1%E7%9A%84%E5%8C%BA%E5%88%AB">1.1.1 <code>a+1，*(a+1)，*(&amp;a+1)，&amp;a+1，*(*(&amp;a+1))</code>的区别</a></li>
+<li><a href="#112-scanf%E5%87%BD%E6%95%B0%E7%9A%84%E8%BF%94%E5%9B%9E%E5%80%BC">1.1.2 scanf()函数的返回值</a></li>
+<li><a href="#113-const-%E5%92%8Cstatic%E5%8C%BA%E5%88%AB">1.1.3 const 和static区别</a></li>
+<li><a href="#114-%E7%BB%93%E6%9E%84%E4%BD%93%E5%86%85%E5%AD%98%E5%AF%B9%E9%BD%90%E5%92%8C%E4%BF%AE%E6%94%B9%E9%BB%98%E8%AE%A4%E5%AF%B9%E9%BD%90%E6%95%B0">1.1.4 结构体内存对齐和修改默认对齐数</a></li>
+<li><a href="#115-%E7%BB%93%E6%9E%84%E4%BD%93%E5%92%8C%E5%85%B1%E7%94%A8%E4%BD%93%E5%8C%BA%E5%88%AB">1.1.5 结构体和共用体区别</a></li>
+<li><a href="#116-%E6%96%87%E4%BB%B6%E6%89%93%E5%BC%80%E7%9A%84%E6%96%B9%E5%BC%8F">1.1.6 文件打开的方式</a></li>
+</ul>
+</li>
+<li><a href="#12-%E7%BB%8F%E5%85%B8%E4%BB%A3%E7%A0%81%E7%89%87%E6%AE%B5">1.2 经典代码片段</a>
+<ul>
+<li><a href="#121-%E7%BB%9F%E8%AE%A1%E4%BA%8C%E8%BF%9B%E5%88%B6%E6%95%B0%E4%B8%AD1%E7%9A%84%E4%B8%AA%E6%95%B0">1.2.1 统计二进制数中<code>1</code>的个数</a></li>
+<li><a href="#122-%E7%BC%96%E7%A8%8B%E4%BB%A3%E7%A0%81%E5%A4%A7%E5%B0%8F%E7%AB%AF%E5%88%A4%E6%96%AD">1.2.2 编程代码大小端判断</a></li>
+</ul>
+</li>
+<li><a href="#13-c%E8%AF%AD%E8%A8%80%E5%86%85%E5%AD%98%E5%88%86%E5%8C%BA">1.3 c语言内存分区</a></li>
+</ul>
+</li>
+</ul>
+</div>
+          
+          <hr />
+          <p class="next-post">下一篇：
+            <a href="https://xstarling.github.io/ttHxL7o9x/">
+              <span class="post-title">
+                C++特性&rarr;
+              </span>
+            </a>
+          </p>
+          
+          <div class="comment" style="text-align: center;">
+            
+
+            
+            
+            <script src='https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js'></script>
+
+<style>
+	div#vcomments{
+		width:100%;
+		max-width: 1000px;
+		padding: 2.5%
+	}
+</style>
+
+
+	<div id="vcomments"></div>
+
+<script>
+	new Valine({
+		el: '#vcomments',
+		appId: 'Y2b59ZcCnZeowrhGKsweiviD-gzGzoHsz',
+		appKey: 'BpGUAoWRmemmVYU1cqKSUoSO',
+		avatar: '',
+		pageSize: 5,
+		recordIp: false,
+		placeholder: '请留下你的建议...',
+		visitor: false,
+	});
+</script>
+
+            
+          </div>
+        </div>
+      </div>
+  </article>
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+            <li class="list-inline-item">
+              <a href="https://github.com/xstarling" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fab fa-github fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+            </li>
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <!-- <li class="list-inline-item">
+              <a href="https://xstarling.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li> -->
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>林星</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://xstarling.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://xstarling.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));</script>
+  <!-- 更新图片的url请求头路径 -->
+  <script src="https://xstarling.github.io/media/scripts/imagePathScript.js"></script>
+  <input id="oldimagepath" name="oldimagepath" value="https://33373sl116.zicp.fun/image-blog" type="hidden" />
+  <input id="newimagepath" name="newimagepath" value="https://33373sl116.zicp.fun/image-blog" type="hidden" />
+  
+  <div id="landlord-parent">
+    <div id="landlord">
+        <div class="message" style="opacity:0"></div>
+        <canvas id="live2d" width="240" height="250" class="live2d"></canvas>
+    </div>
+</div>
+
+<script type="text/javascript">
+    if (/(iPhone|iPad|iPod|iOS|Android)/i.test(navigator.userAgent)) {
+        //移动端
+        console.log("------ 移动端");
+    } else {
+        console.log("------ PC端 " + navigator.userAgent);
+
+        addScript("https://cdn.jsdelivr.net/gh/850552586/ericamcdn@0.1/js/live2d.js", () => {
+            // 加载完成后再loadlive2d
+            loadlive2d("live2d", "https://xstarling.github.io/media/live2d/assets/hijiki.model.json");
+        });
+
+        var home_Path = "https://xstarling.github.io/";
+        addScript("https://xstarling.github.io/media/live2d/js/message.js", () => { });
+    }
+
+    // 插入js文件，完成后callback
+    function addScript(jsfile, callback) {
+        var landlord_parent = document.getElementById("landlord-parent");
+        var script = document.createElement("script");
+        script.type = "text/javascript";
+        script.src = jsfile;
+        landlord_parent.appendChild(script);
+        script.onload = script.onreadystatechange = function () {
+            if (!this.readyState || this.readyState === "loaded" || this.readyState === "complete") {
+                script.onload = script.onreadystatechange = null;
+                if (callback && typeof callback == "function") {
+                    callback(); //window[callback]();如果传递字符串过来 调用window['函数名']() 调用方法
+                }
+            }
+        };
+    }
+</script>
+  
+  <script src="https://xstarling.github.io/media/scripts/tocScript.js"></script>
+
+</body>
+
+</html>

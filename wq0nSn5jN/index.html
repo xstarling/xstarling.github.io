@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta content="yes" name="apple-mobile-web-app-capable" />
+<meta content="black" name="apple-mobile-web-app-status-bar-style" />
+<meta name="referrer" content="never">
+<meta name="keywords" content="">
+<meta name="description" content="欢迎访问[林星]的个人博客">
+<meta name="author" content="kveln">
+<title>linux中VFS | 林星</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css">
+<link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+<link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+<link
+  href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800'
+  rel='stylesheet' type='text/css'>
+<link rel="alternate" type="application/rss+xml" title="linux中VFS | 林星 » Feed"
+  href="https://xstarling.github.io/atom.xml">
+<link rel="stylesheet"
+  href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+<link href="https://xstarling.github.io/styles/main.css" rel="stylesheet">
+<script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets/highlight.min.js"></script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/850552586/ericamcdn@0.1/css/live2d.css">
+
+<script>hljs.initHighlightingOnLoad();</script>
+
+  <meta property="og:description" content="linux中VFS" />
+  <meta property="og:url" content="https://xstarling.github.io/wq0nSn5jN/" />
+  <meta property="og:locale" content="zh-CN" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="林星" />
+  <!-- <script src="../assets/styles/scripts/tocScript.js"></script> -->
+</head>
+
+<body>
+  <!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+  <div class="container">
+    <a class="navbar-brand" href="https://xstarling.github.io">林星</a>
+    <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse"
+      data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false"
+      aria-label="Toggle navigation">
+      Menu
+      <i class="fas fa-bars"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarResponsive">
+      <ul class="navbar-nav ml-auto">
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/">首页</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/archives">归档</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/tags">标签</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/friends">友链</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/about-starling">关于</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          <div class="gridea-search-container">
+            <form id="gridea-search-form" style="position: relative" data-update="1686458398465"
+              action="/search/index.html">
+              <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+              <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+  <!-- Page Header -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+  <div class="container">
+    <a class="navbar-brand" href="https://xstarling.github.io">林星</a>
+    <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse"
+      data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false"
+      aria-label="Toggle navigation">
+      Menu
+      <i class="fas fa-bars"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarResponsive">
+      <ul class="navbar-nav ml-auto">
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/">首页</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/archives">归档</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/tags">标签</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/friends">友链</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/about-starling">关于</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          <div class="gridea-search-container">
+            <form id="gridea-search-form" style="position: relative" data-update="1686458398465"
+              action="/search/index.html">
+              <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+              <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+<header class="masthead" style="background-image: url('https://xstarling.github.io/media/images/home-bg.jpg')">
+  <div class="overlay"></div>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-md-10 mx-auto">
+        
+          <!-- 没Title为其他页面Header -->
+          
+            <!-- 没Title并且有headerType为Post：文章Header -->
+            <div class="post-heading">
+              <span class="tags">
+                
+              </span>
+              <h1>linux中VFS</h1>
+              <span class="meta">
+                Posted on
+                2023-05-20，8 min read
+              </span>
+            </div>
+          
+        
+      </div>
+    </div>
+  </div>
+</header>
+  <!-- Post Content -->
+  <article id="post-content-article">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto post-content-container">
+          
+          <h3 id="概述">概述</h3>
+<ul>
+<li>
+<p><strong>虚拟文件系统</strong><br>
+虚拟文件系统又称为虚拟文件系统转换（VFS，Virual FileSystem Switch）。VFS称为内核的子系统，VFS提供一个统一的接口，一个具体文件系统想要被Linux支持，就必须按照这个接口编写自己的操作函数，也将自己的细节对内核其他子系统隐藏起来。</p>
+</li>
+<li>
+<p><strong>文件系统分类</strong></p>
+<ol>
+<li><strong>对磁盘数据做索引</strong><br>
+fat32，nfs，ext3/ext4，ntfs</li>
+<li><strong>文件系统做索引</strong><br>
+tfs，gfs，fastdfs （这个三个为分布式文件系统）</li>
+<li><strong>fuse内核的一部分</strong><br>
+为文件添加时间戳，特征描述等</li>
+<li><strong>VFS</strong><br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202305202220341.png" alt="VFS调用架构" loading="lazy"></li>
+</ol>
+</li>
+</ul>
+<h3 id="vfs主要作用">VFS主要作用</h3>
+<pre><code>1. 支持多种九天文件系统之间的相互访问；
+2. 接受用户层的系统调用，比如：open,link,write等；
+3. 对具体文件系统的数据结构进行抽象，以一种统一的数据结构进行管理；
+4. 接受内核其他子系统的操作请示。
+</code></pre>
+<h3 id="vfs系统架构图">VFS系统架构图</h3>
+<figure data-type="image" tabindex="1"><img src="https://33373sl116.zicp.fun:443/image-blog/202305210939299.png" alt="VFS系统架构图" loading="lazy"></figure>
+<h3 id="vfs在实际系统调用的常用操作">VFS在实际系统调用的常用操作</h3>
+<blockquote>
+<p>mount()/umount()：文件系统的挂载和卸载<br>
+sysfs()：查看系统文件的信息<br>
+chroot()：更改 root 目录，修改根文件目录<br>
+chdir()/fchdir()/getcwd()：切换当前工作目录到指定的路径<br>
+mkdir()/rmdir()：文件夹创建删除<br>
+readlink()/symlink()：文件软链接<br>
+chown()/fchown()/lchown()：文件权限，用户组<br>
+select()/poll()：文件异步通知访问<br>
+flock()：文件锁</p>
+</blockquote>
+<p>VFS并不是每次都需要open或close关闭资源，有时可以通过修改访问文件的指针到已经打开的文件资源上，实现资源访问。</p>
+<h3 id="vfs核心数据结构对象">VFS核心数据结构(对象)</h3>
+<blockquote>
+<p>存放在内存中</p>
+</blockquote>
+<ol>
+<li>
+<p><strong>超级块（superblock）对象</strong></p>
+<blockquote>
+<p>数据结构：双向循环链表</p>
+<ol>
+<li>记录整个 filesystem 相关信息的地方， 没有 Superblock ，就没有这个 filesystem 了。</li>
+<li>一个超级块对应一个文件系统(已经安装的文件系统类型如ext2，此处是实际的文件系统，不是VFS)。</li>
+</ol>
+</blockquote>
+<ul>
+<li>block 与 inode 的总量；</li>
+<li>未使用与已使用的 inode / block 数量；</li>
+<li>block 与 inode 的大小 (block 为 1, 2, 4K，inode 为 128 bytes)；</li>
+<li>filesystem 的挂载时间、最近一次写入数据的时间、最近一次检验磁盘 (fsck) 的时间等文件系统的相关信息；</li>
+<li>一个 valid bit 数值，若此文件系统已被挂载，则 valid bit 为 0 ，若未被挂载，则 valid bit 为 1 。
+<blockquote>
+<p>Superblock 是非常重要的，因为文件系统的基本信息都写在这里， superblock 的大小为 1024bytes，此外，每个 block group 都可能含有 superblock ！事实上除了第一个 block group 内会含有 superblock 之外，后续的 block group 不一定含有 superblock ， 而若含有 superblock 则该 superblock 主要是做为第一个 block group 内 superblock 的备份咯，这样可以进行 superblock 的救援。</p>
+</blockquote>
+</li>
+<li><strong>结构图</strong><br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202305211027914.png" alt="superblock块的结构图" loading="lazy"></li>
+</ul>
+</li>
+<li>
+<p><strong>块（block）对象</strong></p>
+<ul>
+<li>原则上，block 的大小与数量在格式化完就不能够再改变了(除非重新格式化)；</li>
+<li>每个 block 内最多只能够放置一个文件的数据；</li>
+<li>承上，如果文件大于 block 的大小，则一个文件会占用多个 block 数量；</li>
+<li>承上，若文件小于 block ，则该 block 的剩余容量就不能够再被使用了(磁盘空间会浪费)。</li>
+</ul>
+</li>
+<li>
+<p><strong>索引节点（inode）对象</strong></p>
+<blockquote>
+<p>索引节点：存放在磁盘，属于静态数据结构</p>
+</blockquote>
+<ul>
+<li><strong>用于存储文件的各属性，包括：</strong>
+<ul>
+<li>所有者信息：文件的owner，group；</li>
+<li>权限信息：read、write和excite；</li>
+<li>该文件真正内容的指向 (pointer)；</li>
+<li>时间信息：建立或改变时间（ctime）、最后读取时间（atime）、最后修改时间（mtime）；</li>
+<li>定义文件特性的旗标(flag)，如 SetUID...；</li>
+<li>内容信息：type，size，以及相应的block的位置信息。</li>
+<li>该文件真正内容的指向 (pointer)；</li>
+</ul>
+</li>
+<li>注意：不记录文件名或目录名，文件名或目录名记录在文件所在目录对应的block里。</li>
+<li><strong>inode和文件的关系?</strong>
+<blockquote>
+<p>当创建一个文件的时候，就给文件分配了一个 inode。一个 inode 只对应一个实际文件，一个文件也会只有一个 inode。inodes 最大数量就是文件的最大数量。<br>
+注意管理inode的四个链表：<br>
+<code>static struct hlist_head *inode_hashtable __read_mostly;</code></p>
+</blockquote>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>目录项（dentry）对象</strong></p>
+<ul>
+<li>
+<p>目录项是描述文件的逻辑属性，只存在于内存中，并没有实际对应的磁盘上的描述，更确切的说是存在于内存的目录项缓存，为了提高查找性能而设计。</p>
+</li>
+<li>
+<p>注意不管是文件夹还是最终的文件，都是属于目录项，所有的目录项在一起构成一颗庞大的目录树。</p>
+<blockquote>
+<p>例如：open一个文件/home/xxx/yyy.txt，那么/、home、xxx、yyy.txt都是一个目录项，VFS在查找的时候，根据一层一层的目录项找到对应的每个目录项的inode，那么沿着目录项进行操作就可以找到最终的文件。</p>
+</blockquote>
+</li>
+<li>
+<p>一个有效的dentry结构必定有一个inode结构，这是因为一个目录项要么代表着一个文件，要么代表着一个目录，而目录实际上也是文件。所以，只要dentry结构是有效的，则其指针d_inode必定指向一个inode结构。但是inode却可以对应多个。</p>
+</li>
+<li>
+<p>注意：目录也是一种文件(所以也存在对应的inode)。打开目录，实际上就是打开目录文件。</p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>文件（file）对象</strong></p>
+<ul>
+<li>文件对象描述的是进程已经打开的文件。因为一个文件可以被多个进程打开，所以一个文件可以存在多个文件对象。但是由于文件是唯一的，那么<strong>inode就是唯一</strong>的，<strong>目录项也是定的</strong>！</li>
+<li>进程其实是通过文件描述符来操作文件的，每个文件都有一个32位的数字来表示下一个读写的字节位置，这个数字叫做文件位置。</li>
+<li>一般情况下打开文件后，打开位置都是从0开始，除非一些特殊情况。Linux用file结构体来保存打开的文件的位置，所以file称为打开的文件描述。file结构形成一个<strong>双链表</strong>，称为系统打开文件表。</li>
+<li><strong>file参考源码</strong></li>
+</ul>
+<pre><code class="language-c/c++">    struct file {
+    union {
+        struct llist_node   fu_llist; /* 每个文件系统中被打开的文件都会形成一个双链表 */
+        struct rcu_head     fu_rcuhead;
+    } f_u;
+    struct path     f_path;
+    #define f_dentry    f_path.dentry 782     struct inode  *f_inode;   /* cached value */
+    const struct file_operations    *f_op; /* 指向文件操作表的指针 */
+    
+    /*
+    * Protects f_ep_links, f_flags.
+    * Must not be taken from IRQ context.
+    */
+    spinlock_t      f_lock;
+    atomic_long_t       f_count;  /* 文件对象的使用计数 */
+    unsigned int        f_flags;  /* 打开文件时所指定的标志 */
+    fmode_t         f_mode;       /* 文件的访问模式(权限等) */
+    struct mutex        f_pos_lock;
+    loff_t          f_pos;       /* 文件当前的位移量 */
+    struct fown_struct  f_owner;
+    const struct cred   *f_cred;
+    struct file_ra_state    f_ra; /* 预读状态 */
+
+    u64         f_version;   /* 版本号 */
+    #ifdef CONFIG_SECURITY 801     void            *f_security;  /* 安全模块 */
+    #endif 803     /* needed for tty driver, and maybe others */
+        void            *private_data; /* 私有数据 */
+
+    #ifdef CONFIG_EPOLL 807     /* Used by fs/eventpoll.c to link all the hooks to this file */
+        struct list_head    f_ep_links;
+        struct list_head    f_tfile_llink;
+    #endif /* #ifdef CONFIG_EPOLL */
+        struct address_space    *f_mapping;/* 页缓存映射 */
+    #ifdef CONFIG_DEBUG_WRITECOUNT 813     unsigned long f_mnt_write_state;
+    #endif 815 } __attribute__((aligned(4)));  /* lest something weird decides that 2 is OK */     
+</code></pre>
+</li>
+</ol>
+<ul>
+<li><strong>参考链接：</strong>
+<ul>
+<li>原文链接：https://blog.csdn.net/daocaokafei/article/details/112728887</li>
+<li>YiYezc博客：https://www.cnblogs.com/yiyezc/p/5208318.html</li>
+<li>长烟慢慢：https://blog.csdn.net/cymm_liu/article/details/36006393</li>
+<li>linux技术栈： https://zhuanlan.zhihu.com/p/411051334</li>
+</ul>
+</li>
+</ul>
+<h3 id="文件系统挂载工具mount">文件系统挂载工具（mount）</h3>
+<ol>
+<li><strong>mount工具如何走到系统调用</strong><pre><code class="language-sh">mount -t proc proc /mnt/
+</code></pre>
+<strong>调用流程：</strong>
+<blockquote>
+<p>syscall -- &gt; mount<br>
+do_mount<br>
+do_new_mount<br>
+vfs_kern_mount<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202305202255411.png" alt="" loading="lazy"></p>
+</blockquote>
+</li>
+</ol>
+<h3 id="补充">补充</h3>
+<ol>
+<li><strong>文件系统结构</strong><br>
+文件系统（重要的结构体）：
+<ol>
+<li>file_system_type：描述文件系统一些标识</li>
+<li>super_block：通过这个块衍射出新的子块</li>
+<li>file/file_operations</li>
+<li>inode/inode_operations</li>
+<li>dentry</li>
+</ol>
+</li>
+</ol>
+
+          <div class="toc-container"><ul class="markdownIt-TOC">
+<li>
+<ul>
+<li>
+<ul>
+<li><a href="#%E6%A6%82%E8%BF%B0">概述</a></li>
+<li><a href="#vfs%E4%B8%BB%E8%A6%81%E4%BD%9C%E7%94%A8">VFS主要作用</a></li>
+<li><a href="#vfs%E7%B3%BB%E7%BB%9F%E6%9E%B6%E6%9E%84%E5%9B%BE">VFS系统架构图</a></li>
+<li><a href="#vfs%E5%9C%A8%E5%AE%9E%E9%99%85%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8%E7%9A%84%E5%B8%B8%E7%94%A8%E6%93%8D%E4%BD%9C">VFS在实际系统调用的常用操作</a></li>
+<li><a href="#vfs%E6%A0%B8%E5%BF%83%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%AF%B9%E8%B1%A1">VFS核心数据结构(对象)</a></li>
+<li><a href="#%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E6%8C%82%E8%BD%BD%E5%B7%A5%E5%85%B7mount">文件系统挂载工具（mount）</a></li>
+<li><a href="#%E8%A1%A5%E5%85%85">补充</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+          
+          <hr />
+          <p class="next-post">下一篇：
+            <a href="https://xstarling.github.io/GTICcd6rB/">
+              <span class="post-title">
+                基于fuse实现自定义用户态文件系统&rarr;
+              </span>
+            </a>
+          </p>
+          
+          <div class="comment" style="text-align: center;">
+            
+
+            
+            
+            <script src='https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js'></script>
+
+<style>
+	div#vcomments{
+		width:100%;
+		max-width: 1000px;
+		padding: 2.5%
+	}
+</style>
+
+
+	<div id="vcomments"></div>
+
+<script>
+	new Valine({
+		el: '#vcomments',
+		appId: 'Y2b59ZcCnZeowrhGKsweiviD-gzGzoHsz',
+		appKey: 'BpGUAoWRmemmVYU1cqKSUoSO',
+		avatar: '',
+		pageSize: 5,
+		recordIp: false,
+		placeholder: '请留下你的建议...',
+		visitor: false,
+	});
+</script>
+
+            
+          </div>
+        </div>
+      </div>
+  </article>
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+            <li class="list-inline-item">
+              <a href="https://github.com/xstarling" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fab fa-github fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+            </li>
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <!-- <li class="list-inline-item">
+              <a href="https://xstarling.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li> -->
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>林星</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://xstarling.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://xstarling.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));</script>
+  <!-- 更新图片的url请求头路径 -->
+  <script src="https://xstarling.github.io/media/scripts/imagePathScript.js"></script>
+  <input id="oldimagepath" name="oldimagepath" value="https://33373sl116.zicp.fun/image-blog" type="hidden" />
+  <input id="newimagepath" name="newimagepath" value="https://33373sl116.zicp.fun/image-blog" type="hidden" />
+  
+  <div id="landlord-parent">
+    <div id="landlord">
+        <div class="message" style="opacity:0"></div>
+        <canvas id="live2d" width="240" height="250" class="live2d"></canvas>
+    </div>
+</div>
+
+<script type="text/javascript">
+    if (/(iPhone|iPad|iPod|iOS|Android)/i.test(navigator.userAgent)) {
+        //移动端
+        console.log("------ 移动端");
+    } else {
+        console.log("------ PC端 " + navigator.userAgent);
+
+        addScript("https://cdn.jsdelivr.net/gh/850552586/ericamcdn@0.1/js/live2d.js", () => {
+            // 加载完成后再loadlive2d
+            loadlive2d("live2d", "https://xstarling.github.io/media/live2d/assets/hijiki.model.json");
+        });
+
+        var home_Path = "https://xstarling.github.io/";
+        addScript("https://xstarling.github.io/media/live2d/js/message.js", () => { });
+    }
+
+    // 插入js文件，完成后callback
+    function addScript(jsfile, callback) {
+        var landlord_parent = document.getElementById("landlord-parent");
+        var script = document.createElement("script");
+        script.type = "text/javascript";
+        script.src = jsfile;
+        landlord_parent.appendChild(script);
+        script.onload = script.onreadystatechange = function () {
+            if (!this.readyState || this.readyState === "loaded" || this.readyState === "complete") {
+                script.onload = script.onreadystatechange = null;
+                if (callback && typeof callback == "function") {
+                    callback(); //window[callback]();如果传递字符串过来 调用window['函数名']() 调用方法
+                }
+            }
+        };
+    }
+</script>
+  
+  <script src="https://xstarling.github.io/media/scripts/tocScript.js"></script>
+
+</body>
+
+</html>
