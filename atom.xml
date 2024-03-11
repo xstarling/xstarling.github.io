@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <id>https://xstarling.github.io</id>
+    <title>林星</title>
+    <updated>2024-03-11T16:11:48.963Z</updated>
+    <generator>https://github.com/jpmonette/feed</generator>
+    <link rel="alternate" href="https://xstarling.github.io"/>
+    <link rel="self" href="https://xstarling.github.io/atom.xml"/>
+    <subtitle>温故而知新</subtitle>
+    <logo>https://xstarling.github.io/images/avatar.png</logo>
+    <icon>https://xstarling.github.io/favicon.ico</icon>
+    <rights>All rights reserved 2024, 林星</rights>
+    <entry>
+        <title type="html"><![CDATA[基于555定时器的波形转换]]></title>
+        <id>https://xstarling.github.io/BRVneXEB3/</id>
+        <link href="https://xstarling.github.io/BRVneXEB3/">
+        </link>
+        <updated>2023-06-17T04:30:07.000Z</updated>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[vscode阅读源码]]></title>
+        <id>https://xstarling.github.io/0MnwBOxFh/</id>
+        <link href="https://xstarling.github.io/0MnwBOxFh/">
+        </link>
+        <updated>2023-06-10T15:10:08.000Z</updated>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[gdb调试]]></title>
+        <id>https://xstarling.github.io/KwiVAQPlb/</id>
+        <link href="https://xstarling.github.io/KwiVAQPlb/">
+        </link>
+        <updated>2023-06-09T15:09:22.000Z</updated>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[嵌入式]]></title>
+        <id>https://xstarling.github.io/VwNstCxrN/</id>
+        <link href="https://xstarling.github.io/VwNstCxrN/">
+        </link>
+        <updated>2023-06-04T15:44:58.000Z</updated>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[嵌入式---知识盲点]]></title>
+        <id>https://xstarling.github.io/Bgv24BHxK/</id>
+        <link href="https://xstarling.github.io/Bgv24BHxK/">
+        </link>
+        <updated>2023-05-27T12:30:37.000Z</updated>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[C基础知识]]></title>
+        <id>https://xstarling.github.io/9_Fn4Xz4p/</id>
+        <link href="https://xstarling.github.io/9_Fn4Xz4p/">
+        </link>
+        <updated>2023-05-26T01:38:25.000Z</updated>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[C++特性]]></title>
+        <id>https://xstarling.github.io/ttHxL7o9x/</id>
+        <link href="https://xstarling.github.io/ttHxL7o9x/">
+        </link>
+        <updated>2023-05-25T04:42:31.000Z</updated>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Uboot源码分析]]></title>
+        <id>https://xstarling.github.io/z9c6qfcIW/</id>
+        <link href="https://xstarling.github.io/z9c6qfcIW/">
+        </link>
+        <updated>2023-05-24T14:43:11.000Z</updated>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[uboot编译过程学习]]></title>
+        <id>https://xstarling.github.io/7nr0vBgCD/</id>
+        <link href="https://xstarling.github.io/7nr0vBgCD/">
+        </link>
+        <updated>2023-05-22T04:57:08.000Z</updated>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[linux中VFS]]></title>
+        <id>https://xstarling.github.io/wq0nSn5jN/</id>
+        <link href="https://xstarling.github.io/wq0nSn5jN/">
+        </link>
+        <updated>2023-05-20T10:13:22.000Z</updated>
+    </entry>
+</feed>
