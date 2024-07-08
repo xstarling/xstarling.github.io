@@ -1,0 +1,4126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <id>https://xstarling.gitee.io</id>
+    <title>林星</title>
+    <updated>2024-07-08T09:47:09.120Z</updated>
+    <generator>https://github.com/jpmonette/feed</generator>
+    <link rel="alternate" href="https://xstarling.gitee.io"/>
+    <link rel="self" href="https://xstarling.gitee.io/atom.xml"/>
+    <subtitle>温故而知新</subtitle>
+    <logo>https://xstarling.gitee.io/images/avatar.png</logo>
+    <icon>https://xstarling.gitee.io/favicon.ico</icon>
+    <rights>All rights reserved 2024, 林星</rights>
+    <entry>
+        <title type="html"><![CDATA[Linux中__init和__exit]]></title>
+        <id>https://xstarling.gitee.io/9tbat_4xC/</id>
+        <link href="https://xstarling.gitee.io/9tbat_4xC/">
+        </link>
+        <updated>2023-07-21T08:40:38.000Z</updated>
+        <content type="html"><![CDATA[<h1 id="1-__init和__exit的作用">1. __init和__exit的作用</h1>
+<p>参考博客链接：<a href="https://www.cnblogs.com/linengier/p/12380780.html">linengier-linux kernel __init和__exit宏</a></p>
+<ul>
+<li>会在编译的时候，将对应的代码段放入到 <code>.init.text</code>段内存中，起一个标识作用</li>
+</ul>
+<h1 id="2-源码剖析">2. 源码剖析</h1>
+<blockquote>
+<p>linux4.14/include/linux/init.h</p>
+</blockquote>
+<pre><code class="language-c">/* These are for everybody (although not all archs will actually
+   discard it in modules) */
+#define __init		__section(.init.text) __cold __inittrace __latent_entropy __noinitretpoline
+#define __initdata	__section(.init.data)
+#define __initconst	__section(.init.rodata)
+#define __exitdata	__section(.exit.data)
+#define __exit_call	__used __section(.exitcall.exit)
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[基于虚拟机的驱动程序开发]]></title>
+        <id>https://xstarling.gitee.io/lw5QlVMqW/</id>
+        <link href="https://xstarling.gitee.io/lw5QlVMqW/">
+        </link>
+        <updated>2023-07-19T01:56:17.000Z</updated>
+        <content type="html"><![CDATA[<h1 id="1-问题汇总">1. 问题汇总</h1>
+<h3 id="11-把编译好的ko文件加载模块时出错error-could-not-insert-module-hello_worldko-invalid-module-format">1.1 把编译好的.ko文件加载模块时出错：Error: could not insert module hello_world.ko: Invalid module format</h3>
+<blockquote>
+<p>编译.ko文件的内核源码和工具链，与目标源码的内核源码和运行环境不匹配</p>
+</blockquote>
+<h3 id="12-nfs文件系统搭建好传输文件报错touch-cannot-touch-testc-read-only-file-system">1.2 nfs文件系统搭建好，传输文件报错：touch: cannot touch `test.c': Read-only file system</h3>
+<blockquote>
+<ul>
+<li>mount -o remount rw /      ：检查文件系统是否挂载正常</li>
+<li>检查 <code>/etc/exports</code> 文件配置是否正确，nfs-server释放正常启动</li>
+<li>service nfs-server start/status/stop</li>
+</ul>
+</blockquote>
+<h3 id="13-export_symbolvar导出static修饰变量报错homelearnsoftwareworksdriversmodule_symbolmodule_paramo-error-local-symbol-itype-was-exported">1.3 EXPORT_SYMBOL(var)：导出static修饰变量报错：/home/learn/software/works/drivers/module_symbol/module_param.o: error: local symbol 'itype' was exported</h3>
+<blockquote>
+<p>取消对应变量的static关键字<br>
+<a href="https://zhuanlan.zhihu.com/p/27586298">static、extern关键字说明</a></p>
+</blockquote>
+<h1 id="2-hello驱动加载学习">2. hello驱动加载学习</h1>
+<h3 id="21-实验环境">2.1 实验环境</h3>
+<ul>
+<li>开发版烧录号ubuntu/Debian镜像</li>
+<li>启动开发版，搭建好nfs客户端，挂载共享文件夹</li>
+<li>获取Debian镜像的内核源码并编译</li>
+<li>下载交叉编译工具链</li>
+</ul>
+<h3 id="22-编译41971版本内核">2.2 编译4.19.71版本内核</h3>
+<p><strong>2.2.1 下载镜像源文件</strong></p>
+<p><strong>2.2.2 安装交叉编译工具链</strong></p>
+<p><strong>2.2.3 编译内核设置编译路径</strong></p>
+<p>deb_distro=bionic</p>
+<p>DISTRO=stable</p>
+<p>build_opts=&quot;${build_opts} O=/home/pi/build&quot;</p>
+<p>make ${build_opts} npi_v7_defonfig</p>
+<p>make ${build_opts}</p>
+<p>make ${build_opts} bindeb-pkg</p>
+<h3 id="23-内核模块头文件">2.3 内核模块头文件</h3>
+<ul>
+<li>#include&lt;linux/module.h&gt;：包函内核模块信息声明的相关函数</li>
+<li>#include&lt;linux/init.h&gt;：包含了module_init()和module_exit()函数的</li>
+<li>#include&lt;linux/kernel.h&gt;：包含内核提供的各种函数，如printk()</li>
+</ul>
+<h3 id="24-内核模块打印函数">2.4 内核模块打印函数</h3>
+<ul>
+<li>
+<p>printf：glibc实现的打印函数，工作与用户空间</p>
+</li>
+<li>
+<p>printk：内核模块无法使用glibc库函数，内核自身实现的一个类printf函数，但是需要指定打印等级。</p>
+<ul>
+<li>#define KERN_EMEGR    &quot;&lt;0&gt;&quot;通常是系统崩溃前的信息</li>
+<li>#define KERN_ALERT    &quot;&lt;1&gt;&quot;需要立即处理的消息</li>
+<li>#define KERN_CRIT    &quot;&lt;2&gt;&quot;严重情况</li>
+<li>#define KERN_ERR    &quot;&lt;3&gt;&quot;错误情况</li>
+<li>#define KERN_WARNING    &quot;&lt;4&gt;&quot;有问题的情况</li>
+<li>#define KERN_NOTICE    &quot;&lt;5&gt;&quot;注意信息</li>
+<li>#define KERN_EMEGR    &quot;&lt;6&gt;&quot;普通信息</li>
+<li>#define KERN_EMEGR    &quot;&lt;7&gt;&quot;调试信息</li>
+</ul>
+</li>
+</ul>
+<p><strong>查看当前系统printk打印等级</strong>：cat /proc/sys/kernel/printk</p>
+<ul>
+<li>当前控制台日志级别（第一数字）</li>
+<li>默认消息日志级别（第二数字）</li>
+<li>最小的控制台级别（第三数字）</li>
+<li>默认控制台日志级别（第四数字）</li>
+</ul>
+<blockquote>
+<p>//使用系统默认打印级别———（默认的打印级别 &lt; 当前打印级别）不能打印<br>
+printk(&quot;[default] Hello World Module init\n&quot;);</p>
+</blockquote>
+<p><strong>打印内核所有打印信息</strong>：dmesg</p>
+<ul>
+<li>内核log缓冲区大小有限制，缓冲区数据可能被冲掉</li>
+</ul>
+<h3 id="25-makefile分析">2.5 Makefile分析</h3>
+<ul>
+<li>KERNEL_DIR：指向Linux内核具体路径</li>
+<li>export：导出变量给子Makefile使用</li>
+<li>obj-m := &lt;模块名&gt;.o ：定义要生成的模块</li>
+<li>$(MAKE)：Makefile的默认变量，值为make</li>
+<li>选型“-C”：让make工具跳转到Linux内核目录下读取顶层Makefile</li>
+<li>M=：表示内核模块源码目录</li>
+<li>$(CURDIR)：Makefile默认变量，值为当前目录所在路径</li>
+<li>make modules：执行Linux顶层Makefile的伪目标，它实现内核模块的源码读取并且编译为#.ko#文件</li>
+</ul>
+<h3 id="25-编译内核模块">2.5 编译内核模块</h3>
+<pre><code class="language-shell">make
+</code></pre>
+<h3 id="26-把生成的内核模块拷贝到nfs共享目录">2.6 把生成的内核模块拷贝到nfs共享目录</h3>
+<pre><code class="language-shell">make copy
+</code></pre>
+<h3 id="27-开发版加载-卸载及查看内核模块">2.7 开发版加载、卸载及查看内核模块</h3>
+<p>insmod xxx.ko	//加载内核模块</p>
+<p>lsmod | grep &quot;hello&quot;			//查看内核模块</p>
+<p>rmmod			//卸载内核模块</p>
+<h3 id="28-代码">2.8 代码</h3>
+<h4 id="281-c代码">2.8.1 c代码</h4>
+<pre><code class="language-c">#include&lt;linux/module.h&gt;
+#include&lt;linux/init.h&gt;
+#include&lt;linux/kernel.h&gt;
+
+/*
+*	__init：是一个空的宏定义，用于标识当前函数为初始化函数
+*/
+static int __init hello_init(void){
+	//设置最高级别打印信息
+	printk(KERN_EMERG &quot;[KERN_EMERG] Hello World Module init\n&quot;);
+	//使用系统默认打印级别———（默认的打印级别 &lt; 当前打印级别）不能打印
+	printk(&quot;[default] Hello World Module init\n&quot;);
+	return 0;
+}
+
+static void __exit hello_exit(void){
+	printk(&quot;[default] good bye\n&quot;);
+}
+
+module_init(hello_init);
+module_exit(hello_exit);
+
+MODULE_LICENSE(&quot;GPL2&quot;);
+MODULE_AUTHOR(&quot;xlx&quot;);
+MODULE_DESCRIPTION(&quot;Welcome Ling driver&quot;);
+MODULE_ALIAS(&quot;Ling:hello&quot;);
+</code></pre>
+<h4 id="282-make代码">2.8.2 make代码</h4>
+<pre><code class="language-make"># 内核源码路径
+#KERNEL_DIR = /home/learn/software/kernel/linux-5.19/
+KERNEL_DIR = /usr/src/linux-headers-5.19.0-46-generic/
+
+#ARCH=x86
+#CROSS_COMPILE=
+#export ARCH CROSS_COMPILE
+
+obj-m := hello.o
+all:
+        $(MAKE) -C $(KERNEL_DIR) M=$(CURDIR) modules
+    
+.PHONE:clean copy
+
+clean:
+        $(MAKE) -C $(KERNEL_DIR) M=$(CURDIR) clean
+
+copy:
+        sudo cp *.ko /home/learn/software/kernel/linux-5.19/drivers/ling
+
+</code></pre>
+<h1 id="3-内核模块和符号共享">3. 内核模块和符号共享</h1>
+<h3 id="mobaxterm设置窗口行数列数">mobaxterm设置窗口行数，列数</h3>
+<p>liux终端窗口</p>
+<ul>
+<li>查看终端窗口的行列：stty size</li>
+<li>设置终端窗口列数：stty cols xxx</li>
+<li>设置终端窗口行数：stty rows xxx</li>
+</ul>
+<p>mobaxterm窗口</p>
+<ul>
+<li>右击会话窗口，选择“edit session” --- “Terminal settings” --- “Terminal font settings” --- “Terminal size”</li>
+</ul>
+<h3 id="模块参数">模块参数</h3>
+<blockquote>
+<p>参考视频链接：<a href="https://www.bilibili.com/video/BV1C64y1z7WL/?spm_id_from=333.337.search-card.all.click&amp;vd_source=9752c2c90782ff8bd76174dfbc76c933">[Linux]内核模块参数和导出符号，增强你的内核模块功能_哔哩哔哩_bilibili</a></p>
+</blockquote>
+<p>根据不同应用场合给内核模块传递不同参数，提高内核模块灵活性</p>
+<ul>
+<li>
+<p>定义一个常见变量</p>
+</li>
+<li>
+<p>使用module_param宏把传参值赋给变量</p>
+<blockquote>
+<p>module_param（name，type，perm）</p>
+<ul>
+<li>
+<p>name：参数名</p>
+</li>
+<li>
+<p>type：参数类型，如：int，byte（对应char），bool，charp（对应char*）......</p>
+</li>
+<li>
+<p>perm：读写权限</p>
+<ul>
+<li>不允许设置可执行权限</li>
+<li>在“sys/module/模块名/parameters”目录下，会生成该参数对应的文件名（perm=0，则不会生成参数对应的文件名）</li>
+</ul>
+</li>
+</ul>
+</blockquote>
+</li>
+</ul>
+<h3 id="符号共享">符号共享</h3>
+<p>内核模块可以共享导出的符号表</p>
+<ul>
+<li>变量共享</li>
+<li>函数共享</li>
+</ul>
+<pre><code class="language-c">EXPORT_SYMBOL(sym)
+//sym：变量名或函数名
+</code></pre>
+<p>查看符号表</p>
+<pre><code class="language-shell">cat /proc/kallsyms | grep xxx
+</code></pre>
+<p>Makefile修改</p>
+<ul>
+<li>有依赖关系的模块，放在一起进行编译</li>
+<li>clean伪目标增加清除共享文件夹指令</li>
+</ul>
+<p>模块手动加载</p>
+<ul>
+<li>加载是，必须先加载相关依赖模块</li>
+<li>卸载时，顺序想法</li>
+</ul>
+<p>模块自动加载</p>
+<ul>
+<li>
+<p>所有内核模块统一放到“/lib/modules/内核版本”目录下</p>
+<pre><code class="language-shell">cp *.ko /lib/modules/内核版本	//此目录用来存放当前操作系统的.ko文件
+</code></pre>
+</li>
+<li>
+<p>建立模块依赖关系</p>
+<pre><code class="language-shell">depmod -a
+</code></pre>
+</li>
+<li>
+<p>查看模块依赖关系</p>
+<pre><code class="language-shell">cat /lib/modules/内核版本/modules.dep
+</code></pre>
+</li>
+<li>
+<p>加载模块及其他依赖模块</p>
+<pre><code class="language-shell">modprobe xxx
+</code></pre>
+</li>
+<li>
+<p>卸载模块及其依赖模块</p>
+<pre><code class="language-shell">modprobe -r xxx
+</code></pre>
+</li>
+</ul>
+<h3 id="附件代码示例">附件代码示例</h3>
+<h4 id="module_paramc代码">module_param.c代码</h4>
+<pre><code class="language-c">#include&lt;linux/module.h&gt;
+#include&lt;linux/init.h&gt;
+#include&lt;linux/kernel.h&gt;
+
+static int itype = 0;
+module_param(itype, int, 0);
+
+static bool btype = 0;
+module_param(btype, bool, 0644);
+
+static char ctype = 0;
+module_param(ctype, byte, 0);
+
+static char* stype = 0;
+module_param(stype, charp, 0644);
+
+static int __init param_init(void){
+	printk(KERN_ALERT &quot;param init\n&quot;);
+	printk(KERN_ALERT &quot;itype=%d\n&quot;,itype);
+	printk(KERN_ALERT &quot;btype=%d\n&quot;,btype);
+	printk(KERN_ALERT &quot;ctype=%d\n&quot;,ctype);
+	printk(KERN_ALERT &quot;stype=%s\n&quot;,stype);
+	return 0;
+}
+
+static void __exit param_exit(void){
+	printk(KERN_ALERT &quot;module exit\n&quot;);
+}
+
+EXPORT_SYMBOL(itype);
+
+int my_add(int a,int b){
+	return a + b;
+}
+
+EXPORT_SYMBOL(my_add);
+
+int my_sub(int a,int b){
+	return a - b;
+}
+
+EXPORT_SYMBOL(my_sub);
+
+module_init(param_init);
+module_exit(param_exit);
+
+MODULE_LICENSE(&quot;GPL2&quot;);
+MODULE_AUTHOR(&quot;xlx&quot;);
+MODULE_DESCRIPTION(&quot;module_param&quot;);
+MODULE_ALIAS(&quot;Ling:module_param&quot;);
+
+</code></pre>
+<h4 id="calculationh代码">calculation.h代码</h4>
+<pre><code class="language-c">#ifndef __CALCULATION_H__
+#define __CALCULATION_H__
+
+extern int itype;
+
+int my_add(int a,int b);
+int my_sub(int a,int b);
+
+#endif
+
+</code></pre>
+<h4 id="calculationc代码">calculation.c代码</h4>
+<pre><code class="language-c">#include&lt;linux/module.h&gt;
+#include&lt;linux/init.h&gt;
+#include&lt;linux/kernel.h&gt;
+
+#include &quot;calculation.h&quot;
+
+static int __init calculation_init(void){
+	printk(KERN_ALERT &quot;calculation init\n&quot;);
+	printk(KERN_ALERT &quot;itype + 1=%d,itype - 1=%d\n&quot;,my_add(itype, 1),my_sub(itype, 1));
+	return 0;
+}
+
+static void __exit calculation_exit(void){
+	printk(KERN_ALERT &quot;calculation exit\n&quot;);
+}
+
+module_init(calculation_init);
+module_exit(calculation_exit);
+
+
+MODULE_LICENSE(&quot;GPL2&quot;);
+MODULE_AUTHOR(&quot;xlx&quot;);
+MODULE_DESCRIPTION(&quot;calculation module&quot;);
+MODULE_ALIAS(&quot;Ling:calculation module&quot;);
+</code></pre>
+<h1 id="4-字符设备">4. 字符设备</h1>
+<p>copy</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[基于555定时器的波形转换]]></title>
+        <id>https://xstarling.gitee.io/BRVneXEB3/</id>
+        <link href="https://xstarling.gitee.io/BRVneXEB3/">
+        </link>
+        <updated>2023-06-17T04:30:07.000Z</updated>
+        <content type="html"><![CDATA[<h1 id="1-前期知识准备">1. 前期知识准备</h1>
+<ul>
+<li>
+<p>555定时器<br>
+参考视频链接：<a href="https://www.bilibili.com/video/BV1fr4y1r7Tk/?spm_id_from=333.337.search-card.all.click&amp;vd_source=9752c2c90782ff8bd76174dfbc76c933">爱上半导体-555定时器</a></p>
+<ol>
+<li>
+<p>比较器和RS触发器<br>
+比较器：<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306061352535.png" alt="" loading="lazy"><br>
+RS触发器：<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306061354076.png" alt="" loading="lazy"><br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306061355695.png" alt="" loading="lazy"></p>
+</li>
+<li>
+<p>原理图<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306052325437.png" alt="" loading="lazy"><br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306061400832.png" alt="" loading="lazy"></p>
+</li>
+<li>
+<p>工作模式</p>
+</li>
+</ol>
+<blockquote>
+<p>无稳态电路<br>
+单稳态电路<br>
+双稳态电流<br>
+1. 基本无稳态电路<br>
+电路图：<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306060903849.png" alt="" loading="lazy"><br>
+公式：<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306060923462.png" alt="" loading="lazy"><br>
+2. 任意占空比的无稳态电路<br>
+电路图：<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306060929125.png" alt="" loading="lazy"><br>
+公式：<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306060931983.png" alt="" loading="lazy"><br>
+3. 50%占空比无稳态电路<br>
+电路图：<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306060933131.png" alt="" loading="lazy"><br>
+公式：<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306060934400.png" alt="" loading="lazy"><br>
+<strong>注意</strong>：<br>
+应用此电路时要注意，电阻R1不能太小，否则会影响电容C1的充电，导致占空比不是50%。<br>
+4. 单稳态模式<br>
+在单稳态电路中，输出端保持低电平，在输入端触发之后，输出端变成高电平，延时一段时间后回到低电平并保持。这个特性可以用来制作延时开关。原理图如下：<br>
+电路图：<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306060938425.png" alt="" loading="lazy"><br>
+公式：<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306061335617.png" alt="" loading="lazy"><br>
+1. 双稳态模式<br>
+双稳态电路指的是输出端可以稳定在高电平或低电平两种状态，可以通过开关在两个状态间切换。这个特性可以用来制作按钮开关。<br>
+电路图：<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306061336661.png" alt="" loading="lazy"><br>
+公式：<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306061340725.png" alt="" loading="lazy"></p>
+</blockquote>
+</li>
+</ul>
+<blockquote>
+<p><strong>滤波原理</strong>：<br>
+参考视频链接：<a href="https://www.bilibili.com/video/BV1ri4y1y7yG/?spm_id_from=333.999.0.0&amp;vd_source=9752c2c90782ff8bd76174dfbc76c933">爱上半导体-滤波器</a></p>
+</blockquote>
+<ul>
+<li>高通滤波器<br>
+https://zhuanlan.zhihu.com/p/347963026
+<ul>
+<li>电路图<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306161448043.png" alt="" loading="lazy"></li>
+</ul>
+</li>
+<li>低通滤波器<br>
+https://zhuanlan.zhihu.com/p/347963026
+<ul>
+<li>电路图<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306161426110.png" alt="" loading="lazy"></li>
+<li>电路容抗<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306161436378.png" alt="" loading="lazy"></li>
+</ul>
+</li>
+<li>带通滤波器<br>
+https://zhuanlan.zhihu.com/p/347963026</li>
+</ul>
+<blockquote>
+<p>参考博客链接：<a href="https://blog.csdn.net/bigbearger/article/details/104573802">bigbearger-带通滤波器</a><br>
+可以由低通滤波和高通滤波进行组合</p>
+</blockquote>
+<ul>
+<li>
+<p>差分比例运放电路<br>
+知识点：<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306062106283.png" alt="" loading="lazy"><br>
+差分电路改进：<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306062111183.png" alt="" loading="lazy"></p>
+</li>
+<li>
+<p>积分电路设计<br>
+参考链接：<a href="https://zhuanlan.zhihu.com/p/52899137">积分，微分电路</a><br>
+参考视频链接：<a href="https://www.bilibili.com/video/BV17y4y1R7zX/?spm_id_from=333.337.search-card.all.click&amp;vd_source=9752c2c90782ff8bd76174dfbc76c933">电子科技队长</a><br>
+知识点：<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306062017211.png" alt="" loading="lazy"><br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306062020616.png" alt="" loading="lazy"><br>
+积分电路应用：</p>
+</li>
+<li>
+<p>同向积分电路<br>
+知识点：<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306062124150.png" alt="" loading="lazy"></p>
+</li>
+<li>
+<p>微分电路设计<br>
+参考链接：<a href="https://zhuanlan.zhihu.com/p/52899137">积分，微分电路</a><br>
+参考视频链接：<a href="https://www.bilibili.com/video/BV16A411m7Su/?spm_id_from=pageDriver&amp;vd_source=9752c2c90782ff8bd76174dfbc76c933">微分电路</a><br>
+知识点：<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306062154378.png" alt="" loading="lazy"><br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306062156256.png" alt="" loading="lazy"></p>
+</li>
+<li>
+<p>运放和比较器的区别<br>
+参考链接：<a href="https://www.bilibili.com/read/cv9412435">运算放大器和比较器区别</a></p>
+</li>
+</ul>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[vscode阅读源码]]></title>
+        <id>https://xstarling.gitee.io/0MnwBOxFh/</id>
+        <link href="https://xstarling.gitee.io/0MnwBOxFh/">
+        </link>
+        <updated>2023-06-10T15:10:08.000Z</updated>
+        <content type="html"><![CDATA[<h1 id="1-vscode阅读源码前提条件">1. vscode阅读源码前提条件</h1>
+<p>参考博客链接：<a href="https://blog.csdn.net/weixin_40209493/article/details/128175003">Engineer-Jaylen_Sun-VScode+clangd阅读linux内核源码</a></p>
+<ul>
+<li>clangd插件---安装</li>
+<li>禁止c/c++ intellisense：<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306102321760.png" alt="" loading="lazy"></li>
+<li>源码目录下有compile_commands.json</li>
+<li>compile_commands.json里面含有文件，并且修改<code>&quot;cc&quot;</code> 为 <code>&quot;xxx-gcc&quot;</code></li>
+</ul>
+<pre><code class="language-shell">make clean
+bear make ......
+</code></pre>
+<h1 id="2-vscode快捷键使用">2. vscode快捷键使用</h1>
+<p>参考链接：<a href="https://blog.csdn.net/qq_45261963/article/details/108695261">昱Wy-vscode快捷键</a></p>
+<figure data-type="image" tabindex="1"><img src="https://33373sl116.zicp.fun:443/image-blog/202306102334075.png" alt="" loading="lazy"></figure>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[gdb调试]]></title>
+        <id>https://xstarling.gitee.io/KwiVAQPlb/</id>
+        <link href="https://xstarling.gitee.io/KwiVAQPlb/">
+        </link>
+        <updated>2023-06-09T15:09:22.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="1-gdb基本命令">1. gdb基本命令</h2>
+<h3 id="11-gdb安装">1.1 gdb安装</h3>
+<ul>
+<li>安装命令：</li>
+</ul>
+<pre><code class="language-shell">sudo apt install gdb
+</code></pre>
+<ul>
+<li>注意<br>
+注意，如果服务器没有安装gdb，上面命令自动安装最新的gdb。</li>
+</ul>
+<h3 id="12-gdb调试准备">1.2 gdb调试准备</h3>
+<p>用gcc编译源程序的时候，编译后的可执行文件<strong>默认不包括源程序代码</strong>，如果你打算编译后的程序可以被调试，编译的时候要加<code>-g</code>的参数。<br>
+例如：</p>
+<pre><code class="language-shell">gcc -g -o test test.c
+</code></pre>
+<p>在命令行输入如下命令，即可进入gdb调试</p>
+<pre><code class="language-shell">gdb test
+</code></pre>
+<h3 id="13-基本调试命令">1.3 基本调试命令</h3>
+<table>
+<thead>
+<tr>
+<th>命令名称</th>
+<th>命令缩写</th>
+<th>命令说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>run</td>
+<td>r</td>
+<td>运行一个待调试的程序</td>
+</tr>
+<tr>
+<td>continue</td>
+<td>c</td>
+<td>让暂停的程序继续运行</td>
+</tr>
+<tr>
+<td>next</td>
+<td>n</td>
+<td>运行到下一行</td>
+</tr>
+<tr>
+<td>step</td>
+<td>s</td>
+<td>单步执行，遇到函数会进入</td>
+</tr>
+<tr>
+<td>until</td>
+<td>u</td>
+<td>运行到指定行停下来</td>
+</tr>
+<tr>
+<td>finish</td>
+<td>fi</td>
+<td>结束当前调用函数，回到上一层调用函数处</td>
+</tr>
+<tr>
+<td>return</td>
+<td>return</td>
+<td>结束当前调用函数并返回指定值，到上一层函数调用处</td>
+</tr>
+<tr>
+<td>jump</td>
+<td>j</td>
+<td>将当前程序执行流跳转到指定行或地址</td>
+</tr>
+<tr>
+<td>print</td>
+<td>p</td>
+<td>打印变量或寄存器值</td>
+</tr>
+<tr>
+<td>backtrace</td>
+<td>bt</td>
+<td>查看当前线程的调用堆栈</td>
+</tr>
+<tr>
+<td>frame</td>
+<td>f</td>
+<td>切换到当前调用线程的指定堆栈</td>
+</tr>
+<tr>
+<td>thread</td>
+<td>thread</td>
+<td>切换到指定线程</td>
+</tr>
+<tr>
+<td>break</td>
+<td>b</td>
+<td>添加断点</td>
+</tr>
+<tr>
+<td>tbreak</td>
+<td>tb</td>
+<td>添加临时断点</td>
+</tr>
+<tr>
+<td>delete</td>
+<td>d</td>
+<td>删除断点</td>
+</tr>
+<tr>
+<td>enable</td>
+<td>enable</td>
+<td>启用某个断点</td>
+</tr>
+<tr>
+<td>disable</td>
+<td>disable</td>
+<td>禁用某个断点</td>
+</tr>
+<tr>
+<td>watch</td>
+<td>watch</td>
+<td>监视某一个变量或内存地址的值是否发生变化</td>
+</tr>
+<tr>
+<td>list</td>
+<td>l</td>
+<td>显示源码</td>
+</tr>
+<tr>
+<td>info</td>
+<td>i</td>
+<td>查看断点 / 线程等信息</td>
+</tr>
+<tr>
+<td>ptype</td>
+<td>ptype</td>
+<td>查看变量类型</td>
+</tr>
+<tr>
+<td>disassemble</td>
+<td>dis</td>
+<td>查看汇编代码</td>
+</tr>
+<tr>
+<td>set args</td>
+<td>set args</td>
+<td>设置程序启动命令行参数</td>
+</tr>
+<tr>
+<td>show args</td>
+<td>show args</td>
+<td>查看设置的命令行参数</td>
+</tr>
+</tbody>
+</table>
+<h2 id="2-调试core文件">2. 调试core文件</h2>
+<blockquote>
+<p>当程序挂掉时，系统缺省不会生成core文件。<br>
+core文件：有问题的程序运行后，产生“段错误 (核心已转储)”时生成的具有堆栈信息和调试信息的文件</p>
+</blockquote>
+<ul>
+<li>
+<p>配置core文件</p>
+<ol>
+<li>ulimit -a 查看系统参数；</li>
+<li>ulimit -c 查看core开关，如果为0表示关闭，不会生成core文件；</li>
+<li>ulimit -c [filesize]  设置core文件大小，当最小设置为4之后才会生成core文件</li>
+<li>ulimit -c unlimit 把core文件的大小设置为无限制；</li>
+<li>运行程序，生成core文件；</li>
+<li>gdb 程序名 core文件名。</li>
+</ol>
+</li>
+<li>
+<p>core文件命名和保存路径<br>
+①core文件有默认的名称和路径，但为了方便，我们通常会自己命名和指定保存路径；</p>
+</li>
+</ul>
+<p>②可以通过 <code>/proc/sys/kernel/core_pattern</code> 设置 core 文件名和保存路径，方法如下：</p>
+<p><code>echo &quot;/corefile/core-%e-%p-%t&quot; &gt; /proc/sys/kernel/core_pattern</code></p>
+<p>命名的参数列表：</p>
+<pre><code class="language-shell">     %p - insert pid into filename 添加pid 
+     %u - insert current uid into filename 添加当前uid 
+     %g - insert current gid into filename 添加当前gid 
+     %s - insert signal that caused the coredump into the filename 添加导致产生core的信号 
+     %t - insert UNIX time that the coredump occurred into filename 添加core文件生成时的unix时间 
+     %h - insert hostname where the coredump happened into filename 添加主机名 
+     %e - insert coredumping executable name into filename 添加命令名
+</code></pre>
+<ul>
+<li>调试core文件
+<ol>
+<li>方法1: gdb [exec file] [core file] 然后执行bt看堆栈信息</li>
+<li>方法2:gdb -c [core file],然后 file [exec file],最后再使用<code>bt</code>查看错误位置</li>
+</ol>
+</li>
+</ul>
+<p><strong>注意</strong>：<code>bt</code>：命令查看程序运行的栈</p>
+<h2 id="3-调试正在运行中的程序">3. 调试正在运行中的程序</h2>
+<ul>
+<li><strong>调试的流程</strong></li>
+</ul>
+<ol>
+<li>ps查看程序的进程ID<br>
+<code>ps -aux| grep test</code></li>
+<li>启动gdb调试程序<br>
+<strong>方式0</strong>：之间通过程序名和pid<br>
+<code> gdb 程序名称 -p 进程ID</code><br>
+<strong>方式1</strong>：通过–-pid参数来绑定指定的进程程序。<br>
+<code> gdb --pid 25552</code><br>
+<strong>方式2</strong>：通过程序和进程号来绑定。<br>
+<code> gdb test 25552</code><br>
+<strong>方式3</strong>：先启动gdb后，通过attach来绑定pid<br>
+<code> gdb attach 25552</code></li>
+<li>查看程序的栈信息<br>
+<code>bt</code></li>
+<li>使用gdb的普通调试命令进行程序调试</li>
+</ol>
+<ul>
+<li><strong>调试命令 (缩写) 作用</strong></li>
+</ul>
+<pre><code class="language-c">(gdb) break (b) 在源代码指定的某一行设置断点，其中xxx用于指定具体打断点位置
+(gdb) run (r） 执行被调试的程序，其会自动在第一个断点处暂停执行。
+(gdb) continue (c） 当程序在某一断点处停止后，用该指令可以继续执行，直至遇到断点或者程序结束。
+(gdb) next (n) 令程序一行代码一行代码的执行。
+(gdb) step（s） 如果有调用函数，进入调用的函数内部；否则，和 next 命令的功能一样。
+(gdb) until (u)
+(gdb) until (u) location 当你厌倦了在一个循环体内单步跟踪时，单纯使用 until 命令，可以运行程序直到退出循环体。
+until n 命令中，n 为某一行代码的行号，该命令会使程序运行至第 n 行代码处停止。
+(gdb) print (p） 打印指定变量的值，其中 xxx 指的就是某一变量名。
+(gdb) list (l) 显示源程序代码的内容，包括各行代码所在的行号。
+(gdb) finish（fi） 结束当前正在执行的函数，并在跳出函数后暂停程序的执行。
+(gdb) return（return） 结束当前调用函数并返回指定值，到上一层函数调用处停止程序执行。
+(gdb) jump（j) 使程序从当前要执行的代码处，直接跳转到指定位置处继续执行后续的代码。
+(gdb) quit (q) 终止调试。
+(gdb) Backtrace(bt) 查看堆栈。
+(gdb) info threads 显示当前可调试的所有线程
+(gdb) thread ID 切换当前调试的线程为指定ID的线程
+(gdb) attach process-id 在gdb状态下，开始调试一个正在运行的进程
+(gdb) thread apply all command 所有线程执行command
+
+</code></pre>
+<h2 id="4-调试多进程服务程序">4. 调试多进程服务程序</h2>
+<blockquote>
+<p>调试父进程：set follow-fork-mode parent （缺省）<br>
+调试子进程：set follow-fork-mode child<br>
+设置调试模式：set detach-on-fork [on|off]，缺省是on<br>
+标识调试当前进程的时候，其他的进程继续运行，如果用off调试当前进程的时候，其他的进程被gdb挂起<br>
+查看调试的进程：info inferiors    （*：表示当前调试进程）<br>
+切换当前调试的进程：inferior  进程ID</p>
+</blockquote>
+<ul>
+<li>常用命令表格</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>命令</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>follow-fork-mode</td>
+<td>set follow-fork-mode [parent|child]<br> parent：gdb默认调试的是父进程，如果参数是parent则fork之后继续调试父进程，子进程不受影响 <br> child：如果想调试子进程，则修改参数为child，set follow-fork-mode child之后调试子进程，父进程不受影响。</td>
+</tr>
+<tr>
+<td>show follow-fork-mode</td>
+<td>查看当前调试的fork进程的模式</td>
+</tr>
+<tr>
+<td>detach-on-fork</td>
+<td>该参数表明gdb在fork之后是否断开(detach)某个进程的调试，或者交给gdb控制.<br>set detach-on-fork [on|off]<br> on：断开调试follow-fork-mode调试的指定进程<br> off：gdb将控制父进程和子进程。follow-fork-mode指定的进程将被调试，另一个进程置于暂停（suspended）状态。</td>
+</tr>
+<tr>
+<td>show detach-on-fork</td>
+<td>查看detach-on-fork模式<br> gdb将每一个被调试进程的执行状态记录在一个名为inferior的结构中。一般情况下一个inferior对应一个进程，每个不同的inferior有不同的地址空间。inferior有时候会在进程没有启动的时候就存在。</td>
+</tr>
+<tr>
+<td>info inferiors</td>
+<td>查询正在调试的进程,gdb会为他们分配唯一的Num号，其中前面带'*'号的就是正在调试的进程</td>
+</tr>
+<tr>
+<td>inferior <inferior num></td>
+<td>切换调试的进程为inferior num的进程处<br> add-inferior [-copies n] [-exec executable] <br>添加n个新的调试进程，可以用file executable来分配给inferior可执行文件。如果不指定n，则只增加一个inferior；如果不指定executable，则执行程序留空，增加后可使用file命令重新指定执行程序；这时候创建的inferior其关联的进程并没启动。</td>
+</tr>
+<tr>
+<td>clone-inferior [-copies n] [infno]</td>
+<td>复制n个编号是infno的inferior。如果不指定n的话，就只复制一个inferior；如果不指定infno，则就复制正在调试的inferior。</td>
+</tr>
+<tr>
+<td>detach inferior infno</td>
+<td>断开(detach)掉编号是infno的inferior。值得注意的是这个inferior还存在，可以再次用run命令执行它。</td>
+</tr>
+<tr>
+<td>kill inferior infno</td>
+<td>kill掉infno号inferior。值得注意的是这个inferior仍然存在，可以再次用run等命令执行它。</td>
+</tr>
+<tr>
+<td>remove-inferior infno</td>
+<td>删除一个infno号的inferior。删除前需要先kill或者detach这个inferior，因为当一个inferior正在运行时不能被删除.</td>
+</tr>
+<tr>
+<td>set schedule-multiple [on|off]</td>
+<td>off：只有当前inferior会执行。 <br> on：全部是执行状态的inferior都会执行。</td>
+</tr>
+<tr>
+<td>show schedule-multiple</td>
+<td>查看schedule-multiple的状态。</td>
+</tr>
+<tr>
+<td>set follow-exec-mode [new|same]</td>
+<td>same：当发生exec的时候，在执行exec的inferior上控制子进程。 <br> new：新建一个inferior给执行起来的子进程。而父进程的inferior仍然保留，当前保留的inferior的程序状态是没有执行。</td>
+</tr>
+<tr>
+<td>show follow-exec-mode</td>
+<td>查看follow-exec-mode设置的模式。</td>
+</tr>
+<tr>
+<td>set print inferior-events [on|off]</td>
+<td>用来打开和关闭inferior状态的提示信息。</td>
+</tr>
+<tr>
+<td>show print inferior-events</td>
+<td>查看print inferior-events设置的状态。</td>
+</tr>
+<tr>
+<td>maint info program-spaces</td>
+<td>用来显示当前gdb管理的地址空间的数目。</td>
+</tr>
+</tbody>
+</table>
+<h2 id="5-调试多线程服务程序">5. 调试多线程服务程序</h2>
+<ul>
+<li>查看线程状态<br>
+<strong>在shell中执行</strong>：</li>
+</ul>
+<blockquote>
+<p>查看当前运行的进程：ps aux | grep 进程名称<br>
+查看当前运行的轻量级进程：ps -aL | grep 进程名称<br>
+查看主线程和子线程的关系：pstree -p 主线程ID</p>
+</blockquote>
+<p><strong>在gdb中执行</strong>：</p>
+<blockquote>
+<p>查看线程：info threads<br>
+切换线程：thread 线程ID<br>
+只运行当前线程：set scheduler-locking on<br>
+运行全部的线程：set scheduler-locking off<br>
+指定某线程执行某gdb命令：thread apply 线程ID cmd命令<br>
+全部的线程执行某gdb命令：thread apply all cmd命令</p>
+</blockquote>
+<ul>
+<li>多线程调试命令</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>命令</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>info threads</td>
+<td>显示当前可调试的所有线程，每个线程会有一个GDB为其分配的ID，后面操作线程的时候会用到这个ID。 前面有*的是当前调试的线程</td>
+</tr>
+<tr>
+<td>thread ID(1,2,3…)</td>
+<td>切换当前调试的线程为指定ID的线程</td>
+</tr>
+<tr>
+<td>break thread_test.c:123 thread all<br>（例：在相应函数的位置设置断点break pthread_run1）</td>
+<td>在所有线程中相应的行上设置断点</td>
+</tr>
+<tr>
+<td>thread apply ID1 ID2 command</td>
+<td>让一个或者多个线程执行GDB命令command</td>
+</tr>
+<tr>
+<td>thread apply all command</td>
+<td>让所有被调试线程执行GDB命令command</td>
+</tr>
+<tr>
+<td>set scheduler-locking 选项 command</td>
+<td>设置线程是以什么方式来执行命令<br><strong>set scheduler-locking off</strong>: 不锁定任何线程，也就是所有线程都执行，这是默认值<br><strong>set scheduler-locking on</strong>：只有当前被调试程序会执行<br><strong>set scheduler-locking on step</strong>：在单步的时候，除了next过一个函数的情况(熟悉情况的人可能知道，这其实是一个设置断点然后continue的行为)以外，只有当前线程会执行</td>
+</tr>
+</tbody>
+</table>
+<h2 id="6-服务程序运行日志">6. 服务程序运行日志</h2>
+<p>freecplus开源框的日志工具：<a href="https://xie.infoq.cn/article/3c7b99b5c8b5663c61cc06204">freecplus-参考文档</a></p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[嵌入式]]></title>
+        <id>https://xstarling.gitee.io/VwNstCxrN/</id>
+        <link href="https://xstarling.gitee.io/VwNstCxrN/">
+        </link>
+        <updated>2023-06-04T15:44:58.000Z</updated>
+        <content type="html"><![CDATA[<h1 id="1-linux驱动uboot内核移植">1. linux驱动，uboot内核移植</h1>
+<h2 id="11-项目准备">1.1 项目准备</h2>
+<p>参考准备：<a href="https://zhuanlan.zhihu.com/p/384128160">新爷​—嵌入式设置简历准备</a><br>
+参考准备：<a href="https://www.zhihu.com/question/434468953">仲一​---有面试题</a></p>
+<h3 id="111-波形转换555芯片">1.1.1 波形转换(555芯片)</h3>
+<ul>
+<li>
+<p>555定时器<br>
+参考视频链接：<a href="https://www.bilibili.com/video/BV1fr4y1r7Tk/?spm_id_from=333.337.search-card.all.click&amp;vd_source=9752c2c90782ff8bd76174dfbc76c933">爱上半导体-555定时器</a></p>
+<ol>
+<li>
+<p>比较器和RS触发器<br>
+比较器：<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306061352535.png" alt="" loading="lazy"><br>
+RS触发器：<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306061354076.png" alt="" loading="lazy"><br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306061355695.png" alt="" loading="lazy"></p>
+</li>
+<li>
+<p>原理图<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306052325437.png" alt="" loading="lazy"><br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306061400832.png" alt="" loading="lazy"></p>
+</li>
+<li>
+<p>工作模式</p>
+</li>
+</ol>
+<blockquote>
+<p>无稳态电路<br>
+单稳态电路<br>
+双稳态电流<br>
+1. 基本无稳态电路<br>
+电路图：<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306060903849.png" alt="" loading="lazy"><br>
+公式：<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306060923462.png" alt="" loading="lazy"><br>
+2. 任意占空比的无稳态电路<br>
+电路图：<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306060929125.png" alt="" loading="lazy"><br>
+公式：<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306060931983.png" alt="" loading="lazy"><br>
+3. 50%占空比无稳态电路<br>
+电路图：<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306060933131.png" alt="" loading="lazy"><br>
+公式：<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306060934400.png" alt="" loading="lazy"><br>
+<strong>注意</strong>：<br>
+应用此电路时要注意，电阻R1不能太小，否则会影响电容C1的充电，导致占空比不是50%。<br>
+4. 单稳态模式<br>
+在单稳态电路中，输出端保持低电平，在输入端触发之后，输出端变成高电平，延时一段时间后回到低电平并保持。这个特性可以用来制作延时开关。原理图如下：<br>
+电路图：<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306060938425.png" alt="" loading="lazy"><br>
+公式：<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306061335617.png" alt="" loading="lazy"><br>
+1. 双稳态模式<br>
+双稳态电路指的是输出端可以稳定在高电平或低电平两种状态，可以通过开关在两个状态间切换。这个特性可以用来制作按钮开关。<br>
+电路图：<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306061336661.png" alt="" loading="lazy"><br>
+公式：<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306061340725.png" alt="" loading="lazy"></p>
+</blockquote>
+</li>
+</ul>
+<blockquote>
+<p><strong>滤波原理</strong>：<br>
+参考视频链接：<a href="https://www.bilibili.com/video/BV1ri4y1y7yG/?spm_id_from=333.999.0.0&amp;vd_source=9752c2c90782ff8bd76174dfbc76c933">爱上半导体-滤波器</a></p>
+</blockquote>
+<ul>
+<li>高通滤波器<br>
+https://zhuanlan.zhihu.com/p/347963026
+<ul>
+<li>电路图<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306161448043.png" alt="" loading="lazy"></li>
+</ul>
+</li>
+<li>低通滤波器<br>
+https://zhuanlan.zhihu.com/p/347963026
+<ul>
+<li>电路图<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306161426110.png" alt="" loading="lazy"></li>
+<li>电路容抗<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306161436378.png" alt="" loading="lazy"></li>
+</ul>
+</li>
+<li>带通滤波器<br>
+https://zhuanlan.zhihu.com/p/347963026</li>
+</ul>
+<blockquote>
+<p>参考博客链接：<a href="https://blog.csdn.net/bigbearger/article/details/104573802">bigbearger-带通滤波器</a><br>
+可以由低通滤波和高通滤波进行组合</p>
+</blockquote>
+<ul>
+<li>
+<p>差分比例运放电路<br>
+知识点：<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306062106283.png" alt="" loading="lazy"><br>
+差分电路改进：<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306062111183.png" alt="" loading="lazy"></p>
+</li>
+<li>
+<p>积分电路设计<br>
+参考链接：<a href="https://zhuanlan.zhihu.com/p/52899137">积分，微分电路</a><br>
+参考视频链接：<a href="https://www.bilibili.com/video/BV17y4y1R7zX/?spm_id_from=333.337.search-card.all.click&amp;vd_source=9752c2c90782ff8bd76174dfbc76c933">电子科技队长</a><br>
+知识点：<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306062017211.png" alt="" loading="lazy"><br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306062020616.png" alt="" loading="lazy"><br>
+积分电路应用：</p>
+</li>
+<li>
+<p>同向积分电路<br>
+知识点：<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306062124150.png" alt="" loading="lazy"></p>
+</li>
+<li>
+<p>微分电路设计<br>
+参考链接：<a href="https://zhuanlan.zhihu.com/p/52899137">积分，微分电路</a><br>
+参考视频链接：<a href="https://www.bilibili.com/video/BV16A411m7Su/?spm_id_from=pageDriver&amp;vd_source=9752c2c90782ff8bd76174dfbc76c933">微分电路</a><br>
+知识点：<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306062154378.png" alt="" loading="lazy"><br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306062156256.png" alt="" loading="lazy"></p>
+</li>
+<li>
+<p>运放和比较器的区别<br>
+参考链接：<a href="https://www.bilibili.com/read/cv9412435">运算放大器和比较器区别</a></p>
+</li>
+<li>
+<p>项目难点</p>
+</li>
+<li></li>
+</ul>
+<h3 id="112-智能车选">1.1.2 智能车（选）</h3>
+<ul>
+<li>
+<p>项目描述：</p>
+</li>
+<li>
+<p>PID控制算法<br>
+参考视频链接：<a href="https://www.bilibili.com/video/BV1wh411y78M/?spm_id_from=333.337.search-card.all.click&amp;vd_source=9752c2c90782ff8bd76174dfbc76c933">Acme-老朱-PID算法</a><br>
+知识点：<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306071019078.png" alt="" loading="lazy"><br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306071021834.png" alt="" loading="lazy"></p>
+</li>
+<li>
+<p>电磁车电路设计</p>
+</li>
+<li>
+<p>环岛算法</p>
+</li>
+<li>
+<p>项目难点（环岛算法和PID控制）<br>
+实话实说</p>
+</li>
+</ul>
+<h3 id="113-基于8086芯片的交通信号灯">1.1.3 基于8086芯片的交通信号灯</h3>
+<p>难点：定时设置<br>
+参考链接：<a href="https://zhuanlan.zhihu.com/p/34242218">8086知识点总结</a><br>
+知识点：</p>
+<h3 id="114-linux驱动红外驱动和红外遥控器">1.1.4 *linux驱动（红外驱动和红外遥控器）</h3>
+<h3 id="115-freertos架构">1.1.5 FreeRTOS架构</h3>
+<h2 id="12-公司了解">1.2 公司了解</h2>
+<h3 id="121-芯动科技">1.2.1 芯动科技</h3>
+<p>工作经历：<br>
+2022.06-至今	浙江农商数字科技有限责任公司	java开发工程师<br>
+1.参与完成公司数据库和系统的迁移，个人主要负责优化旧系统中存在的慢SQL，提高旧系统的运行效率，达到数据迁移的标准。<br>
+2.基于java语言，独立开发完成了一个针对关联系统通过文件交互时，存在的取数通知失败的补偿机制。<br>
+3.基于python语言，独立开发完成了SQL自动匹配对应回滚SQL的生产上线小工具，可以在SQL执行失败时自动回滚SQL语句。<br>
+4.完成了3份公司日常相关业务需求开发。</p>
+<p>芯动科技：<br>
+基于树莓派的万能遥控器（写驱动开发）---(明天学习并写简历)</p>
+<ol>
+<li>红外驱动设计</li>
+</ol>
+<p>基于555芯片的波形转换（明天写简历）<br>
+针对万用表，示波器<br>
+积分，微分电路</p>
+<p>经纬恒润等车企<br>
+基于树莓派的万能遥控器（写驱动开发）</p>
+<ol>
+<li>红外驱动设计</li>
+</ol>
+<p>智能车（电磁+摄像头）<br>
+环岛算法<br>
+pid</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[嵌入式---知识盲点]]></title>
+        <id>https://xstarling.gitee.io/Bgv24BHxK/</id>
+        <link href="https://xstarling.gitee.io/Bgv24BHxK/">
+        </link>
+        <updated>2023-05-27T12:30:37.000Z</updated>
+        <content type="html"><![CDATA[<h1 id="1-linux驱动uboot内核移植的面试问题">1. linux驱动，uboot内核移植的面试问题</h1>
+<blockquote>
+<p>异常优先级比中断高，不可以屏蔽<br>
+中断上下文不能进行休眠</p>
+</blockquote>
+<h2 id="11-linux系统中自旋锁互斥锁读写锁和rcu">1.1 linux系统中自旋锁，互斥锁，读写锁和RCU</h2>
+<blockquote>
+<p>内核当发生访问资源冲突的时候，可以有两种锁的解决方案选择：</p>
+<ul>
+<li>一个是原地等待</li>
+<li>一个是挂起当前进程，调度其他进程执行（睡眠）</li>
+</ul>
+</blockquote>
+<ul>
+<li>
+<p><strong>自旋锁</strong>(死等锁)<br>
+Spinlock 是内核中提供的一种比较常见的锁机制，<strong>自旋锁是“原地等待”<strong>的方式解决资源冲突的，即，一个线程获取了一个自旋锁后，另外一个线程期望获取该自旋锁，获取不到，只能够原地“打转”（忙等待）。由于自旋锁的这个忙等待的特性，注定了它使用场景上的限制 —— 自旋锁不应该被</strong>长时间的持有</strong>（消耗 CPU 资源）。</p>
+<ul>
+<li>自旋锁的使用<br>
+在linux kernel的实现中，经常会遇到这样的场景：共享数据被中断上下文和进程上下文访问，该如何保护呢？如果只有进程上下文的访问，那么可以考虑使用semaphore或者mutex的锁机制，但是现在<strong>中断上下文</strong>也参和进来，那些可以导致睡眠的lock就不能使用了，这时候，可以考虑使用spin lock。<br>
+这里为什么把中断上下文标红加粗呢？因为<strong>在中断上下文，是不允许睡眠的</strong>（原因详见文章《<a href="https://blog.csdn.net/zhoutaopower/article/details/86506725">Linux 中断之中断处理浅析</a>》中的第四章），所以，这里需要的是一个不会导致睡眠的锁——spinlock。<br>
+换言之，中断上下文要用锁，首选 spinlock。</li>
+<li>自旋锁的死锁和解决<br>
+自旋锁不可递归，自己等待自己已经获取的锁，会导致死锁。</li>
+</ul>
+<p><strong>内核抢占场景</strong><br>
+（1）进程A在某个系统调用过程中访问了共享资源 R<br>
+（2）进程B在某个系统调用过程中也访问了共享资源 R<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202305301738273.png" alt="" loading="lazy"><br>
+<strong>中断上下文场景</strong><br>
+（1）运行在CPU0上的进程A在某个系统调用过程中访问了共享资源 R<br>
+（2）运行在CPU1上的进程B在某个系统调用过程中也访问了共享资源 R<br>
+（3）外设P的中断handler中也会访问共享资源 R<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202305301736174.png" alt="" loading="lazy"></p>
+<ul>
+<li>自旋锁的实现<br>
+kernel/locking/spinlock.c<br>
+SMP上的spin lock实现。</li>
+</ul>
+</li>
+<li>
+<p><strong>互斥锁</strong>(休眠锁)<br>
+互斥锁实现了“互相排斥”(mutual exclusion)同步的简单形式，所以名为互斥锁。互斥锁禁止多个进程同时进入受保护的代码“临界区”（critical section）。因此，在任意时刻，只有一个进程被允许进入这样的代码保护区。</p>
+<ul>
+<li>互斥锁的特性</li>
+</ul>
+<blockquote>
+<p>互斥锁是Linux内核中用于互斥操做的一种同步原语；<br>
+互斥锁是一种<strong>休眠锁</strong>，锁争用时可能存在进程的睡眠与唤醒，context的切换带来的代价较高，适用于加锁时间较长的场景；<br>
+互斥锁每次只容许一个进程进入临界区，有点相似于二值信号量；<br>
+互斥锁<strong>在锁争用</strong>时，在锁被持有时，<strong>选择自旋等待，而不当即进行休眠</strong>，能够极大的提升性能,这种机制（optimistic spinning）也应用到了读写信号量上；</p>
+</blockquote>
+<ul>
+<li>互斥锁的缺点<br>
+互斥锁的缺点是互斥锁对象的结构较大，会占用更多的CPU缓存和内存空间；</li>
+<li>互斥锁的优点<br>
+与信号量相比，互斥锁的性能与扩展性都更好，所以，在内核中老是会优先考虑互斥锁；</li>
+<li>互斥锁性能提升</li>
+</ul>
+<blockquote>
+<p>互斥锁按为了提升性能，提供了三条路径处理：<strong>快速路径，中速路径，慢速路径</strong>；</p>
+</blockquote>
+<ul>
+<li>互斥锁的代码</li>
+</ul>
+<blockquote>
+<p>定义互斥锁：struct mutex my_mutex;<br>
+初始化互斥锁：mutex_init(&amp;my_mutex);<br>
+使用宏定义并初始化互斥锁：DEFINE_MUTEX(my_mutex)<br>
+获取互斥锁：void mutex_lock(struct mutex *lock); //会进入睡眠，中断上下文避免使用<br>
+获取互斥锁：int mutex_lock_interruptible(struct mutex *lock);//进入睡眠后，会被中断<br>
+释放互斥锁：void mutex_unlock(struct mutex *lock);</p>
+</blockquote>
+</li>
+<li>
+<p><strong>读写锁</strong><br>
+读写锁其实还是一种锁，是给一段临界区代码加锁，但是此加锁是在进行写操作的时候才会互斥，而在进行读的时候是可以共享的进行访问临界区的<br>
+ps：读写锁本质上是一种自旋锁</p>
+<ul>
+<li>读写锁的加锁规则<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202305302348992.png" alt="" loading="lazy"></li>
+<li>读写锁怎么实现？<pre><code class="language-c">1.一种交易场所（存放数据的地方）：可以是变量、链表、数组或其他数据结构
+2.两种角色：读操作和写操作
+3.三种关系：（1）读和读之间没有关系
+            （2） 写和写之间是互斥关系
+            （3）读和写之间是同步互斥关系
+ps：同步----&gt;读和写在同时竞争锁的时候，写会优先的得到锁
+        互斥----&gt;读的时候写阻塞，写的时候读阻塞
+</code></pre>
+</li>
+<li>相关函数
+<ul>
+<li>pthread_rwlock_init()—-&gt;初始化函数<pre><code class="language-c">功能：初始化读写锁
+头文件：#include&lt;pthread.h&gt;
+int pthread_rwlock_init(pthread_rwlock_t *restrict rwlock,const pthred_rwlockattr_t *restrict attr);
+参数说明：
+rwlock：是要进行初始化的
+attr：是rwlock的属性
+ps：此参数一般不关注，可设为NULL
+</code></pre>
+</li>
+<li>pthread_rwlock_destroy—-&gt;销毁函数<pre><code class="language-c">功能：销毁初始化的锁
+头文件：#include&lt;pthread.h&gt;
+int pthread_rwlock_destroy(pthread_rwlock_t *rwlock);
+参数说明：
+rwlock:是需要进行销毁的锁
+</code></pre>
+</li>
+<li>加锁和解锁</li>
+</ul>
+<pre><code class="language-c">在进行读操作的时候加的锁：
+pthread_rwlock_rdlock(pthread_rwlock_t* rwlock);
+在进行写操作的时候加的锁：
+pthread_rwlock_wrlock(pthread_rwlock_t* rwlock);
+对读/写统一进行解锁：
+pthread_rwlock_unlock(pthread_rwlock_t* rwlock);
+</code></pre>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>RCU</strong>（读写锁升级版）<br>
+参考链接：<a href="https://zhuanlan.zhihu.com/p/89439043">知乎：术道经纬</a></p>
+<ul>
+<li>基本原理：类似java的ArrayList的拷贝</li>
+</ul>
+</li>
+</ul>
+<h2 id="12-bootloader加载期间不区分数据段和代码段">1.2 bootloader加载期间不区分数据段和代码段</h2>
+<p>参考链接：<a href="https://blog.csdn.net/iduuigdg/article/details/122144655">「已注销」的博客</a></p>
+<h2 id="13-c容器">1.3 c++容器</h2>
+<p>参考链接：<a href="https://blog.csdn.net/NXHYD/article/details/108072498">AliceWanderAI的博客C++的STL组件</a><br>
+容器是STL中很重要的一种数据结构。常见的容器包括</p>
+<ul>
+<li>
+<p>vector容器<br>
+vector是一种动态数组，在内存中具有<strong>连续的存储空间</strong>，支持<strong>快速随机</strong>访问。由于具有连续的存储空间，所以在插入和删除操作方面，效率比较慢。vector有多个构造函数，默认的构造函数是构造一个<strong>初始长度为0</strong>的内存空间，且分配的内存空间是以2的倍数动态增长的。在push_back的过程中，若发现分配的内存空间不足，则重新分配一段连续的内存空间，其大小是现在<strong>连续空间的2倍</strong>，再将原先空间中的元素<strong>复制</strong>到新的空间中，性能消耗比较大。<br>
+vector的另一个常见的问题就是clear操作。clear函数只是把vector的size清为零，但vector中的元素在内存中并没有消除，所以在使用vector的过程中会发现内存消耗会越来越多，导致内存泄露，现在经常用的方法是swap函数来进行解决：</p>
+<pre><code class="language-c++">vector&lt;int&gt; V;
+V.push_back(1); 
+V.push_back(2);
+V.push_back(1); 
+V.push_back(2);
+vector&lt;int&gt;().swap(V); 
+//或者 V.swap(vector&lt;int&gt;());
+</code></pre>
+</li>
+<li>
+<p>deque双端数组<br>
+deque和vector类似，支持<strong>快速随机访问</strong>。二者最大的区别在于，vector只能在末端插入数据，而<strong>deque支持双端</strong>插入数据。<br>
+deque的内存空间分布是小片的连续，小片间用链表相连，实际上内部有一个map的指针。deque空间的<strong>重新分配要比vector快</strong>，重新分配空间后，原有的元素是不需要拷贝的。<br>
+与vector不同的是，deque还支持从<strong>开始端插入数据</strong>：<code>push_front()</code>。其余类似vector操作方法的使用。</p>
+<ul>
+<li><code>push_back</code> 从尾部插入元素</li>
+<li><code>push_front</code> 从头部插入元素</li>
+<li><code>pop_back</code> 从尾部删除元素</li>
+<li><code>pop_front</code> 从头部删除元素</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>distance函数可以求出当前的迭代器指针it距离头部的位置，也就是容器的指针<br>
+<strong>用法</strong>: distance(v1.begin(), it)</p>
+</blockquote>
+<ul>
+<li>
+<p>list链表模型<br>
+list是一个双向链表，因此它的<strong>内存空间是可以不连续</strong>的，通过指针来进行数据的访问，这使list的<strong>随机存储变得非常低效</strong>，因此list没有提供[]操作符的重载。但list可以很好地支持<strong>任意地方的插入和删除</strong>，只需移动相应的指针即可。</p>
+<ul>
+<li>list常见操作<pre><code class="language-c++">lst1.assign(lst2.begin(),lst2.end());  //分配值
+lst1.push_back(10);                    //添加值
+lst1.pop_back();                   //删除末尾值
+lst1.begin();                      //返回首值的迭代器
+lst1.end();                            //返回尾值的迭代器
+lst1.clear();                      //清空值
+bool isEmpty1 = lst1.empty();          //判断为空
+lst1.erase(lst1.begin(),lst1.end());                        //删除元素
+lst1.front();                      //返回第一个元素的引用
+lst1.back();                       //返回最后一个元素的引用
+lst1.insert(lst1.begin(),3,2);         //从指定位置插入3个值为2的元素
+lst1.rbegin();                         //返回第一个元素的前向指针
+lst1.remove(2);                        //相同的元素全部删除
+lst1.reverse();                        //反转
+lst1.size();                       //含有元素个数
+lst1.sort();                       //排序
+lst1.unique();                         //删除相邻重复元素
+</code></pre>
+</li>
+</ul>
+</li>
+<li>
+<p>set与multiset容器</p>
+</li>
+</ul>
+<blockquote>
+<p><strong>set和multiset的区别</strong>：set插入的元素不能相同，但是multiset可以相同。Set默认自动排序。使用方法类似list。<br>
+set也是一种关联性容器，它同map一样，底层使用<strong>红黑树</strong>实现，插入删除操作时仅仅移动指针即可，不涉及内存的移动和拷贝，所以<strong>效率比较高</strong>。<br>
+set的含义是集合，它是一个有序的容器，里面的元素都是排序好的，支持<strong>插入，删除，查找</strong>等操作，就像一个集合一样。所有的操作的都是严格在<strong>logn</strong>时间之内完成，效率非常高。<br>
+set中的元素都是<strong>唯一</strong>的，而且默认情况下会对元素进行<strong>升序排列</strong>。<br>
+所以在set中，不能直接改变元素值，因为那样会打乱原本正确的顺序，要<strong>改变元素值必须先删除</strong>旧元素，再插入新元素。不提供直接存取元素的任何操作函数，<strong>只能通过迭代器进行间接存取</strong>。</p>
+</blockquote>
+<pre><code>+ 创建集合的方式：
+    + `set&lt;int&gt;`创建默认的从小到大的int类型的集合
+    + `set&lt;int,less&lt;int&gt;&gt;`创建一个从小打到大的int类型的集合
+    + `set&lt;int,greater&lt;int&gt;&gt;`创建一个从大到小的int类型的集合
+ 上面的less和greater就是仿函数，集合会根据这个仿函数的返回值是否为真类进行排序。
+</code></pre>
+<ul>
+<li>map与multimap容器</li>
+</ul>
+<blockquote>
+<p><strong>map和multimap唯一区别</strong>：multimap支持多个键值。由于支持多个键值，multimap提供了cout函数来计算同一个key的元素个数。<br>
+map 是键－值对的集合。map 类型通常可理解为关联数组：可使用键作为下标来获取一个值，正如内置数组类型一样。而关联的本质在于元素的值与某个特定的键相关联，而并非通过元素在数组中的位置来获取。<br>
+map内部自建一棵<strong>红黑树（一种自平衡二叉树）</strong>，这棵树具有数据<strong>自动排序</strong>的功能，所以在<strong>map内部所有的数据都是有序的</strong>，以二叉树的形式进行组织。</p>
+</blockquote>
+<ul>
+<li>queue队列模型<br>
+queue是一个队列，实现<strong>先进先出</strong>功能，<strong>queue不是标准的STL容器，却以标准的STL容器为基础</strong>。<strong>queue是在deque的基础上封装的</strong>。之所以选择deque而不选择vector是因为<strong>deque在删除元素的时候释放空间</strong>，同时在重新申请空间的时候<strong>无需拷贝所有元素</strong>。<br>
+和 stack 一样，queue 也<strong>没有迭代器</strong>。访问元素的唯一方式是遍历容器内容，并移除访问过的每一个元素。</li>
+</ul>
+<center>Queue操作</center>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>q.pop()</td>
+<td>移除q的首元素或priority_queue的最高优先级的元素，返回void</td>
+</tr>
+<tr>
+<td>q.front()</td>
+<td>访问首元素或尾元素</td>
+</tr>
+<tr>
+<td>q.back()</td>
+<td>访问尾元素，只适用于queue</td>
+</tr>
+<tr>
+<td>q.top()</td>
+<td>访问最高优先级元素，只适用于priority_queue</td>
+</tr>
+<tr>
+<td>q.push(item)</td>
+<td>在queue末尾或priority_queue中恰当位置创造一个元素，其值为item, 或者又args构造</td>
+</tr>
+<tr>
+<td>q.emplace(args)</td>
+<td>同上</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>stack栈模型<br>
+stack是实现先进后出的功能，和queue一样，也是内部封装了deque。stack的源代码原理和实现方式均跟queue相同。</li>
+</ul>
+<center>Queue操作</center>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>stk.top()</td>
+<td>访问栈顶元素</td>
+</tr>
+<tr>
+<td>stk.push(value)</td>
+<td>将value压入栈内</td>
+</tr>
+<tr>
+<td>stk.emplace(seq)</td>
+<td>用seq构造元素并压栈</td>
+</tr>
+<tr>
+<td>stk.pop()</td>
+<td>将当前栈顶元素出栈，返回类型void</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>priotriy_queue优先级队列<br>
+优先级队列（priority_queue）其实，不满足先进先出的条件，更像是数据类型中的“堆”。优先级队列每次出队的元素是队列中优先级最高的那个元素，而不是队首的元素。这个优先级可以通过元素的大小等进行定义。比如定义元素越大优先级越高，那么每次出队，都是将当前队列中最大的那个元素出队。个人感觉这就是所谓“优先级”的定义。
+<ul>
+<li>优先级队列的定义<br>
+C++中，使用优先级队列需要包含头文件<queue>，优先级队列的定义如下：<pre><code class="language-c++">priority_queue&lt;typename, container, functional&gt;
+</code></pre>
+</li>
+</ul>
+<blockquote>
+<p>typename是数据的类型；<br>
+container是容器类型，可以是vector,queue等用数组实现的容器，不能是list，默认可以用vector；<br>
+functional是比较的方式，默认是大顶堆（就是元素值越大，优先级越高）；如果使用C++基本数据类型，可以直接使用自带的less和greater这两个仿函数（默认使用的是less，就是构造大顶堆，元素小于当前节点时下沉）。使用自定义的数据类型的时候，可以重写比较函数，也可以进行运算符重载（less重载小于“&lt;”运算符，构造大顶堆；greater重载大于“&gt;”运算符，构造小顶堆）。</p>
+</blockquote>
+<ul>
+<li>
+<p><strong>定义一个优先级队列的示例如下</strong></p>
+<pre><code class="language-c++">//构造一个大顶堆，堆中小于当前节点的元素需要下沉，因此使用less
+priority_queue&lt;int, vector&lt;int&gt;, less&lt;int&gt;&gt; priQueMaxFirst;
+
+//构造一个小顶堆，堆中大于当前节点的元素需要下沉，因此使用greater
+priority_queue&lt;string, vector&lt;string&gt;, greater&lt;string&gt;&gt; priQueMinFirst;
+</code></pre>
+</li>
+<li>
+<p>通过重写仿函数来支持自定义数据类型</p>
+<pre><code class="language-c++">//自定义数据类型，Data类
+class Data
+{
+public:
+    Data(int i, int d) :id(i), data(d) {}
+    ~Data() {}
+    int getId() { return id; }
+    int getData() { return data; }
+private:
+    int id;
+    int data;
+};
+//重写仿函数，完成less的功能，也可以用class定义类，此时需要将运算符重载函数设为public
+//结构体struct中默认是访问类型是public
+struct cmp    
+{
+    bool operator() ( Data &amp;a, Data &amp;b) {
+        return a.getId() &lt; b.getId();
+    }
+};
+
+int main(void){
+    priority_queue&lt;Data, vector&lt;Data&gt;, cmp &gt; priQueMaxFirst;//该优先级队列维护一个大顶堆，因此最大的元素最先出队
+    ...//一系列操作
+    ...
+    return 0;
+}
+
+</code></pre>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="14-arm体系架构">1.4 ARM体系架构</h2>
+<ul>
+<li>
+<p>SOC（System on Chip）片上系统</p>
+</li>
+<li>
+<p>ARM内核架构图<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202305312152492.png" alt="" loading="lazy"><br>
+ARM内核进行运算的核心部件是算术逻辑运算单元-ALU（arithmetic and logic unit）。它对两个操作数进行逻辑或者算术运算。为了提高嵌入式处理器的工作速度，以保证实时性的要求，ARM在处理器中尽可能多地设置了寄存器。ARM处理器共有37个32位寄存器。</p>
+</li>
+<li>
+<p>冯诺依曼结构和哈佛结构<br>
+冯•诺依曼结构也称普林斯顿结构，是一种将程序<strong>指令存储器和数据存储器合并在一起的存储器结构</strong>。程序指令存储地址和数据存储地址指向同一个存储器的不同物理地址，因此<strong>程序指令和数据的宽度相同</strong>。<br>
+哈佛结构是一种将程序<strong>指令存储和数据指令存储分开的存储器结构</strong>。中央处理器首先到程序存储器中读取程序指令内容，解码后得到数据地址，再到相应的数据存储器中读取数据，并进行下一步操作。程序指令存储和数据存储分开，<strong>可以使指令和数据有不同的数据宽度</strong>。<br>
+哈佛结构的微处理器通常具有较高的执行效率。ARM9、ARM10和ARM11属于哈佛结构<br>
+<img src="https://pic1.zhimg.com/80/v2-7039a18007fdd5440a637fcb36fb7ec8_1440w.webp" alt="" loading="lazy"></p>
+</li>
+<li>
+<p>ARM处理器的运行模式<br>
+运行不同的程序所需的硬件资源不同，因此ARM处理器可以为程序提供7种不同的硬件资源组合，每一种硬件资源组合叫做一种运行模式。</p>
+<ul>
+<li><strong>USR(用户模式)</strong>：ARM处理器正常程序执行模式。</li>
+<li><strong>FIQ(快速中断模式)</strong>：用于高速数据传输或通道处理</li>
+<li><strong>IRQ(中断模式)</strong>：用于通用的中断处理</li>
+<li><strong>SVC(管理模式)</strong>：操作系统使用的保护模式</li>
+<li><strong>ABT(终止模式)</strong>：当数据或指令预取出错时进入的模式。</li>
+<li><strong>SYS(系统模式)</strong>：运行具有特权的操作系统任务。</li>
+<li><strong>UND(未定义指令中止模式)</strong>：当处理器试图执行未定义指令时进入的模式</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>相对于用户模式来说，对硬件资源的使用有某种特权的运行模式叫做特权模式（除了用户模式其他六种运行模式都是特权模式）。</p>
+</blockquote>
+<ul>
+<li>
+<p>ARM的两种工作状态</p>
+<ul>
+<li>ARM指令集和Thumb指令集
+<ul>
+<li>完成相同的操作，Thumb指令通常需要更多的指令，因此在对系统运行时间要求苛刻的应用场合ARM指令集更为适合;</li>
+<li>Thumb指令集没有包含进行异常处理时需要的一些指令，因此在异常中断时，还是需要使用ARM指令，这种限制决定了Thumb指令需要和ARM指令配合使用。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>ARM处理器的寄存器<br>
+<strong>ARM状态下寄存器的组织方式</strong>：虽然ARM处理器共有37个寄存器，但是根据处理器的运行模式，程序能够真正使用的只是其中的18个或者17个。</p>
+<ul>
+<li>基础基础器<br>
+R0<sub>R15和CPSR，其中R0</sub>R7、R15和CPSR为所有运行模式共享；R8~R12为除了快中断模式之外的其他所有运行模式共享；R13和R14为用户模式和系统模式共享 ，如下图所示：<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202305312217045.png" alt="" loading="lazy"></li>
+<li>模式私有寄存器<br>
+ARM为某些运行模式设置了一些只能在该运行模式下使用的私有寄存器；ARM规定，当处理器在某种模式运行时，凡是与该模式私有寄存器序号相同的基本寄存器都将被禁用。例如在终止模式下，与该模式私有寄存器R13_abt~R14_abt序号相同的基础寄存器R13和R14就处于禁用状态。</li>
+<li>程序计数器R15（pc）<br>
+在ARM中，基础寄存器R15固定得作为程序计数器来使用。为了提高程序的可读性，通常用PC来标识。</li>
+<li>程序状态寄存器PSR<br>
+基础寄存器R16专门用作程序状态寄存器。为了提高程序的可读性，程序中也可以称为PSR<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202305312222759.png" alt="" loading="lazy"><br>
+ARM处理器中有6个PSR，当前程序状态寄存器CPSR是所有运行模式所共享的，而另外5个PSR为模式私有，用来对CPSR进行备份的寄存器叫做SPSR。<br>
+由于CPSR中保存的是程序当前运行模式的状态信息，所以当前运行模式发生变化时，为了防止这些信息丢失，ARM对每种异常运行模式都设置了一个<strong>与CPSR的格式完全相同的备份寄存器SPSR</strong>（Saved Progarm Status Register）。即当处理器进入<strong>异常运行模式</strong>时，系统会自动把CPSR的当前值转存到SPSR；当从异常模式退出时，再自动把当初保存到SPSR中的状态信息存回CPSR。<br>
+由于用户模式和系统模式不属于异常模式，所以这两个模式没有SPSR。</li>
+<li>堆栈指针寄存器R13（SP）<br>
+堆栈是计算机存储数据的一种<strong>数据结构</strong>，SP的作用就是指示当前要出栈或入栈的数据，并在<strong>操作执行后自动递增或递减</strong>。<br>
+计算机中的堆栈主要用来保存临时数据，局部变量和<strong>中断/调用子程序程序的返回地址</strong>。程序中栈主要是用来存储函数中的<strong>局部变量</strong>以及<strong>保存寄存器参数</strong>。
+<ol>
+<li>保存现场；</li>
+<li>传递参数:汇编代码调用 C 函数时，需传递参数；</li>
+<li>保存临时变量:包括函数的非静态局部变量以及编译器自动生成的其他临时变量；</li>
+</ol>
+</li>
+<li>链接寄存器R14（LR）<br>
+寄存器R14也称为子程序链接寄存器（Subroutine Link Register）或链接寄存器LR。当执行<strong>子程序调用指令BL时</strong>，<strong>R14会备份R15（程序计数器PC）的内容</strong>，以便子程序结束后能使程序正确地返回。</li>
+</ul>
+</li>
+<li>
+<p>存储器的组织</p>
+<ul>
+<li>数据存储方式<br>
+ARM是一种32位处理器，即ARM处理器处理的数据通常是以32位二进制位基本单位的。ARM中的一个32位数叫做一个字。在存储器中，ARM的一个基本数据需要占用4个连续存储单元，为了判断哪四个单元为一个字，ARM规定一个字所占用的4个连续存储单元的<strong>第一个单元地址的低2位必须是00</strong>。<br>
+根据字的4字节在4个存储单元中的存储顺序，ARM提供了两种存储方式：小端方式和大端方式。系统默认的是小端方式，即字的低位字节在地址的底端（小端）。<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202305312233298.png" alt="" loading="lazy"></li>
+<li>ARM的堆栈组织方式<br>
+在计算机应用中，常常需要在内存中建立一种特殊工作方式的存储区域，这种存储区域中数据的读/写方式是按先进后出（First In Last Out，FILO）的原则来组织的，这种存储区域就叫做堆栈。<br>
+为了只是堆栈的位置，计算机系统都有一个堆栈指针的专用寄存器来存放堆栈的地址：<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202305312236208.png" alt="" loading="lazy"><br>
+堆栈按照其生长方式可分为两种：<strong>地址递增式、地址递减式</strong><br>
+在系统初始化时，如果把<strong>堆栈指针置于较低</strong>的地址，当向堆栈存入一个数据时，堆栈的指针<strong>会指向高地址移动</strong>，即下次再存入数据时，数据的存放地址位于先存入数据上方的这个堆栈叫做地址递增式的堆栈。反之，如果数据的存储方向刚好与地址递增方式的堆栈的方向相反，则这种堆栈就叫做地址递减式堆栈。</li>
+</ul>
+</li>
+<li>
+<p>ARM体系结构的其他特点</p>
+<ul>
+<li>ARM协处理器接口<br>
+在ARM中，可以通过ARM核的协处理器接口配置一个或多个协处理器的方法来增强ARM处理器的功能。一个ARM核最多可以配置16个协处理器。<br>
+ARM体系结构有三组总线，可以方便地扩充各种处理器、DSP或I/O。
+<ul>
+<li>AHB: Advanced High performance Bus 高级高性能总线</li>
+<li>ASB: Advanced System Bus 高级系统总线----用的很少</li>
+<li>APB: Advanced Peripherial Bus 高级外围总线</li>
+</ul>
+</li>
+<li>ARM在线仿真调试<br>
+为了对处理器进行仿真调试，大多数基于ARM的处理器嵌入了ICE-RT逻辑，以便通过JTAG来仿真调试。另外，处理器还可以嵌入跟踪宏单元ETM（Embedded Trace Macrocell），用于监控内部总线，以实时跟踪指令和数据的执行。</li>
+</ul>
+</li>
+</ul>
+<h2 id="15-uartspiusbi2ccan总线">1.5 uart，spi，usb，i2c，can总线</h2>
+<blockquote>
+<p>串行通信：距离长，传输速率慢<br>
+并行通信：距离端，传输速率快<br>
+同步通信：有统一时钟信号<br>
+异步通信：无时钟信号，以数据帧的的格式发送</p>
+</blockquote>
+<p>串行通信：<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306040105627.png" alt="" loading="lazy"></p>
+<ul>
+<li><strong>UART</strong>:</li>
+</ul>
+<blockquote>
+<p><strong>串行异步全双工通信</strong>，通信双方有相同<strong>波特率</strong><br>
+参考视频链接：<a href="https://www.bilibili.com/video/BV1cQ4y1C7hj/?spm_id_from=333.337.search-card.all.click&amp;vd_source=9752c2c90782ff8bd76174dfbc76c933">硬声APP-UART</a></p>
+</blockquote>
+<ol>
+<li>
+<p>数据帧格式详解<br>
+参考博客链接：<a href="https://zhuanlan.zhihu.com/p/182321407">记得诚-uart</a><br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306041030989.png" alt="" loading="lazy"></p>
+<blockquote>
+<p>起始位：发送1位逻辑0（低电平），开始传输数据。<br>
+数据位：可以是5~8位的数据，先发低位，再发高位，一般常见的就是8位（1个字节），其他的如7位的ASCII码。<br>
+校验位：奇偶校验，将数据位加上校验位，1的位数为偶数（偶校验），1的位数4为奇数（奇校验）。<br>
+停止位：停止位是数据传输结束的标志，可以是1/1.5/2位的逻辑1（高电平）。<br>
+空闲位：空闲时数据线为高电平状态，代表无数据传输。<br>
+例如传输0x33(00110011)，那么对应的波形就是如下这样，因为是LSB在前，所以8位数据依次是11001100<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306041037405.png" alt="" loading="lazy"></p>
+</blockquote>
+</li>
+<li>
+<p>四种工作方式<br>
+参考链接：<a href="https://blog.csdn.net/qq_40459977/article/details/106926139">咖啡乌龙-uart四种工作方式</a></p>
+</li>
+</ol>
+<ul>
+<li><strong>SPI</strong>:</li>
+</ul>
+<blockquote>
+<p><strong>串行同步半双工数据通信</strong>，<strong>一主多从</strong>，<strong>一般上升沿数据有效</strong><br>
+参数视频链接：<a href="https://www.bilibili.com/video/BV1F54y1M7e7/?spm_id_from=333.999.0.0&amp;vd_source=9752c2c90782ff8bd76174dfbc76c933">爱上半导体-spi总线</a></p>
+</blockquote>
+<ol>
+<li>四条信号线<br>
+1. SS(片选信号线)<br>
+用来确定选择哪个从芯片通信<br>
+低电平有效<br>
+2. SCK(时钟信号线)<br>
+主设备产生<br>
+3. MOSI(主设备输出数据线)<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306040037186.png" alt="" loading="lazy"><br>
+4. MISO(主设备接受数据线)<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306040038426.png" alt="" loading="lazy"></li>
+<li>数据采集方式：<br>
+上升下降沿等都可以，由具体设备决定<br>
+时序图：<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306040043561.png" alt="" loading="lazy"></li>
+</ol>
+<ul>
+<li><strong>USB</strong>:</li>
+<li><strong>I2C</strong>:<br>
+<strong>一主多从模式</strong>，<strong>串行同步全双工</strong><br>
+参考视频链接：<a href="https://www.bilibili.com/video/BV1dg4y1H773/?spm_id_from=333.999.0.0&amp;vd_source=9752c2c90782ff8bd76174dfbc76c933">爱上半导体-I2C总线</a></li>
+</ul>
+<ol>
+<li>两条信号线<br>
+1. SCL（时钟信号线）<br>
+2. SDA（数据信号线）</li>
+<li>数据传输比特0和1<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306040052776.png" alt="" loading="lazy">
+<ul>
+<li>传输数据起始和结束<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306040056043.png" alt="" loading="lazy"></li>
+<li>读写数据的帧格式<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306040059488.png" alt="" loading="lazy"></li>
+<li>总结<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306040058790.png" alt="" loading="lazy"></li>
+</ul>
+</li>
+</ol>
+<ul>
+<li><strong>CAN</strong>:</li>
+</ul>
+<blockquote>
+<p>采用<strong>差分传递数据</strong>，多个设备挂载<strong>同一总线</strong>的方式链接<br>
+视频链接：<a href="https://www.bilibili.com/video/BV14k4y187e6/?spm_id_from=333.1007.tianma.2-2-5.click&amp;vd_source=9752c2c90782ff8bd76174dfbc76c933">爱上半导体-can</a><br>
+帧格式<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306040028284.png" alt="" loading="lazy"></p>
+</blockquote>
+<h2 id="16-awksedgrep">1.6 awk，sed，grep</h2>
+<p>参考链接：<a href="https://zhuanlan.zhihu.com/p/110983126">Beritra的知乎文章</a></p>
+<h2 id="17-linux中断上下文">1.7 *linux中断上下文</h2>
+<p>参考链接：<a href="https://zhuanlan.zhihu.com/p/113002536">韦东山的中断上下文</a><br>
+参考链接：<a href="https://blog.csdn.net/qq_38500662/article/details/80598486">kyo_博客的什么是中断上下文详解</a></p>
+<figure data-type="image" tabindex="1"><img src="https://33373sl116.zicp.fun:443/image-blog/202306021406503.png" alt="" loading="lazy"></figure>
+<h2 id="18-c语言内存分区">1.8 c语言内存分区</h2>
+<p>参考博客：<a href="/9_Fn4Xz4p">C语言内存分区</a></p>
+<h2 id="19-pinctrl和gpioctrlplatform">1.9 *pinctrl和gpioctrl，platform</h2>
+<ul>
+<li>
+<p><strong>platform总线</strong><br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306041544822.png" alt="" loading="lazy"></p>
+<ul>
+<li>platform_driver和platform_device的使用<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306041548508.png" alt="" loading="lazy"></li>
+<li>platform_driver和platform_device匹配<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306041552999.png" alt="" loading="lazy"></li>
+</ul>
+<blockquote>
+<p>match：函数用来driver和device的比较匹配</p>
+</blockquote>
+<ul>
+<li>platform_driver和device的匹配规则<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306041605826.png" alt="" loading="lazy">
+<ol>
+<li>首先匹配<code>platform_device</code>中<code>driver_override</code>和 <code>platform_driver</code>的<code>name</code>匹配（优先级高）</li>
+<li>若上一步匹配失败，则匹配<code>platform_device</code>中<code>name</code>和 <code>platform_driver</code>的<code>id_table</code>里的<code>name</code>一一匹配（优先级中）</li>
+<li>若前两步匹配失败，则匹配<code>platform_device</code>中<code>name</code>和 <code>platform_driver</code>的<code>name</code>匹配（优先级低）</li>
+</ol>
+</li>
+<li>函数调用关系<br>
+device_register关系<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306041610549.png" alt="" loading="lazy"><br>
+driver_register关系<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306041611134.png" alt="" loading="lazy"></li>
+<li>应用层，驱动层，设备层的职责<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306041813902.png" alt="" loading="lazy"></li>
+</ul>
+</li>
+<li>
+<p><strong>设备树</strong></p>
+</li>
+</ul>
+<blockquote>
+<p>可以使用C语言的语法<code>#include&lt;xxxx.h&gt;</code>，包含其他设备树文件<br>
+<strong>bootloader负责将dtb文件传递给内核</strong><br>
+<code>cd /sys/firmware/devicetree</code>：系统设备树文件存放路径<br>
+参考博客链接：<a href="https://zhuanlan.zhihu.com/p/165570521">听心跳的声音-设备树</a></p>
+</blockquote>
+<ul>
+<li>基础语法</li>
+</ul>
+<blockquote>
+<p>&quot;&quot;：字符串<br>
+&lt;&gt;：32位数字<br>
+[ ] ：16进制数字</p>
+</blockquote>
+<ul>
+<li>
+<p>cpu属性</p>
+</li>
+<li>
+<p>memory属性<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306041825301.png" alt="" loading="lazy"></p>
+</li>
+<li>
+<p>compatible属性<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306041826162.png" alt="" loading="lazy"></p>
+</li>
+<li>
+<p>model属性<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306041829295.png" alt="" loading="lazy"></p>
+</li>
+<li>
+<p>status属性<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306041832353.png" alt="" loading="lazy"></p>
+</li>
+<li>
+<p>reg属性<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306041834650.png" alt="" loading="lazy"></p>
+</li>
+<li>
+<p>name属性（过时了）<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306041837514.png" alt="" loading="lazy"></p>
+</li>
+<li>
+<p>device_type属性（过时了）<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306041838669.png" alt="" loading="lazy"></p>
+</li>
+<li>
+<p>设备树编译<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306041848956.png" alt="" loading="lazy"></p>
+</li>
+<li>
+<p>内核对设备树的处理<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306042144224.png" alt="" loading="lazy"></p>
+</li>
+<li>
+<p>会被转为platform_device节点的设备树节点</p>
+</li>
+</ul>
+<blockquote>
+<p>设备树的根设备节点含有<code>compatile</code>属性则会被转换为<code>platform_device</code>节点<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306042145832.png" alt="" loading="lazy"></p>
+</blockquote>
+<ul>
+<li>
+<p><strong>设备树匹配设备驱动程序</strong><br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306042239235.png" alt="" loading="lazy"><br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306042240886.png" alt="" loading="lazy"><br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306042237896.png" alt="" loading="lazy"></p>
+</li>
+<li>
+<p>获取设备资源和中断信息<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306042242879.png" alt="" loading="lazy"></p>
+</li>
+<li>
+<p>不会生成platform_device设备的节点查找</p>
+</li>
+</ul>
+<blockquote>
+<p>先根据函数，找到对应设备树的节点<br>
+根据节点，查找对应属性<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306042244927.png" alt="" loading="lazy"></p>
+</blockquote>
+<ul>
+<li>
+<p><strong>pinctrl子系统</strong></p>
+<ul>
+<li>引入<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306042251431.png" alt="" loading="lazy"></li>
+<li>pincontroller和client的设备树文件配置关系<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306042300242.png" alt="" loading="lazy"></li>
+</ul>
+</li>
+<li>
+<p><strong>gpio子系统</strong><br>
+参考视频链接：<a href="">韦东山-GPIO子系统概述</a><br>
+参考视频链接：<a href="https://www.bilibili.com/video/BV1w4411B7a4?p=116&amp;spm_id_from=pageDriver&amp;vd_source=9752c2c90782ff8bd76174dfbc76c933">韦东山-GPIO子系统的LED灯驱动</a></p>
+</li>
+</ul>
+<h2 id="110-linux中软链接和硬链接">1.10 linux中软链接和硬链接</h2>
+<figure data-type="image" tabindex="2"><img src="https://33373sl116.zicp.fun:443/image-blog/202306012309992.png" alt="" loading="lazy"></figure>
+<h2 id="111-sysfs节点">1.11 sysfs节点</h2>
+<p>sys目录结构<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306012338936.png" alt="" loading="lazy"></p>
+<p>sysfs可以看成与<strong>proc,devfs和devpty</strong>同类别的<strong>文件系统</strong>，该文件系统是<strong>虚拟的文件系统</strong>，可以更方便对系统设备进行管理。它可以产生一个包含所有系统硬件层次视图，与提供进程和状态信息的proc文件系统十分类似。</p>
+<p>sysfs把连接在系统上的设备和总线组织成为一个分级的文件，它们可以<strong>由用户空间存取</strong>，向用户空间导出内核的数据结构以及它们的属性。sysfs的一个目的就是<strong>展示设备驱动模型中各组件的层次关系</strong>，其顶级目录包括block,bus,drivers,class,power和firmware等.</p>
+<p>sysfs提供一种机制，使得可以显式的描述<strong>内核对象、对象属性及对象间关系</strong>。sysfs有两组接口，一组针对内核，用于将设备映射到文件系统中，另一组针对用户程序，用于读取或操作这些设备。表2描述了内核中的sysfs要素及其在用户空间的表现：</p>
+<table>
+<thead>
+<tr>
+<th><strong>sysfs在内核中的组成要素</strong></th>
+<th><strong>在用户空间的显示</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>内核对象（kobject）</td>
+<td>目录</td>
+</tr>
+<tr>
+<td>对象属性（attribute）</td>
+<td>文件</td>
+</tr>
+<tr>
+<td>对象关系（relationship）</td>
+<td>链接（Symbolic Link）</td>
+</tr>
+</tbody>
+</table>
+<h2 id="112-haldmaidlepolling">1.12 HAL,DMA,IDLE,POLLING</h2>
+<ul>
+<li>HAL<br>
+参考链接：<a href="https://zhuanlan.zhihu.com/p/387447152">编程小霸王的博客</a><br>
+参考链接：<a href="https://zhuanlan.zhihu.com/p/250602562">Nixxx的博客</a></li>
+<li>DMA<br>
+参考链接：<a href="https://www.jianshu.com/p/12f00061b223">听力巴士的博客</a><br>
+参考视频链接：<a href="https://www.bilibili.com/video/BV1jW4y1k7cg/?spm_id_from=333.337.search-card.all.click&amp;vd_source=9752c2c90782ff8bd76174dfbc76c933">阿熊话太多的视频</a></li>
+<li>IDLE</li>
+<li>POLLING<br>
+参考博客链接：<a href="https://blog.csdn.net/qq_28499879/article/details/123870478">菜菜的阿庄</a></li>
+</ul>
+<p>polling即轮询模式，是一种软件协议。<br>
+在轮询过程中，CPU周期性的依次询问每一个设备，是否有业务需要处理。<br>
+每个设备有一个指令就绪bit位，这个bit位标识了设备是否需要处理器服务的状态。当这个状态位被置位，CPU将处理该设备上的指令。</p>
+<h2 id="113-linux多线程一个线程访问某个外设驱动怎么防止其他线程访问">1.13 linux多线程：一个线程访问某个外设驱动，怎么防止其他线程访问</h2>
+<p>参考链接：<a href="https://www.cnblogs.com/chen-farsight/p/6139416.html">Green的博客</a><br>
+<strong>通俗来说就是并发控制，即竞态问题解决</strong></p>
+<blockquote>
+<p><strong>并发</strong>：指在同一时刻只能有一条指令执行，但多个进程指令被快速的轮换执行，使得在宏观上具有多个进程同时执行的效果，但在微观上并不是同时执行的，只是把时间分成若干段，使多个进程快速交替的执行。<br>
+<strong>并行</strong>：指在同一时刻，有多条指令在多个处理器上同时执行。<br>
+<strong>竞态（race condition）</strong>：简单来讲，竞态就是指多个执行序列同时访问同一个共享资源的状况；<br>
+<strong>临界区（critical sections）</strong>：访问共性资源的代码区域称为临界区，临界区需要被以某种互斥机制加以保护；<br>
+<strong>临界资源</strong>：是指一段时间内只允许一个进程访问的资源</p>
+</blockquote>
+<ul>
+<li>
+<p>在Linux内核中，主要的竞态发生于如下几种情况：</p>
+<ol>
+<li>对称多处理器（SMP）的多个CPU<br>
+SMP是一种紧密耦合、共享存储的系统模型，它的特点是<strong>多个CPU使用共同的系统总线</strong>，因此可访问共同的外设和存储器。</li>
+<li>单CPU内进程与抢占它的进程<br>
+一个进程在内核执行的时候可能被另一高优先级进程打断。</li>
+<li>中断（硬中断，软中断，Tasklet，下半部）与进程之间的<br>
+<strong>中断可以打断正在执行的进程</strong>，如果中断处理程序访问进程正在访问的资源，则竞态就会发生。此外，中断也有可能被更高优先级的中断打断，因此，<strong>多个中断之间本身也可能引起并发而导致竞态</strong>。</li>
+</ol>
+</li>
+<li>
+<p>竞态问题的解决方法</p>
+<ol>
+<li>中断屏蔽<br>
+在<strong>单CPU范围内</strong>避免竞态的一种简单省事的方法是在进入临界区之前<strong>屏蔽系统的中断</strong>，这项功能可以保证正在执行的内核执行路径不被中断处理程序所抢占，<strong>防止某些竞态条件的发生</strong>。</li>
+</ol>
+<blockquote>
+<p>1）中断屏蔽将使得中断与进程之间的并发不再发生<br>
+2）由于Linux内核的进程调度等操作都依赖中断来实现，<strong>内核抢占</strong>与<strong>进程之间</strong>的并发就得意避免了。</p>
+</blockquote>
+<p><strong>中断屏蔽的使用方法</strong>：</p>
+<pre><code class="language-c">    local_irq_disable()　　/*屏蔽中断*/
+    ...
+    critical section　　/*临界区*/
+    ...
+    local_irq_enable()　　/*打开中断*/
+    local_irq_disable()  
+    local_irq_enable()  
+    /* 只能禁止和使能本地CPU的中断，所以不能解决多CPU引发的竞态  */
+      
+    local_irq_save(flags)  
+    local_irq_restore(flags)  
+    /* 除了能禁止和使能中断外，还保存和还原目前的CPU中断位信息  */
+      
+    local_bh_disable()  
+    local_bh_disable()  
+    /* 如果只是想禁止中断的底半部，这是个不错的选择 */
+</code></pre>
+<p><strong>注意</strong>：<br>
+1）由于Linux的异步I/O、进程调度等很多重要操作依赖于中断，中断对于内核的执行非常重要，在屏蔽中断期间说有的中断都无法得到处理，因此产时间屏蔽中断是很危险的，有可能造成数据丢失乃至系统崩溃等后果，因此在屏蔽了中断之后，当前的内核执行路径应当尽快的执行完临界区的代码；<br>
+2）单独使用中断屏蔽<strong>不是一种值得推荐的避免竞态的方式</strong>，它宜与自旋锁联合使用。</p>
+<ol>
+<li>
+<p>原子操作<br>
+原子操作（整型原子操作和位原子操作）是在执行过程不会被别的代码路径所中断的操作，它在任何情况下操作都是原子的，内核代码可以安全的调用它们而不被打断。<br>
+原子操作的优点编写简单；缺点是功能太简单，只能做计数操作，保护的东西太少。下面看一个实例：</p>
+<pre><code class="language-c">static atomic_t v=ATOMIC_INIT(1);  
+static int hello_open (struct inode *inode, struct file *filep)  
+{  
+    if(!atomic_dec_and_test(&amp;v)) {   
+        atomic_inc(&amp;v);  
+        return -EBUSY;  
+    }  
+    return 0;  
+}    
+static int hello_release (struct inode *inode, struct file *filep)  
+{  
+    atomic_inc(&amp;v);  
+    return 0;  
+}
+</code></pre>
+</li>
+<li>
+<p>自旋锁<br>
+自旋锁（spin lock）是一个互斥设备，它只有两个值：“锁定”和“解锁”。它通常实现为某个整数值中的某个位。希望获得某个特定锁，需要代码测试相关的位。如果锁可用，则“锁定”被设置，而代码继续进入临界区；相反，**如果锁被其他人获得，则代码进入忙循环（而不是休眠，这也是自旋锁和一般锁的区别）**并重复检查这个锁，直到该锁可用为止，这就是自旋的过程。“测试并设置位”的操作必须是原子的，这样，即使多个线程在给定时间自旋，也只有一个线程可获得该锁。<br>
+<strong>Linux自旋锁的操作</strong></p>
+<ol>
+<li>定义自旋锁<br>
+<code>spinlock_t lock;</code></li>
+<li>初始化自旋锁<br>
+<code>#define spin_lock_init(_lock)　　/* 该宏用于动态初始化自旋锁 lock */void spin_lock_init(spinlock_t *);</code></li>
+<li>获取自旋锁</li>
+</ol>
+<pre><code class="language-c">void spin_lock(spinlock_t *lock);　　/* 该宏用于获得自旋锁 lock，如果 lock 未被加锁，它就会称为 持有者并立即返回，否者它将自旋在那里，知道该自旋锁的持有者释放 */
+int spin_trylock(spinlock_t *lock);　　/* 该宏用于获得自旋锁 lock，如果 lock 未被加锁，它就会称为 持有者并返回真，否者立即返回假 */
+</code></pre>
+<ol>
+<li>释放自旋锁<br>
+<code>void spin_unlock(spinlock_t *lock);　　/* 用于释放自旋锁，与 spin_lock 或 spin_trylock 配对使用*/</code></li>
+<li>自旋锁的使用</li>
+</ol>
+<pre><code class="language-c">/* 定义一个自旋锁 */
+spinlock_t lock;
+spin_lock_init(&amp;lock);
+spin_lock(&amp;lock);　　/* 获取自旋锁，保护临界区 */
+...
+critical section　　/*临界区*/ 
+...
+spin_unlock(&amp;lock);　　/* 解锁*/        
+</code></pre>
+<p>自旋锁最初是为了在<strong>多处理器系统（SMP）使用而设计的</strong>，但是只要考虑到并发问题，单处理器在运行可抢占内核时其行为就类似于SMP。因此，自旋锁对于SMP和单处理器可抢占内核都适用。可以想象，当一个处理器处于自旋状态时，它做不了任何有用的工作，因此自旋锁对于单处理器不可抢占内核没有意义，实际上，非抢占式的单处理器系统上自旋锁被实现为空操作，不做任何事情。</p>
+</li>
+</ol>
+<p><strong>注意</strong>：<br>
+1）<strong>自旋锁实际上是忙等锁</strong>，因此只有在占用锁的时间极短的情况下，使用自旋锁才是合理的；</p>
+<pre><code>  2）**自旋锁可能导致系统死锁**。引发这个问题的常见情况是递归使用一个自旋锁；　　
+
+  　　自旋锁导致死锁的实例】
+
+  　　a) a进程拥有自旋锁，在**内核态阻塞**的，内核调度进程b，b也要或得自旋锁，b只能自旋，而此时抢占已经关闭了，a进程就不会调度到了，b进程永远自旋。
+
+  　　b) 进程a拥有自旋锁，中断来了，cpu执行中断，中断处理函数也要获得锁访问共享资源，此时也获得不到锁，只能死锁。
+
+  3）**自旋锁锁定期间不能调用任何可能引起进程调度的函数**。　
+</code></pre>
+<p><strong>自旋锁的特性</strong>：<br>
+1. 被自旋锁保护的临界区代码执行时不能进入休眠；<br>
+2. 被自旋锁保护的临界区代码执行时是不能被被其他中断中断；<br>
+3. 被自旋锁保护的临界区代码执行时，内核不能被抢占。<br>
+从这几个特性可以归纳出一个共性：被自旋锁保护的临界区代码执行时，它不能因为任何原因放弃处理器。<br>
+<strong>读写自旋锁</strong><br>
+读写自旋锁是一种比自旋锁粒度（保护范围）更小的锁机制，它保留了“自旋”的概念。在读写操作时，允许多个读执行单元；写操作最多有一个写进程，且读和写不能同时进行<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306031036573.png" alt="" loading="lazy"></p>
+<ol>
+<li>信号量<br>
+信号量（semaphore）是用于保护临界区的一种常用方法，它的使用方式和自旋锁类似，只有得到信号量的进程才能执行临界区代码。但也与自旋锁有不同之处，对于<strong>获取不到信号量的执行序列将会进入休眠状态</strong>而不是原地打转。
+<ul>
+<li>自旋锁和信号量的比较<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306031110790.png" alt="" loading="lazy"></li>
+</ul>
+</li>
+</ol>
+<ul>
+<li>进程上下文和中断上下文的框架<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306031115228.png" alt="" loading="lazy"></li>
+<li>并发控制机制汇总<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306031117927.png" alt="" loading="lazy"></li>
+</ul>
+</li>
+</ul>
+<h2 id="114-采用dma方式进行串口通信如何解析数据才能提高吞吐量">1.14 采用DMA方式进行串口通信，如何解析数据才能提高吞吐量</h2>
+<p>参考链接：<a href="https://blog.csdn.net/wuyongpeng0912/article/details/46634931">HelloWuyp的博客DMA总结</a></p>
+<blockquote>
+<p><strong>直接存储访器问(DMA)</strong>：用于在外设与存储器之间以及存储器与存储器之间进行高速数据传输。DMA传输过程的初始化和启动由CPU完成，传输过程由DMA控制器来执行，无需CPU参与，从而节省CPU资源，提高利用率。<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306031621123.png" alt="" loading="lazy"><br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306031637582.png" alt="" loading="lazy"></p>
+</blockquote>
+<ul>
+<li>
+<p>DMA与CPU和外设的数据交换简图<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306031650683.png" alt="" loading="lazy"></p>
+</li>
+<li>
+<p>DMA传输和没有DMA传输区别</p>
+<ul>
+<li>没有DMA传输</li>
+</ul>
+<blockquote>
+<ol>
+<li>如果没有DMA,CPU传输数据还要以内核作为中转站，比如要将ADC采集的数据转移到到SRAM中，这个过程是这样的：</li>
+<li>内核通过<strong>DCode经过总线矩阵</strong>协调，从获取AHB存储的外设ADC采集的数据，</li>
+<li>然后内核再通过DCode经过总线矩阵协调把数据存放到<strong>内存SRAM</strong>中。<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306031629713.png" alt="" loading="lazy"></li>
+</ol>
+</blockquote>
+<ul>
+<li>有DMA传输</li>
+</ul>
+<blockquote>
+<ol>
+<li>DMA传输时外设对<strong>DMA控制器</strong>发出请求。</li>
+<li>DMA控制器收到请求，触发DMA工作。</li>
+<li>DMA控制器从AHB外设获取ADC采集的数据，<strong>存储到DMA通道</strong>中。</li>
+<li>DMA控制器的<strong>DMA总线</strong>与<strong>总线矩阵</strong>协调，使用AHB把外设ADC采集的数据经由DMA通道存放到SRAM中，这个数据的传输过程中，完全<strong>不需要内核的参与，也就是不需要CPU的参与</strong>。<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306031633391.png" alt="" loading="lazy"></li>
+</ol>
+</blockquote>
+</li>
+<li>
+<p>如何解析数据提高吞吐量<br>
+DMA传输方式</p>
+</li>
+</ul>
+<blockquote>
+<ol>
+<li>单字节传输方式；<br>
+一次DMA只传输一个字节，效率很低。但是在传输过程中CPU有机会获取对总线的控制器。</li>
+<li>数据块传输方式；<br>
+数据以数据块的方式进行传输。只要DREQ启动就会连续地传送数据块。一次请求传送一个数据块，效率高。在数据的传送期间，CPU长时间无法控制总线。</li>
+<li>请求传输方式；<br>
+DREQ信号有效就连续传输数据，否则不能进行数据的传输。</li>
+<li>级联传输方式。<br>
+用于通过多个DMA控制器级联以扩展通道。第一级只起优先权网络的作用，实际的操作由第二级芯片完成。还可由第二级到第三级等。（多个DMAC）</li>
+</ol>
+</blockquote>
+<ul>
+<li>DMA的缺点<br>
+DMA传送的<strong>优点是以增加系统硬件的复杂性和成本为代价的</strong>，因为DMA是用硬件控制代替软件控制的。另外，DMA传送期间CPU被挂起，部分或完全失去对系统总线的控制，这可能会影响CPU对中断请求的及时响应与处理。因此，在一些小系统或速度要求不高、数据传输量不大的系统中，一般并不用DMA方式。<br>
+因为DMA允许外设直接访问内存，从而形成<strong>对总线的独占</strong>。这在实时性强的硬实时系统嵌入式开发中将会造成中断延时过长。</li>
+</ul>
+<h2 id="115-c内联函数的缺点是什么">1.15 c++内联函数的缺点是什么？</h2>
+<p>参考链接：<a href="https://blog.csdn.net/qq_35902025/article/details/127912415">赵大宝字的内联函数</a></p>
+<ul>
+<li>
+<p>内联函数相关问题</p>
+<ol>
+<li>
+<p>在这一节，我们先一口气回答前两节的所有问题，然后慢慢引出后面的话题。函数前面加上inline一定会有效果吗？<br>
+答：不会，使用内联inline关键字修饰函数只是一种提示，编译器不一定认。</p>
+</li>
+<li>
+<p>如果不加inline就不是内联函数了吗？<br>
+答：存在隐式内联，不用inline关键字，C++中在类内定义的所有函数都自动称为内联函数。</p>
+</li>
+<li>
+<p>内联函数一定就会展开吗？<br>
+答：其实和第一个问题类似，还是看编译器认不认。</p>
+</li>
+<li>
+<p>在什么情况下内联函数会展开？<br>
+答：首先需要满足有inline修饰或者是类中的定义的函数，然后再由编译器决定。</p>
+</li>
+</ol>
+</li>
+<li>
+<p>内联函数的使用<br>
+<strong>内联函数是定义在头文件还是源文件？</strong><br>
+内联展开是在编译时进行的，只有链接的时候源文件之间才有关系。所以内联要想跨源文件必须把实现写在头文件里。如果一个内联函数会在多个源文件中被用到，那么必须把它定义在头文件中<br>
+内联函数的定义不一定要跟声明放在一个头文件里面：定义可以放在一个单独的头文件中，里面需要给函数定义前加上inline 关键字，原因看下面第 2.点；然后声明 放在另一个头文件中，此文件include上一个头文件。这种用法 boost里很常见：优点1. 实现跟API分离封装。优点2. 可以解决有关inline函数的循环调用问题。</p>
+<ul>
+<li>
+<p>隐式内联：<br>
+如第三节说的C++中在类内定义的所有函数都自动称为内联函数，类的成员函数的定义直接写在类的声明中时，不需要inline关键字</p>
+<pre><code class="language-c++">#include &lt;stdio.h&gt;
+
+class Trace{
+public:
+    Trace()
+    {
+        noisy = 0;
+    }
+    void print(char *s)
+    {
+        if (noisy)
+        {
+            printf(&quot;%s&quot;, s);
+        }
+    }
+    void on(){ noisy = 1; }
+    void off(){ noisy = 0; }
+private:
+    int noisy;
+};
+</code></pre>
+</li>
+<li>
+<p>显示内联：<br>
+需要使用inline关键字</p>
+<pre><code class="language-c++">#include &lt;stdio.h&gt;
+
+class Trace{
+public:
+    Trace()
+    {
+        noisy = 0;
+    }
+    void print(char *s); //类内没有显示声明
+    void on(){ noisy = 1; }
+    void off(){ noisy = 0; }
+private:
+    int noisy;
+};
+//类外显示定义
+inline void Trace::print(char *s)
+{
+    if (noisy)
+    {
+        printf(&quot;%s&quot;, s);
+    }
+}
+</code></pre>
+</li>
+</ul>
+</li>
+<li>
+<p>内联函数的重定义</p>
+<ul>
+<li>
+<p>什么是重定义？<br>
+答：C/C++语法中，如果变量、函数在同一个工程中被多次定义，链接期间会报类似“对 xxx 多重定义”的错误。<br>
+当内联函数的声明和定义分别在头文件和源文件中，并且在其他文件中被调用时，链接期间编译器会报“对 xxx 未定义的引用”错误。内联函数如果会在多处被调用，则需要将函数的定义写在头文件中。</p>
+</li>
+<li>
+<p>​为什么inline关键字修饰的函数定义在头文件中（函数可能会被多次定义），编译器不会报“对 xxx 多重定义”的错误呢？<br>
+答：编译器对被inline修饰的函数做了特殊处理，inline起到了内联的作用；</p>
+</li>
+<li>
+<p>inline为什么能起作用？<br>
+答：因为inline是一个弱符号；</p>
+</li>
+<li>
+<p>什么是弱符号？(反编译后.weak确定)<br>
+答：在C语言中，编译器默认函数和初始化了的全局变量为强符号（Strong Symbol），未初始化的全局变量为弱符号（Weak Symbol）。强符号之所以强，是因为它们拥有确切的数据，变量有值，函数有函数体；弱符号之所以弱，是因为它们还未被初始化，没有确切的数据。</p>
+</li>
+</ul>
+<p>链接器会按照如下的规则处理被多次定义的强符号和弱符号：<br>
+1) 不允许强符号被多次定义，也即不同的目标文件中不能有同名的强符号；如果有多个强符号，那么链接器会报符号重复定义错误。</p>
+<pre><code>  2) 如果一个符号在某个目标文件中是强符号，在其他文件中是弱符号，那么选择强符号。
+
+  3) 如果一个符号在所有的目标文件中都是弱符号，那么选择其中占用空间最大的一个。
+</code></pre>
+</li>
+<li>
+<p>内联函数与宏<br>
+在C程序中，可以用<strong>宏代码提高执行效率</strong>。宏代码本身不是函数，但使用起来象函数。预处理器用<strong>复制宏代码的方式代替函数调用</strong>，省去了参数压栈、生成汇编语言的CALL调用、 返回参数、执行return等过程，从而提高了速度。<br>
+使用宏代码最大的缺点是容易出错，预处理器在复制宏代码时常常产生意想不到的<strong>边际效应</strong>。宏看起来像函数调用，但没有参数类型及返回值，实际会有隐藏的难以发现的问题，例如：执行ans = MyAdd(2, 3)<em>2时会返回2+3</em>2。</p>
+</li>
+<li>
+<p>内联的局限性<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306012253063.png" alt="" loading="lazy"></p>
+</li>
+<li>
+<p>内联的优缺点：</p>
+<ul>
+<li>优点</li>
+</ul>
+<ol>
+<li>
+<p>inline定义的内联函数，函数代码被放入符号表中，在使用时进行替换（像宏一样展开），效率很高</p>
+</li>
+<li>
+<p>类的内联函数也是函数。编绎器在调用一个内联函数，首先会检查参数问题，保证调用正确，像对待真正函数一样，消除了隐患及局限性。</p>
+</li>
+<li>
+<p>inline可以作为类的成员函数，也可以使用所在类的保护成员及私有成员。</p>
+</li>
+</ol>
+<ul>
+<li>缺点</li>
+</ul>
+<ol>
+<li>
+<p>内联函数以复制为代价，活动产函数开销</p>
+</li>
+<li>
+<p>如果函数的代码较长，使用内联将消耗过多内存</p>
+</li>
+<li>
+<p>如果函数体内有循环，那么执行函数代码时间比调用开销大。</p>
+</li>
+</ol>
+</li>
+</ul>
+<h2 id="116-是否做个i2c从机设备开发没有">1.16 是否做个i2c从机设备开发（没有）</h2>
+<h2 id="117-异步i2c有接触过吗">1.17 异步i2c有接触过吗？</h2>
+<h2 id="118-看门狗多线程如何喂狗">1.18 看门狗：多线程如何喂狗？</h2>
+<blockquote>
+<p><strong>喂狗</strong>：就是及时清除看门狗数据，避免正常情况下重启程序。</p>
+</blockquote>
+<ul>
+<li>
+<p>定时器学习<br>
+参考视频链接：<a href="https://www.bilibili.com/video/BV1MY4y1u7eY/?spm_id_from=333.337.search-card.all.click&amp;vd_source=9752c2c90782ff8bd76174dfbc76c933">点击此处</a></p>
+<ul>
+<li>系统定时器SysTick（滴答定时器）</li>
+<li>基础定时器</li>
+<li>专用定时器</li>
+</ul>
+</li>
+<li>
+<p>看门狗的由来<br>
+由于单片机在运行过程经常会遭到外部电磁场的干扰，就可能会出现程序“跑飞”，如：出现数据的缺失，导致寄存器中的数据发生变化、程序指针<code>PC</code>指向非法地址.......，为了提高程序的可靠性，就提供了看门狗外设，在程序出现由软件或硬件导致的未知问题，利用看门狗外设对<strong>芯片进行复位</strong> ，相当于重新运行程序。<br>
+如果程序没有任何问题，则可以<strong>按时喂狗</strong>，<strong>就不会让芯片复位</strong>，一旦程序出现问题导致<strong>无法喂狗</strong>，则<strong>看门狗会自动复位程序</strong>。</p>
+</li>
+<li>
+<p>看门狗的分类</p>
+<ul>
+<li>
+<p>独立看门狗<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306031815182.png" alt="" loading="lazy"><br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306031831984.png" alt="" loading="lazy"><br>
+<strong>看门狗代码编写</strong>：</p>
+<pre><code class="language-c">void IWDG_Init(void){
+    //1. 判断系统复位是否由看门狗导致
+    if(RCC_GetFlagStatus(RCC_FLAG_IWDGRST) != RESET){
+        printf(&quot;System Reset is by IWDG\n&quot;);
+        RCC_ClearFlag();        //清除复位标志，看门狗中断会置为1
+    }else{
+        printf(&quot;System Reset is by User\n&quot;);
+        //不用清除复位，默认为0，手动复位的值也是0
+    }
+    //2. 解除写保护
+    IWDG_WriteAccessCmd(IWDG_WriteAccess_Enable);
+    //3. 设置分频，和喂狗时间  32khz / 256 = 125
+    IWDG_SetPrescaler(IWDG_Prescaler_256);
+    IWDG_SetReload(125-1);
+    //4. 重载计数值（或理解为将计数值刷入寄存器中）--- 喂狗代码
+    IWDG_ReloadCounter();
+    //5. 启动看门狗
+    IWDG_Enable();
+
+}
+</code></pre>
+</li>
+<li>
+<p>窗口看门狗</p>
+</li>
+<li>
+<p>软件看门狗<br>
+由CPU时钟作为看门狗定时器，不能检测到CPU的异常</p>
+</li>
+<li>
+<p>硬件看门狗<br>
+由独立低速定时作为看门狗定时器，可以检测所有CPU是否正常运行；且任何一个CPU都可以喂硬狗，当在一定时间内没有核喂狗，触发硬狗复位</p>
+</li>
+</ul>
+</li>
+<li>
+<p>多线程喂狗<br>
+参考链接：<a href="https://blog.csdn.net/little_grapes/article/details/126843059">xiaobaibai_2021的博客</a><br>
+参考链接：<a href="https://www.sohu.com/a/239171102_505886">搜狐网站多线程看门狗</a></p>
+</li>
+<li>
+<p><strong>多线程喂狗示意图</strong>：<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306031928742.png" alt="" loading="lazy"></p>
+</li>
+</ul>
+<h2 id="119-三极管的四种方式">1.19 三极管的四种方式</h2>
+<h2 id="120-中断时钟存储等">1.20 中断，时钟，存储等</h2>
+<ul>
+<li>扇区：512byte(字节)</li>
+<li>时钟频率：</li>
+<li>存储：</li>
+</ul>
+<h2 id="121-线程">1.21 线程</h2>
+<ul>
+<li>
+<p>pthread_join方法(参考链接：<a href="https://blog.csdn.net/yzy1103203312/article/details/80849831">多线程pthread_join()的两种作用</a>)<br>
+&gt; 1. 用于等待其他线程结束：当调用 pthread_join() 时，当前线程会处于阻塞状态，直到被调用的线程结束后，当前线程才会重新开始执行。<br>
+&gt; 2. 对线程的资源进行回收：如果一个线程是非分离的（默认情况下创建的线程都是非分离）并且没有对该线程使用 pthread_join() 的话，该线程结束后并不会释放其内存空间，这会导致该线程变成了“僵尸线程”。<br>
+线程的分离状态决定一个线程以什么样的方式来终止自己</p>
+</li>
+<li>
+<p>分离线程【detached】和非分离线程【joinable】<br>
+<strong>非分离的线程</strong>能够被其他线程收回其资源和杀死；在被其他线程回收之前，它的存储器资源（如栈）是不释放的【默认状态】<br>
+<strong>分离的线程</strong>是不能被其他线程回收或杀死的，它的存储器资源在它终止时由系统自动释放</p>
+</li>
+</ul>
+<h2 id="122-仿函数">1.22 仿函数</h2>
+<p>参考链接：<a href="https://blog.csdn.net/toby54king/article/details/105103111">ISmileLi博客的仿函数</a><br>
+参考链接：<a href="https://blog.csdn.net/K346K346/article/details/82818801">恋喵大鲤鱼博客的仿函数</a></p>
+<h2 id="123-explicit函数介绍">1.23 explicit函数介绍</h2>
+<p>作用：explicit构造函数是用来防止隐式转换的</p>
+<pre><code class="language-c++">#include &lt;iostream&gt;
+
+using namespace std;
+
+// explicit函数的介绍!!!
+
+// explicit函数的作用：explicit构造函数是用来防止隐式转换的
+class Test1{
+    public:
+        Test1(int n){  // 普通隐式的构造函数
+            num = n;
+        }
+    private:
+        int num;
+};
+
+class Test2{
+    public:
+        explicit Test2(int n){   //explicit(显式)构造函数
+            num = n;
+        }
+    private:
+        int num;
+};
+
+int main(){
+    Test1 t1 = 12;  // 隐式调用其构造函数,成功
+    // Test2 t2 = 12;  编译错误,不能隐式调用其构造函数
+    Test2 t3(12);  //  显式调用成功
+    return 0;
+}
+</code></pre>
+<p>Test1的构造函数带一个int型的参数，会隐式转换成调用Test1的这个构造函数。而Test2的构造函数被声明为explicit（显式），这表示不能通过隐式转换来调用这个构造函数，因此Test2 t2 = 12会出现编译错误。普通构造函数能够被隐式调用,而explicit构造函数只能被显式调用。</p>
+<h2 id="124-static关键cc">1.24 static关键c/c++</h2>
+<p>参考链接：<a href="https://blog.csdn.net/guotianqing/article/details/79828100">guotianqing的博客</a></p>
+<h2 id="125-用户和内核态">1.25 用户和内核态</h2>
+<h3 id="1251用户态和内核态概述">1.25.1用户态和内核态概述</h3>
+<blockquote>
+<p>用户态：提供应用程序运行的空间，为了使应用程序访问到内核管理的资源，例如CPU，内存，I/O等。<br>
+内核态：本质是内核，一种特殊的软件程序，用于控制计算机的硬件资源，例如协调CPU资源，分配内存资源，并且提供稳定的环境供应用程序运行。</p>
+</blockquote>
+<p>用户态只能受限的访问内存, 且不允许访问外设(硬盘、网卡等)；内核态CPU可以访问内存所有数据, 包括外设，且可以将自己从一个程序切换到另一个程序。</p>
+<ul>
+<li><strong>系统调用</strong>：操作系统对外会表现为一个整体，但是会暴露自己的部分接口来供上层开发使用，这部分由操作系统提供的接口，叫做系统调用。</li>
+<li><strong>库函数</strong>：库函数实际上就是对系统调用接口的封装，提供简单的基本接口给用户</li>
+<li><strong>Shell</strong>：命令行，为了方便用户和系统交互。</li>
+</ul>
+<h3 id="1252-用户态与内核态的切换">1.25.2 用户态与内核态的切换</h3>
+<p>用户程序跑在用户态下，但是如果需要执行一些操作例如申请内存，网络读写时，自己的权限不够，就需要转换到内核态去让内核的code帮忙干一些事情，这样就存在用户态和内核态切换的过程，例如：<strong>C库接口malloc申请动态内存</strong>，malloc的实现内部<strong>可能</strong>会调用 系统调用brk()来分配内存。</p>
+<blockquote>
+<p><strong>注意</strong>：</p>
+</blockquote>
+<blockquote>
+<pre><code>   上述例子提到的malloc的实现内部为什么是可能会进行系统调用而不是一定会进行系统调用呢？
+</code></pre>
+</blockquote>
+<blockquote>
+<pre><code>   malloc是用于用户空间堆扩展的函数接口。该函数是C库，属于封装了相关系统调用（brk()）的glibc库函数，而不是系统调用（系统可没有sys_malloc()），如果谈及malloc函数涉及的系统内核的那些操作，那么总体可以分为用户空间层面和内核空间层面来讨论：
+</code></pre>
+</blockquote>
+<blockquote>
+<p>用户层面：每当进程调用malloc，首先会在该堆缓冲区寻找足够大小的内存块分配给进程（选择缓冲区中的那个块就有首次命中和最佳命中两种算法）。如果free_chunk_list已无法满足需求的chunk时，那么malloc会通过调用系统调用brk()将进程空间的堆进行扩展，在新扩展的堆空间上建立一个新的chunk并加入到空闲队列中，这个过程相当于进程想向系统批量申请一块内存<br>
+内核层面：用户层面中如果malloc的空闲chunk列表无法满足用户的需求，那么就要通过sys_brk()进行堆的扩展，这时候才真正算得上进入内核空间。</p>
+</blockquote>
+<ul>
+<li><strong>那么如何从用户态切换到内核态呢？有以下三种方式</strong>
+<ol>
+<li><strong>系统调用</strong>：是用户态进程主动要求切换到内核态的一种方式，用户态进程通过系统调用申请使用操作系统提供的服务程序完成工作。例如上面的例子、还比如fork()实际上就是执行了一个创建新进程的系统调用。(其实系统调用本身就是中断，是软件中断)</li>
+<li><strong>异常</strong>：如果当前进程运行在用户态，如果这个时候发生了异常事件，就会触发切换。例如：缺页异常。</li>
+<li><strong>外设中断</strong>：当外设完成用户的请求时，会向CPU发送中断信号，此时CPU会暂停执行下一条即将要执行的指令转而去执行与中断信号对应的处理程序，如果先前执行的指令是用户态下的程序，那么这个转换的过程自然也就发生了由用户态到内核态的切换。例：如硬盘读写操作完成后，系统会切换到硬盘读写的中断处理程序中执行后续操作。</li>
+</ol>
+</li>
+</ul>
+<blockquote>
+<p><strong>用户态和内核态之间切换调度的成本很高，原因是什么？</strong><br>
+答：Linux下每个进程的栈有两个，一个是用户态栈，一个是内核态栈。在从用户态栈进入内核的时候，进行执行栈的转换，需要保存用户态的寄存器，在内核态返回用户态的时候会恢复这些寄存器的内容，相对而言这是一个很大的开销且耗时。</p>
+</blockquote>
+<ul>
+<li>操作系统通过中断来从用户态切换到内核态，内核态可以直接切换到用户态</li>
+</ul>
+<h2 id="126-linux系统的惊群效应">1.26 Linux系统的惊群效应</h2>
+<p>参考链接：<a href="https://www.programminghunter.com/article/74692326128/">编程猎人---Linux惊群效应</a></p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[C基础知识]]></title>
+        <id>https://xstarling.gitee.io/9_Fn4Xz4p/</id>
+        <link href="https://xstarling.gitee.io/9_Fn4Xz4p/">
+        </link>
+        <updated>2023-05-26T01:38:25.000Z</updated>
+        <content type="html"><![CDATA[<h1 id="1-易混淆知识">1. 易混淆知识</h1>
+<h2 id="11-基础语法">1.1 基础语法</h2>
+<h3 id="111-a1a1a1a1a1的区别">1.1.1 <code>a+1，*(a+1)，*(&amp;a+1)，&amp;a+1，*(*(&amp;a+1))</code>的区别</h3>
+<ul>
+<li><code>a+1</code>：就是数组首地址加上一个元素所占的地址大小，结果是一个<strong>地址</strong>，这里int是4字节，则就是<code>1x4</code></li>
+<li><code>*(a+1)</code>：代表的是数组的第一个元素的<strong>值</strong>，不再是地址</li>
+<li><code>*(&amp;a+1)</code>：将&amp;a+1的地址取出来，这值是<code>地址的值</code></li>
+<li><code>&amp;a+1</code>：代表的是加上<strong>整个数组的大小</strong>，例如：数组长度为3，则&amp;a+1表示指向数组最后一个元素的下一个地址开始处，即这里的<code>+1</code>代表的是加上<code>3x4</code></li>
+<li><code>*(*(&amp;a+1)-1)</code>：取出<code>&amp;a+1</code>地址的前一个元素的值。（即数组的最后一个元素的值）</li>
+</ul>
+<h3 id="112-scanf函数的返回值">1.1.2 scanf()函数的返回值</h3>
+<ul>
+<li>
+<p>scanf 函数是有返回值的，它的返回值可以分成三种情况</p>
+<ul>
+<li>
+<p>正整数，表示正确输入参数的个数。<br>
+例如执行 scanf(“%d %d”, &amp;a, &amp;b);<br>
+如果用户输入”3 4”，可以正确输入，返回2（正确输入了两个变量）；<br>
+如果用户输入”3,4”，可以正确输入a，无法输入b，返回1（正确输入了一个变量）。</p>
+</li>
+<li>
+<p>0，表示用户的输入不匹配，无法正确输入任何值。如上例，用户如果输入”,3 4”，返回0。</p>
+</li>
+<li>
+<p>EOF，这是在 stdio.h 里面定义的常量（通常值为-1），表示输入流已经结束。在Windows下，用户按下CTRL+Z（会看到一个^Z字符）再按下回车（可能需要重复2次），就表示输入结束；Linux/Unix下使用CTRL+D表示输入结束。</p>
+</li>
+</ul>
+</li>
+<li>
+<p>scanf 的格式串里面，为什么%s 和 %c 中间需要空格呢？</p>
+<pre><code class="language-c">while (scanf(&quot;%s %c %c&quot;, str, &amp;oldchar, &amp;newchar) == 3)
+/* 或!= EOF , 但前者更好 */
+{
+    ; //处理
+}
+</code></pre>
+<blockquote>
+<p>因为如果没空格的话。。。oldchar输入的就是空格了= =.</p>
+</blockquote>
+</li>
+</ul>
+<p><strong>补充</strong></p>
+<blockquote>
+<p>printf 的返回值是输出的字符数，例如，printf(“1234”)的返回值是4，而printf(“1234\n”)的返回值是5。</p>
+</blockquote>
+<h3 id="113-const-和static区别">1.1.3 const 和static区别</h3>
+<ul>
+<li><strong>常量（const 类型）</strong><br>
+const类型的值是不能被修改的，但是，这个不能修改，意思是const 修饰的部分是不能被修改的。典型的应用是如下的两种：
+<ul>
+<li>const     int*     p; 这个声明的意思是：p 是一个指针，是指向const int 的一个指针。（p is a pointer, point to a const int）也就是说，p这个<strong>地址是可以改变</strong>的，但是，不管地址如何变，其<strong>指向的值是不变</strong>的。p = p + 1 是对的，但是 *p是不合法的，不能改变*p的值。</li>
+<li>int*    const      p; 同样是定义一个指针，意思是：p是一个const的int类型的指针。（p is a const pointer to int）也就是说，p是一个地址，但是这个<strong>地址不能被改变</strong>，但是里面的<strong>值 *p 是可以改变</strong>的。p = p+1 是错误的，因为p已经固定了，但是*p是合法的。</li>
+</ul>
+<blockquote>
+<p>const int* p：等价于（const int)* p，即：p是一个指针，指向（const int）类型<br>
+int* const p：等价于int* (const p)，即：p是一个常量指针（const p），指向int类型</p>
+</blockquote>
+</li>
+<li><strong>静态变量（static）</strong><br>
+静态变量分为全局的静态变量和局部的静态变量。静态变量的<strong>值是可以改变</strong>的！
+<ul>
+<li><strong>全局静态变量</strong>：这个比较简单，作用域内的所有函数都可以调用，一般可以用来做多线程程序的控制。</li>
+<li><strong>局部静态变量</strong>：在这个例子中，一共调用了func函数三次，每调用一次，i的值都会改变一次。</li>
+</ul>
+</li>
+</ul>
+<h3 id="114-结构体内存对齐和修改默认对齐数">1.1.4 结构体内存对齐和修改默认对齐数</h3>
+<p>参考视频链接：<a href="https://www.bilibili.com/video/BV1Vm4y1r7jY?p=137&amp;vd_source=9752c2c90782ff8bd76174dfbc76c933">鹏哥C语言</a></p>
+<ul>
+<li>结构体内存对齐<br>
+对齐规则：</li>
+</ul>
+<blockquote>
+<ol>
+<li>第一个成员在结构体变量偏移量为0的地址处。</li>
+<li>其他成员变量要对齐到某个数字（对齐数）的整数倍的地址处。<br>
+<strong>对齐数</strong> = 编译器默认的对齐数 与 该成员大小的 <strong>较小值</strong>。如：<code>vs中默认值为8</code>。</li>
+<li>结构体总体大小为最大对齐数（每个成员变量都有一个对齐数）的整数倍。</li>
+<li>如果嵌套了结构体的情况，嵌套的结构体对齐到<strong>自己的最大对齐数的整数倍处</strong>，结构体的整体大小就是所有最大对齐数（含嵌套结构体的对齐数）的整数倍。</li>
+</ol>
+</blockquote>
+<ul>
+<li>
+<p>为啥存在内存对齐？<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306080029910.png" alt="" loading="lazy"></p>
+</li>
+<li>
+<p>修改默认对齐数<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306080847474.png" alt="" loading="lazy"></p>
+</li>
+</ul>
+<h3 id="115-结构体和共用体区别">1.1.5 结构体和共用体区别</h3>
+<p>参考博客链接：<a href="https://blog.csdn.net/qq_40305944/article/details/116270391">嵌入式小刘-共用体和结构体的区别</a></p>
+<ul>
+<li>
+<p>共用体的特点<br>
+1）使用共用体变量的目的是希望用同一个内存段存放几种不同类型的数据，但请注意，在<strong>每一个瞬间只能存放其中一种</strong>，而不是同时存放几种；<br>
+2）能够<strong>访问</strong>的是共用体变量中<strong>最后一次被赋值的成员</strong>，在对一个新的成员赋值后原有的成员就失去作用。<br>
+3）共用体变量的地址和它各成员的地址都是<strong>同一个地址</strong>；<br>
+4）<strong>不能对共用体变量名赋值</strong>；不能企图引用变量名来得到一个值；不能在定义共用体变量时对它初始化；不能用共用体变量名作为函数参数。</p>
+</li>
+<li>
+<p>共用体变量的赋值<br>
+参考博客链接：<a href="https://blog.csdn.net/qq_43589855/article/details/84578455">KingSF5-共用体赋值</a></p>
+</li>
+</ul>
+<h3 id="116-文件打开的方式">1.1.6 文件打开的方式</h3>
+<table>
+<thead>
+<tr>
+<th>文件使用方式</th>
+<th>含义</th>
+<th>如果指定的文件不存在</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>r（只读）</td>
+<td>读取一个已经存在的文本文件</td>
+<td>出错</td>
+</tr>
+<tr>
+<td>w（只写）</td>
+<td>打开一个文本文件，输出数据，若文件存在则文件长度清为0，即该文件内容会消失</td>
+<td>建立新文件</td>
+</tr>
+<tr>
+<td>a （追加）</td>
+<td>向文本文件末尾添加数据，原来文件中的数据保留，新的数据添加到文件为，原文件EOF保留</td>
+<td>建立新文件</td>
+</tr>
+<tr>
+<td>rb（只读）</td>
+<td>读取一个二进制文件</td>
+<td>出错</td>
+</tr>
+<tr>
+<td>wb（只写）</td>
+<td>打开一个二进制文件，输出数据，若文件存在则文件长度清为0，即该文件内容会消失</td>
+<td>建立新文件</td>
+</tr>
+<tr>
+<td>ab （追加）</td>
+<td>向二进制文件尾添加数据</td>
+<td>建立新文件</td>
+</tr>
+<tr>
+<td>r+ （读写）</td>
+<td>对一个文本文件进行读写操作</td>
+<td>出错</td>
+</tr>
+<tr>
+<td>w+ （读写）</td>
+<td>对一个文本文件进行读写操作，若文件存在则文件长度清为0，即该文件内容会消失</td>
+<td>建立新文件</td>
+</tr>
+<tr>
+<td>a+（读写）</td>
+<td>向文本文件末尾添加数据，原来文件中的数据保留，新的数据添加到文件尾，原文件EOF不保留</td>
+<td>建立新文件</td>
+</tr>
+<tr>
+<td>rb+ （读写）</td>
+<td>读写一个二进制文件</td>
+<td>出错</td>
+</tr>
+<tr>
+<td>wb+ （读写）</td>
+<td>对一个二进制文件进行读写操作，若文件存在则文件长度清为0，即该文件内容会消失</td>
+<td>建立新文件</td>
+</tr>
+<tr>
+<td>ab+（读写）</td>
+<td>向二进制文件末尾添加数据，原来文件中的数据保留，新的数据添加到文件尾</td>
+<td>建立新文件</td>
+</tr>
+</tbody>
+</table>
+<h2 id="12-经典代码片段">1.2 经典代码片段</h2>
+<h3 id="121-统计二进制数中1的个数">1.2.1 统计二进制数中<code>1</code>的个数</h3>
+<pre><code class="language-c">int countOne(int x){
+    int count = 0;
+    while (x){
+        count++;
+        x = x &amp; (x-1);
+    }
+    return count;
+}
+</code></pre>
+<h3 id="122-编程代码大小端判断">1.2.2 编程代码大小端判断</h3>
+<p>参考视频链接：<a href="https://www.bilibili.com/video/BV1Vm4y1r7jY?p=146&amp;vd_source=9752c2c90782ff8bd76174dfbc76c933">比特鹏---联合</a></p>
+<pre><code class="language-c"># include&lt;stdio.h&gt;
+//方式一
+int  check_sys(){
+    int a = 1;
+    return *(char*)&amp;a;  //将a转为char类型指针，只能取一个字节，然后在去值返回
+}
+//方式二：共用体
+int check_sys(){
+    union {
+        char c;
+        int i;
+    }
+    u.i = 1;
+    return u.c;
+}
+
+int main(){
+    //int a = 1; //0x 00 00 00 01
+    //低------&gt;高
+    //01 00 00 00 -- 小端
+    //00 00 00 01 -- 大端
+    int ret = check_sys();
+    if(ret == 1){
+        printf(&quot;小端\n&quot;);
+    }else{
+        printf(&quot;大端\n&quot;);
+    }
+
+}
+</code></pre>
+<ul>
+<li>共用体字节对齐</li>
+</ul>
+<blockquote>
+<p>char arr[5] 等价于 char a,b,c,d,e;<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202306101906110.png" alt="" loading="lazy"></p>
+</blockquote>
+<h2 id="13-c语言内存分区">1.3 c语言内存分区</h2>
+<p>内存分区示意图，详细请参考笔记：<a href="siyuan://blocks/20230526130845-mf1blib">点击此处</a><br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202305270008000.png" alt="c语言内存分区图" loading="lazy"></p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[C++特性]]></title>
+        <id>https://xstarling.gitee.io/ttHxL7o9x/</id>
+        <link href="https://xstarling.gitee.io/ttHxL7o9x/">
+        </link>
+        <updated>2023-05-25T04:42:31.000Z</updated>
+        <content type="html"><![CDATA[<h1 id="1-函数">1. 函数</h1>
+<p>c++的类函数可以在类的的外面通过<code>返回类型 类名::方法名(){}</code>的方式进行声明定义</p>
+<h2 id="11-构造函数">1.1 构造函数</h2>
+<blockquote>
+<p>类的构造函数是类的一种特殊的成员函数，它会在每次创建类的新对象时执行。<br>
+构造函数的名称与类的名称是完全相同的，并且不会返回任何类型，也不会返回 void。构造函数可用于<br>
+为某些成员变量设置初始值。</p>
+</blockquote>
+<p>代码示例</p>
+<pre><code class="language-c++">#include &lt;iostream&gt;
+ 
+using namespace std;
+ 
+class Line
+{
+   public:
+      void setLength( double len );
+      double getLength( void );
+      Line();  // 这是构造函数
+ 
+   private:
+      double length;
+};
+ 
+// 成员函数定义，包括构造函数
+Line::Line(void)
+{
+    cout &lt;&lt; &quot;Object is being created&quot; &lt;&lt; endl;
+}
+ 
+void Line::setLength( double len )
+{
+    length = len;
+}
+ 
+double Line::getLength( void )
+{
+    return length;
+}
+// 程序的主函数
+int main( )
+{
+   Line line;
+ 
+   // 设置长度
+   line.setLength(6.0); 
+   cout &lt;&lt; &quot;Length of line : &quot; &lt;&lt; line.getLength() &lt;&lt;endl;
+ 
+   return 0;
+}
+</code></pre>
+<h2 id="12-方法重载和运算符重载">1.2 方法重载和运算符重载</h2>
+<blockquote>
+<p>C++ 允许在同一作用域中的某个函数和运算符指定多个定义，分别称为函数重载和运算符重载。<br>
+重载声明是指一个与之前已经在该作用域内声明过的函数或方法具有相同名称的声明，但是它们的参数列表和定义（实现）不相同。<br>
+当您调用一个重载函数或重载运算符时，编译器通过把您所使用的参数类型与定义中的参数类型进行比较，决定选用最合适的定义。选择最合适的重载函数或重载运算符的过程，称为重载决策。</p>
+</blockquote>
+<p><strong>C++ 中的函数重载</strong><br>
+在同一个作用域内，可以声明几个功能类似的同名函数，但是这些同名函数的形式参数（指参数的个数、类型或者顺序）必须不同。不能仅通过返回类型的不同来重载函数。</p>
+<pre><code class="language-c++">#include &lt;iostream&gt;
+using namespace std;
+ 
+class printData
+{
+   public:
+      void print(int i) {
+        cout &lt;&lt; &quot;整数为: &quot; &lt;&lt; i &lt;&lt; endl;
+      }
+ 
+      void print(double  f) {
+        cout &lt;&lt; &quot;浮点数为: &quot; &lt;&lt; f &lt;&lt; endl;
+      }
+ 
+      void print(char c[]) {
+        cout &lt;&lt; &quot;字符串为: &quot; &lt;&lt; c &lt;&lt; endl;
+      }
+};
+ 
+int main(void)
+{
+   printData pd;
+ 
+   // 输出整数
+   pd.print(5);
+   // 输出浮点数
+   pd.print(500.263);
+   // 输出字符串
+   char c[] = &quot;Hello C++&quot;;
+   pd.print(c);
+ 
+   return 0;
+}
+</code></pre>
+<p><strong>C++ 中的运算符重载</strong><br>
+可以重定义或重载大部分 C++ 内置的运算符。这样，您就能使用自定义类型的运算符。</p>
+<p>重载的运算符是带有特殊名称的函数，函数名是由关键字 operator 和其后要重载的运算符符号构成的。与其他函数一样，重载运算符有一个返回类型和一个参数列表。</p>
+<blockquote>
+<p>Box operator+(const Box&amp;);<br>
+声明加法运算符用于把两个 Box 对象相加，返回最终的 Box 对象。大多数的重载运算符可被定义为普通的非成员函数或者被定义为类成员函数。如果我们定义上面的函数为类的非成员函数，那么我们需要为每次操作传递两个参数，如下所示：</p>
+</blockquote>
+<blockquote>
+<p>Box operator+(const Box&amp;, const Box&amp;);</p>
+</blockquote>
+<p><strong>运算符重载的基本格式</strong></p>
+<pre><code class="language-c++"> 返回值类型 类名::operator重载的运算符(参数表)
+   {
+   ……
+   }
+
+operator是关键字，它与重载的运算符一起构成函数名。
+</code></pre>
+<p>代码示例</p>
+<pre><code class="language-c++">#include &lt;iostream&gt;
+using namespace std;
+ 
+class Box
+{
+   public:
+ 
+      double getVolume(void)
+      {
+         return length * breadth * height;
+      }
+      void setLength( double len )
+      {
+          length = len;
+      }
+ 
+      void setBreadth( double bre )
+      {
+          breadth = bre;
+      }
+ 
+      void setHeight( double hei )
+      {
+          height = hei;
+      }
+      // 重载 + 运算符，用于把两个 Box 对象相加
+      Box operator+(const Box&amp; b)
+      {
+         Box box;
+         box.length = this-&gt;length + b.length;
+         box.breadth = this-&gt;breadth + b.breadth;
+         box.height = this-&gt;height + b.height;
+         return box;
+      }
+   private:
+      double length;      // 长度
+      double breadth;     // 宽度
+      double height;      // 高度
+};
+// 程序的主函数
+int main( )
+{
+   Box Box1;                // 声明 Box1，类型为 Box
+   Box Box2;                // 声明 Box2，类型为 Box
+   Box Box3;                // 声明 Box3，类型为 Box
+   double volume = 0.0;     // 把体积存储在该变量中
+ 
+   // Box1 详述
+   Box1.setLength(6.0); 
+   Box1.setBreadth(7.0); 
+   Box1.setHeight(5.0);
+ 
+   // Box2 详述
+   Box2.setLength(12.0); 
+   Box2.setBreadth(13.0); 
+   Box2.setHeight(10.0);
+ 
+   // Box1 的体积
+   volume = Box1.getVolume();
+   cout &lt;&lt; &quot;Volume of Box1 : &quot; &lt;&lt; volume &lt;&lt;endl;
+ 
+   // Box2 的体积
+   volume = Box2.getVolume();
+   cout &lt;&lt; &quot;Volume of Box2 : &quot; &lt;&lt; volume &lt;&lt;endl;
+ 
+   // 把两个对象相加，得到 Box3
+   Box3 = Box1 + Box2;
+ 
+   // Box3 的体积
+   volume = Box3.getVolume();
+   cout &lt;&lt; &quot;Volume of Box3 : &quot; &lt;&lt; volume &lt;&lt;endl;
+ 
+   return 0;
+}
+</code></pre>
+<p>当上面的代码被编译和执行时，它会产生下列结果：</p>
+<blockquote>
+<p>Volume of Box1 : 210<br>
+Volume of Box2 : 1560<br>
+Volume of Box3 : 5400</p>
+</blockquote>
+<ul>
+<li>可重载运算符<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202305251728049.png" alt="可重载运算符" loading="lazy"></li>
+<li>不可重载运算符
+<ul>
+<li>.：成员访问运算符</li>
+<li>.<em>, -&gt;</em>：成员指针访问运算符</li>
+<li>::：域运算符</li>
+<li>sizeof：长度运算符</li>
+<li>?:：条件运算符</li>
+<li>#： 预处理符号</li>
+</ul>
+</li>
+</ul>
+<h2 id="13-析构函数">1.3 析构函数</h2>
+<blockquote>
+<p>类的析构函数是类的一种特殊的成员函数，它会在每次删除所创建的对象时执行。<br>
+析构函数的名称与类的名称是完全相同的，只是在前面加了个波浪号（~）作为前缀，它不会返回任何值,也不能带有任何参数。析构函数有助于在跳出程序（比如关闭文件、释放内存等）前释放资源。<br>
+<strong>补充：</strong> 析构函数与java中finalize函数作用相类似，可以充当做垃圾回收机制。</p>
+</blockquote>
+<p>代码示例</p>
+<pre><code class="language-c++">#include &lt;iostream&gt;
+ 
+using namespace std;
+ 
+class Line
+{
+   public:
+      void setLength( double len );
+      double getLength( void );
+      Line();   // 这是构造函数声明
+      ~Line();  // 这是析构函数声明
+ 
+   private:
+      double length;
+};
+ 
+// 成员函数定义，包括构造函数
+Line::Line(void)
+{
+    cout &lt;&lt; &quot;Object is being created&quot; &lt;&lt; endl;
+}
+Line::~Line(void)
+{
+    cout &lt;&lt; &quot;Object is being deleted&quot; &lt;&lt; endl;
+}
+ 
+void Line::setLength( double len )
+{
+    length = len;
+}
+ 
+double Line::getLength( void )
+{
+    return length;
+}
+// 程序的主函数
+int main( )
+{
+   Line line;
+ 
+   // 设置长度
+   line.setLength(6.0); 
+   cout &lt;&lt; &quot;Length of line : &quot; &lt;&lt; line.getLength() &lt;&lt;endl;
+ 
+   return 0;
+}
+</code></pre>
+<h2 id="14-虚函数和纯虚函数">1.4 虚函数和纯虚函数</h2>
+<p>虚函数和纯虚函数的主要作用是为了实现<code>多态</code></p>
+<blockquote>
+<p>定义一个函数为虚函数，不代表函数为不被实现的函数。<br>
+定义他为虚函数是为了允许用基类的指针来调用子类的这个函数。<br>
+定义一个函数为纯虚函数，才代表函数没有被实现。<br>
+定义纯虚函数是为了实现一个接口，起到一个规范的作用，规范继承这个类的程序员必须实现这个函数。<br>
+<strong>补充：</strong> <code>虚函数</code>允许基类通过指针调用子类中重写的这个虚函数（这个方法定义在父类<code>virtual type function()</code>），<code>纯虚函数</code>类似java中的抽象方法，子类必须重新此方法</p>
+</blockquote>
+<p>虚代码示例</p>
+<pre><code class="language-c++">class A
+{
+public:
+    virtual void foo()
+    {
+        cout&lt;&lt;&quot;A::foo() is called&quot;&lt;&lt;endl;
+    }
+};
+class B:public A
+{
+public:
+    void foo()
+    {
+        cout&lt;&lt;&quot;B::foo() is called&quot;&lt;&lt;endl;
+    }
+};
+int main(void)
+{
+    A *a = new B();
+    a-&gt;foo();   // 在这里，a虽然是指向A的指针，但是被调用的函数(foo)却是B的!
+    return 0;
+}
+</code></pre>
+<p>纯虚函数定义代码示例</p>
+<pre><code class="language-c++">virtual void funtion1()=0
+</code></pre>
+<h2 id="15-友元函数">1.5 友元函数</h2>
+<blockquote>
+<p>类的友元函数是定义在类外部，但有权访问类的所有私有（private）成员和保护（protected）成员。尽管友元函数的原型有在类的定义中出现过，但是友元函数并不是成员函数。<br>
+友元可以是一个函数，该函数被称为友元函数；友元也可以是一个类，该类被称为友元类，在这种情况下，整个类及其所有成员都是友元。<br>
+如果要声明函数为一个类的友元，需要在类定义中该函数原型前使用关键字 friend。</p>
+</blockquote>
+<p>使用示例</p>
+<pre><code class="language-c++">class Box
+{
+   double width;
+public:
+   double length;
+   friend void printWidth( Box box );
+   void setWidth( double wid );
+};
+</code></pre>
+<p>声明类 ClassTwo 的所有成员函数作为类 ClassOne 的友元，需要在类 ClassOne 的定义中放置如下声明：</p>
+<pre><code class="language-c++">friend class ClassTwo;
+</code></pre>
+<p>代码示例</p>
+<pre><code class="language-c++">#include &lt;iostream&gt;
+ 
+using namespace std;
+ 
+class Box
+{
+   double width;
+public:
+   friend void printWidth( Box box );
+   void setWidth( double wid );
+};
+ 
+// 成员函数定义
+void Box::setWidth( double wid )
+{
+    width = wid;
+}
+ 
+// 请注意：printWidth() 不是任何类的成员函数
+void printWidth( Box box )
+{
+   /* 因为 printWidth() 是 Box 的友元，它可以直接访问该类的任何成员 */
+   cout &lt;&lt; &quot;Width of box : &quot; &lt;&lt; box.width &lt;&lt;endl;
+}
+ 
+// 程序的主函数
+int main( )
+{
+   Box box;
+ 
+   // 使用成员函数设置宽度
+   box.setWidth(10.0);
+   
+   // 使用友元函数输出宽度
+   printWidth( box );
+ 
+   return 0;
+}
+</code></pre>
+<h1 id="2-容器stl标准模板库">2. 容器（STL：标准模板库）</h1>
+<p>容器是标准模板库的一个子集</p>
+<h2 id="21-allocator">2.1 allocator</h2>
+<p>参考链接：<a href="https://blog.csdn.net/qingdujun/article/details/85224771">qingdujun---浅谈C++ allocator内存管理（对比new的局限性）</a></p>
+<blockquote>
+<p>简介：allocator类是C++的一个模板，它提供类型化的内存分配以及对象的分配和撤销。<br>
+详介：allocator类定义在头文件memory中。它帮助我们将内存分配和对象构造分离开来。对于内存管理，我们大都习惯使用new 和 delete，毕竟这语句简单好记。而allocator类的用武之地体现在，你想更细致得去管理你的内存，减少浪费。下面举个例子。</p>
+</blockquote>
+<pre><code class="language-c++">#include &lt;iostream&gt;
+using namespace std;
+int main()
+{
+   //当我们想输入一些单词到一个string的数组
+    int n = 1000;//因为不确定，就给多点
+    string *p = new string[n];
+    string *q = p;
+    string word;
+    while (cin &gt;&gt; word) {  //输入
+        *p++ = word;
+    }
+    while (q != p) {       //输出
+        cout &lt;&lt; *q++ &lt;&lt; &quot; &quot; &lt;&lt; flush;
+    }
+    cout &lt;&lt; endl;
+    delete []p;
+    q = nullptr;
+    return 0;
+}
+</code></pre>
+<p>c++中allocator的代码示例：</p>
+<pre><code class="language-c++">#include &lt;iostream&gt;
+using namespace std;
+int main()
+{
+    int n = 1000; //老样子给个大数
+    allocator&lt;string&gt; alloc; //拥有分配string内存能力的alloc
+    auto const p = alloc.allocate(n); //分配n个未初始化的string
+    auto q = p;
+    //为string赋值
+    alloc.construct(q++);           //*q为空
+    alloc.construct(q++, 10, 'c');  //*q为cccccccccc
+    alloc.construct(q++, &quot;hi&quot;);     //*q为 hi
+    //cout &lt;&lt; *q-- &lt;&lt; endl;        //q所指向的内存还未构造，会发生未知的行为
+    while (q != p) {
+        alloc.destroy(--q);        //要挨个摧毁元素
+    }
+    alloc.deallocate(p, n);       //摧毁内存空间
+    return 0;
+}
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Uboot源码分析]]></title>
+        <id>https://xstarling.gitee.io/z9c6qfcIW/</id>
+        <link href="https://xstarling.gitee.io/z9c6qfcIW/">
+        </link>
+        <updated>2023-05-24T14:43:11.000Z</updated>
+        <content type="html"><![CDATA[<h1 id="1-uboot的基础知识">1. uboot的基础知识</h1>
+<h2 id="11-uboot的cpu初始目录">1.1 uboot的cpu初始目录</h2>
+<figure data-type="image" tabindex="1"><img src="https://33373sl116.zicp.fun:443/image-blog/202305251339147.png" alt="初始目录文件" loading="lazy"></figure>
+<h2 id="12-uboot编译的config文件">1.2 uboot编译的config文件</h2>
+<blockquote>
+<ul>
+<li>新版uboot中的<code>config</code>文件是在<code>./configs</code>文件夹，后缀名为<code>xxx_defconfig</code>（选择配置项菜单的文件），并且与<code>kconfig</code>（是所有可以配置的菜单项的目录文件）配合，生成对应的<code>.config</code>文件，在程序启动时加载<code>.config</code>文件生成<code>config.h</code>文件。</li>
+<li>2012版的uboot 在<code>./include/configs</code>目录下直接有对应芯片的<code>xxx.h</code>文件，<strong><code>kconfig</code>文件也不是配置文件，而是一个shell脚本</strong>，通过对<code>make xxx</code>输入参数做匹配，选择对应单板的config头文件，并链接编译。通过<code>make</code> 按<code>tab</code>键补全，会显示支持的配置命令，然后选择就可以了</li>
+<li><strong>注意：</strong><code>make s5p_goni</code>会直接配置编译，<code>make s5p_goni_config</code>只进行配置</li>
+</ul>
+</blockquote>
+<ul>
+<li>uboot编译生成文件<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202305271048963.png" alt="" loading="lazy"></li>
+</ul>
+<h1 id="2-uboot的源码分析">2. uboot的源码分析</h1>
+<p>arm指令集取址流程说明</p>
+<blockquote>
+<p>arm等高级CPU采用RISC精简指令集，这个指令集采用流水线方式（取值---&gt;译码）来执行<br>
+每条指令对应一个机器字长（32=4字节，64=8字节）</p>
+</blockquote>
+<p>汇编指令说明：</p>
+<blockquote>
+<p>b：简单的程序跳转，跳转到到目标标号处执行。<br>
+bl：带链接程序跳转，也就是要带返回地址。在发生跳转前，将当前PC-4保存到R14中。也就是返回地址存在R14中，所以可以在子程序返回时只要MOV PC, LR即可。</p>
+</blockquote>
+<blockquote>
+<p>mrs：MRS    R1，CPSR   ; 将CPSR状态寄存器读取，保存到R1中<br>
+msr：MRS    R2，SPSR    ; 将SPSR状态寄存器读取，保存到R2中</p>
+</blockquote>
+<blockquote>
+<p>bic：bic 是清零指令；用于清除操作数1的某些位，并把结果放置到目的寄存器中。 BIC{条件}{S}  目的寄存器，操作数1，操作数2</p>
+<ul>
+<li>bic	r0, r0, #0x1f</li>
+</ul>
+</blockquote>
+<blockquote>
+<p>orr： orr 是位置1指令；用于在两个操作数上进行逻辑或运算，并把结果放置到目的寄存器中。ORR指令的格式为： ORR{条件}{S}  目的寄存器，操作数1，操作数2</p>
+<ul>
+<li>orr	r0, r0, #0xd3</li>
+</ul>
+</blockquote>
+<blockquote>
+<p>mrc：MRC{cond} p15,&lt;Opcode_1&gt;,<Rd>,<CRn>,<CRm>,&lt;Opcode_2&gt;<br>
+mcr：MCR{cond} p15,&lt;Opcode_1&gt;,<Rd>,<CRn>,<CRm>,&lt;Opcode_2&gt;</p>
+<ul>
+<li>cond：为指令执行的条件码。当cond忽略时指令为无条件执行。</li>
+<li>Opcode_1：协处理器的特定操作码. 对于CP15寄存器来说，opcode1=0</li>
+<li>Rd：源寄存器的ARM寄存器，其值将被传送到协处理器寄存器中，或将协处理器寄存器的值传送到该寄存器里面 ,通常为R0</li>
+<li>CRn：目标寄存器的协处理器寄存器，其编号是C~C15。</li>
+<li>CRm：协处理器中附加的目标寄存器或源操作数寄存器。如果不需要设置附加信息，将CRm设置为c0，否则结果未知</li>
+<li>Opcode_2：可选的协处理器特定操作码。（用来区分同一个编号的不同物理寄存器，当不需要提供附加信息时，指定为0）</li>
+</ul>
+</blockquote>
+<h2 id="21-uboot生成文件反汇编分析">2.1 uboot生成文件反汇编分析</h2>
+<ul>
+<li>u-boot和u-boot.bin的区别
+<ul>
+<li>u-boot是含有调试信息的（用于测试开发）</li>
+<li>u-boot.bin纯二进制文件，不含任何调试信息（用于正式发版）</li>
+</ul>
+</li>
+<li>objdump反汇编查看代码
+<blockquote>
+<p>arm-linux-objdump -S u-boot<br>
+arm-linux-objdump -S u-boot | less    # 用管道重定向到less命令</p>
+</blockquote>
+</li>
+<li>编译器和汇编器区别
+<ul>
+<li>编译器：将C，C++等高级语言编译程为汇编语言</li>
+<li>汇编器：将汇编语言编译为二进制机器码<br>
+<strong>异常中断处理</strong></li>
+</ul>
+</li>
+<li>片内中断处理（三星为例）</li>
+</ul>
+<blockquote>
+<p>系统启动首先会读取ROM中的中断向量表，启动成功后，会创建一个自己的中断向量表，并将pc，loader等中断向量信息拷贝至自定义中断向量区域，后续的中断都会从自定义中断向量中触发。<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202305271442123.png" alt="片内中断" loading="lazy"></p>
+</blockquote>
+<ul>
+<li>片外中断处理（三星为例）</li>
+</ul>
+<blockquote>
+<p>不会再使用片内地址了，boot完后，片内地址被释放。arm在cp15协处理器中开辟了<code>VBAR</code>的寄存器，只需要在自己片外启动程序中设置<code>VBAR</code>的值为新的中断向量的地址，则后续中断请求就会到请求<code>VBAR</code>地址的中断向量表进行中断处理</p>
+</blockquote>
+<p><strong>启动源码分析</strong></p>
+<ul>
+<li>启动初始化源码：</li>
+</ul>
+<pre><code class="language-c">_pad:			.word 0x12345678 /* now 16*4=64 */
+#endif	/* CONFIG_SPL_BUILD */
+
+.global _end_vect
+_end_vect:
+
+	.balignl 16,0xdeadbeef          /*告诉编译器，下面.globl _TEXT_BASE指令执行时，要满足16字节对齐，否则填充0xdeadbeef至16字节再执行*/
+/*************************************************************************
+ *
+ * Startup Code (reset vector)
+ *
+ * do important init only if we don't start from memory!
+ * setup Memory and board specific bits prior to relocation.
+ * relocate armboot to ram
+ * setup stack
+ *
+ *************************************************************************/
+
+.globl _TEXT_BASE
+_TEXT_BASE:
+	.word	CONFIG_SYS_TEXT_BASE    /*源代码起始地址*/
+</code></pre>
+<ul>
+<li>中断请求初始化：</li>
+</ul>
+<pre><code class="language-c">#ifdef CONFIG_USE_IRQ
+/* IRQ stack memory (calculated at run-time) */
+.globl IRQ_STACK_START
+IRQ_STACK_START:
+	.word	0x0badc0de     /*初始系统没有加载完成，堆栈先用badcode填充*/
+
+/* IRQ stack memory (calculated at run-time) */
+.globl FIQ_STACK_START
+FIQ_STACK_START:
+	.word 0x0badc0de
+#endif
+
+/* IRQ stack memory (calculated at run-time) + 8 bytes */
+.globl IRQ_STACK_START_IN
+IRQ_STACK_START_IN:
+	.word	0x0badc0de
+</code></pre>
+<p>reset处理：</p>
+<pre><code class="language-c">/*
+ * the actual reset code
+ */
+
+reset:
+	bl	save_boot_params
+	/*
+	 * set the cpu to SVC32 mode
+	 */
+	mrs	r0, cpsr
+	bic	r0, r0, #0x1f
+	orr	r0, r0, #0xd3
+	msr	cpsr,r0
+</code></pre>
+<h2 id="22-entry等宏展开cpsr寄存器设置">2.2 ENTRY等宏展开，CPSR寄存器设置</h2>
+<h3 id="221-entryendproc宏的展开">2.2.1 ENTRY，ENDPROC宏的展开</h3>
+<p>源代码：</p>
+<pre><code class="language-c">/*************************************************************************
+ *
+ * void save_boot_params(u32 r0, u32 r1, u32 r2, u32 r3)
+ *	__attribute__((weak));
+ *
+ * Stack pointer is not yet initialized at this moment
+ * Don't save anything to stack even if compiled with -O0
+ *
+ *************************************************************************/
+ENTRY(save_boot_params)
+	bx	lr			@ back to my caller
+ENDPROC(save_boot_params)
+	.weak	save_boot_params        //.weak：弱指令，当其他地方没有定义使用时才执行
+</code></pre>
+<blockquote>
+<p>宏定义在头文件里找，ENTRY宏的定义在<code>linux/linkage.h</code>头文件中</p>
+</blockquote>
+<ul>
+<li><strong>ENTRY宏的展开代码：</strong></li>
+</ul>
+<pre><code class="language-c">/************SYMBOL_NAME*************/
+#define SYMBOL_NAME(X)		X
+/*************LENTRY---ALIGN******************/
+#ifndef __ALIGN
+#define __ALIGN .align		4       //四字节对齐
+#define ALIGN			__ALIGN
+/*************LENTRY---SYMBOL_NAME_LABEL******************/
+#ifdef __STDC__
+#define SYMBOL_NAME_LABEL(X)	X##:
+#else
+#define SYMBOL_NAME_LABEL(X)	X:
+#endif
+/***************LENTRY**************/
+#define LENTRY(name) \
+	ALIGN; \
+	SYMBOL_NAME_LABEL(name)
+/***************ENTRY***************/
+#define ENTRY(name) \
+	.globl SYMBOL_NAME(name); \
+	LENTRY(name)
+</code></pre>
+<ul>
+<li><strong>ENDPROC宏的展开代码：</strong></li>
+</ul>
+<pre><code class="language-c">/*************ENDPROC---END***************/
+#ifndef END
+#define END(name) \
+	.size name, .-name   //当前的标号name（ENDPROC） - 开始标号name（ENTRY）；即为程序大小
+#endif
+/************ENDPROC*************/
+#ifndef ENDPROC
+#define ENDPROC(name) \
+	.type name STT_FUNC; \        //伪指令，告诉编译器数据类型为一个函数
+	END(name)
+#endif
+</code></pre>
+<h3 id="222-cpsr寄存器设置">2.2.2 CPSR寄存器设置</h3>
+<blockquote>
+<p>ARM处理器共有37个寄存器。这37个寄存器按其在用户编程中的功能划分，可分为2类寄存器，即31个通用寄存器和6个状态寄存器。这6个状态寄存器在ARM公司文件中其名称分别为：CPSR、SPSR_svc、SPSR_abt、SPSR_und、SPSR_irq和SPSR_fig。这12的作用分别如图1所示：<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202305271740756.png" alt="" loading="lazy"><br>
+所有处理器模式下都可访问当前程序状态寄存器CPSR。CPSR中包含条件码标志、中断禁止位、当前处理器模式以及其他状态和控制信息。在每种异常模式下都有一个对用的程序状态寄存器SPSR。当异常出现时，SPSR用于保存CPSR的状态，以便异常返回后恢复异常发生时的工作状态。</p>
+</blockquote>
+<ul>
+<li>
+<p><strong>条件码标志</strong><br>
+N、Z、C、V，最高4位称为条件码标志。ARM的大多数指令可以条件执行的，即通过检测这些条件码标志来决定程序指令如何执行。<br>
+各个条件码的含义如下：<br>
+N：在结果是有符号的二进制补码情况下，如果结果为负数，则N=1；如果结果为非负数，则N=0。<br>
+Z：如果结果为0，则Z=1;如果结果为非零，则Z=0。<br>
+C：其设置分一下几种情况：</p>
+<ul>
+<li>对于加法指令（包含比较指令CMN），如果产生进位，则C=1;否则C=0。</li>
+<li>对于减法指令（包括比较指令CMP），如果产生借位，则C=0;否则C=1。</li>
+<li>对于有移位操作的非法指令，C为移位操作中最后移出位的值。</li>
+<li>对于其他指令，C通常不变。</li>
+</ul>
+<p>V：对于加减法指令，在操作数和结果是有符号的整数时，如果发生溢出，则V=1;如果无溢出发生，则V=0;对于其他指令，V通常不发生变化。</p>
+</li>
+<li>
+<p><strong>控制位的作用在图1中可以看出</strong>。</p>
+</li>
+</ul>
+<h2 id="23-cp15协处理器基础">2.3 CP15协处理器基础</h2>
+<h3 id="231-vbar异常向量表基址映射">2.3.1 VBAR异常向量表基址映射</h3>
+<p>源代码展示</p>
+<pre><code class="language-c">/*
+ * Setup vector:
+ * (OMAP4 spl TEXT_BASE is not 32 byte aligned.
+ * Continue to use ROM code vector only in OMAP4 spl)
+ */
+#if !(defined(CONFIG_OMAP44XX) &amp;&amp; defined(CONFIG_SPL_BUILD))
+	/* Set V=0 in CP15 SCTRL register - for VBAR to point to vector */
+	mrc	p15, 0, r0, c1, c0, 0	@ Read CP15 SCTRL Register
+	bic	r0, #CR_V		@ V = 0  
+	mcr	p15, 0, r0, c1, c0, 0	@ Write CP15 SCTRL Register
+
+	/* Set vector address in CP15 VBAR register */
+	ldr	r0, =_start
+	mcr	p15, 0, r0, c12, c0, 0	@Set VBAR
+#endif
+</code></pre>
+<p>bic r0,#CR_V：V=0为普通中断，跳转地址<code>0x00000000</code>，V=1位高级中断（可以跳到自定义地址），默认地址<code>0xFFFF0000</code></p>
+<h3 id="232-cp15子过程分析cache操作">2.3.2 CP15子过程分析——cache操作</h3>
+<p>源代码分析</p>
+<pre><code class="language-c">/* the mask ROM code should have PLL and others stable */
+#ifndef CONFIG_SKIP_LOWLEVEL_INIT     //如果为片内则执行，若为片外，则因为会先执行DDR初始化，所以此处便不会重发执行
+	bl	cpu_init_cp15
+	bl	cpu_init_crit
+#endif
+</code></pre>
+<p>icache操作源码分析</p>
+<pre><code class="language-c">/*************************************************************************
+ *
+ * cpu_init_cp15
+ *
+ * Setup CP15 registers (cache, MMU, TLBs). The I-cache is turned on unless
+ * CONFIG_SYS_ICACHE_OFF is defined.
+ *
+ *************************************************************************/
+ENTRY(cpu_init_cp15)
+	/*
+	 * Invalidate L1 I/D
+	 */
+	mov	r0, #0			@ set up for MCR
+	mcr	p15, 0, r0, c8, c7, 0	@ invalidate TLBs
+	mcr	p15, 0, r0, c7, c5, 0	@ invalidate icache     //设置缓存失效
+	mcr	p15, 0, r0, c7, c5, 6	@ invalidate BP array  //分支预测失效
+	mcr     p15, 0, r0, c7, c10, 4	@ DSB       //DSB伪指令（推荐），直接使用指令，可能会导致多核CPU数据不同步
+	mcr     p15, 0, r0, c7, c5, 4	@ ISB       //ISB伪指令（推荐，同上）
+</code></pre>
+<p>缓存实现的方式有三种：</p>
+<ul>
+<li>invalidate icache：设置指令的有效位为无效，则CPU会从RAM直接取数据</li>
+<li>flush：清空icache缓存中的所有数据，则CPU会从RAM中直接获取数据（速度比较慢）</li>
+<li>enable：使能用或不用这个icache缓存功能</li>
+</ul>
+<h3 id="233-cp15子过程分析分支预测mmu操作">2.3.3 CP15子过程分析——分支预测，MMU操作</h3>
+<blockquote>
+<p>影响现代处理器性能的两大关键因素是cache和分支预测<br>
+调用子函数：bl cpu_init_cp15</p>
+</blockquote>
+<h4 id="2331-分支预测">2.3.3.1 分支预测</h4>
+<p><strong>分支预测的目的</strong></p>
+<ul>
+<li>
+<p>在冯诺依曼的存储指令结构下，指令的执行包含有三种冒险：<strong>结构冒险</strong>、<strong>数据冒险</strong>和<strong>控制冒险</strong>。</p>
+<ul>
+<li><strong>结构冒险</strong>：是指硬件部件不足导致指令无法继续执行；</li>
+<li><strong>数据冒险</strong>：是指指令所需要的数据受到前面指令的影响，暂时无法取用，从而导致指令无法继续执行；</li>
+<li><strong>控制冒险</strong>：是指分支指令在控制程序的过程中中断指令流，从而导致程序无法继续执行</li>
+</ul>
+</li>
+<li>
+<p>分支预测技术是指处理器在遇到分支指令时不再傻傻地等待分支结果，而是直接在取指阶段预测分支“跳”或者“不跳”以及跳转目标地址，目的是根据预测结果来实现不间断的指令流，从而让处理器的CPI再度接近理想情况中的1 .</p>
+</li>
+<li>
+<p>分支预测要预测两件事：<strong>分支指令的跳转方向</strong>，<strong>分支指令的跳转目标地址</strong>。</p>
+</li>
+</ul>
+<p><strong>分支方向的预测</strong></p>
+<ul>
+<li>静态预测</li>
+<li>根据最后一次结果预测</li>
+<li>基于两位饱和计数预测</li>
+<li>基于局部历史的预测</li>
+<li>基于全局历史的预测</li>
+<li>竞争的分支预测</li>
+</ul>
+<p><strong>分支地址的预测</strong></p>
+<ul>
+<li>直接跳转类型的分支预测</li>
+<li>BTB缺失的处理</li>
+<li>间接跳转类型的分支预测</li>
+<li>其他预测方法</li>
+</ul>
+<h4 id="2332-mmu操作">2.3.3.2 MMU操作</h4>
+<p><strong>MMU是什么</strong><br>
+MMU是Memory Management Unit的缩写，中文名是内存管理单元，它是<strong>中央处理器（CPU）中用来管理虚拟存储器</strong>、物理存储器的控制线路，同时也负责虚拟地址映射为物理地址，以及提供硬件机制的内存访问授权，多用户多进程操作系统。<br>
+其功能主要有：</p>
+<ul>
+<li>完成虚拟地址到物理地址的转化</li>
+<li>对相应的地址空间的访问权限控制</li>
+<li>与操作系统的内存管理程序一起协作对内存进行管理</li>
+</ul>
+<p><strong>为什么要关闭MMU呢？</strong><br>
+mmu在设备上电之初是没有任何作用的，也就是说，在u-boot的初始化之初执行汇编的那一段代码中，<br>
+包括后面的初始化一些具体的外设时，访问的都是实际的地址，mmu的打开起不到任何的意义，为了不影响启动之初对程序的启动，关闭掉mmu设备是常用的做法。</p>
+<p>代码说明：</p>
+<pre><code class="language-c">/*
+	 * disable MMU stuff and caches
+	 */
+	mrc	p15, 0, r0, c1, c0, 0
+	bic	r0, r0, #0x00002000	@ clear bits 13 (--V-)
+	bic	r0, r0, #0x00000007	@ clear bits 2:0 (-CAM)
+	orr	r0, r0, #0x00000002	@ set bit 1 (--A-) Align
+	orr	r0, r0, #0x00000800	@ set bit 11 (Z---) BTB
+#ifdef CONFIG_SYS_ICACHE_OFF
+	bic	r0, r0, #0x00001000	@ clear bit 12 (I) I-cache
+#else
+	orr	r0, r0, #0x00001000	@ set bit 12 (I) I-cache
+#endif
+</code></pre>
+<h2 id="24-cpu_initcrit子过程分析">2.4 cpu_initcrit子过程分析</h2>
+<h3 id="241-led显示启动运行状态">2.4.1 LED显示启动运行状态</h3>
+<blockquote>
+<p>现在<strong>串口调试等方式还没有建立</strong>，为了确信程序运行到这里了，可以在这里设计一个点亮LED的程序，在lowlevel_init中调用，这样就可以观察到程序运行到哪一步了</p>
+</blockquote>
+<ul>
+<li>初始化代码入口函数：</li>
+</ul>
+<pre><code class="language-c">    /* the mask ROM code should have PLL and others stable */
+#ifndef CONFIG_SKIP_LOWLEVEL_INIT
+    bl	cpu_init_cp15   //初始化cp15协处理器（关闭mmu，分支预测等）
+    bl	cpu_init_crit    //初始化cp15后，就好执行此处初始化函数
+#endif
+</code></pre>
+<ul>
+<li>跳转至对应的初始化函数（<strong>跨文件跳转</strong>）</li>
+</ul>
+<pre><code class="language-c">#ifndef CONFIG_SKIP_LOWLEVEL_INIT
+/*************************************************************************
+*
+* CPU_init_critical registers
+*
+* setup important registers
+* setup memory timing
+*
+*************************************************************************/
+ENTRY(cpu_init_crit)
+    /*
+    * Jump to board specific initialization...
+    * The Mask ROM will have already initialized
+    * basic memory. Go here to bump up clock rate and handle
+    * wake up conditions.
+    */
+    b	lowlevel_init		@ go setup pll,mux,memory  //在lowlevel_init.S文件中
+ENDPROC(cpu_init_crit)
+#endif
+</code></pre>
+<ul>
+<li>GPIO点亮代码：</li>
+</ul>
+<pre><code class="language-c">/*************跳转函数必须放在cpu_init_crit前面**************/
+bl  gpio_out    //bl:带链跳转，初始化GPIO引脚
+bl  led1_on     //点亮LED等代码
+
+........
+/****************GPIO点亮等******************/
+gpio_out:
+	ldr	r11, =0xE0200200
+	ldr	r12, =0x00001111
+	str	r12, [r11]
+	
+	ldr	r11, =0xE0200284
+	ldr	r12, =0XF
+	str	r12, [r11]
+	mov	pc, lr
+	
+.globl led1_on
+led1_on:
+	ldr	r11, =0xE0200284
+	ldr	r12, [r11]
+	bic	r12, r12, #1       //清0r12的第一位，再回写r12中
+	str r12, [r11]      //
+	mov	pc, lr
+</code></pre>
+<h3 id="242-gpio电路分析">2.4.2 GPIO电路分析</h3>
+<p>推挽输出和开漏输出参考视频链接：</p>
+<ul>
+<li>爱上半导体：<a href="https://www.bilibili.com/video/BV1Pr4y1n74J/?spm_id_from=333.337.search-card.all.click&amp;vd_source=9752c2c90782ff8bd76174dfbc76c933">点击此处</a></li>
+<li>工科孙老师：<a href="https://www.bilibili.com/video/BV1D84y1c7GV/?spm_id_from=333.337.search-card.all.click&amp;vd_source=9752c2c90782ff8bd76174dfbc76c933">点击此处</a></li>
+</ul>
+<p>GPIO引脚电路：</p>
+<ul>
+<li>三种输出状态<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202305280922984.png" alt="GPIO三种输出状态图" loading="lazy"></li>
+<li>推挽输出
+<ul>
+<li>推：<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202305280924938.png" alt="GPIO电流推" loading="lazy"></li>
+<li>挽：<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202305280926357.png" alt="GPIO电流挽" loading="lazy"></li>
+</ul>
+</li>
+<li>开漏输出<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202305280930343.png" alt="开漏模式" loading="lazy">
+<ul>
+<li>5v控制3.3v<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202305280934562.png" alt="开漏设置高电平" loading="lazy"><br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202305280934073.png" alt="开漏设置低电平" loading="lazy"></li>
+<li>多个GPIO同时控制一个输入
+<ul>
+<li>推挽模式（多个GPIO控制同一个输入，一个mos管必定短路烧毁）<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202305280937891.png" alt="" loading="lazy"></li>
+<li>开漏模式<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202305280940969.png" alt="" loading="lazy"></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>总结<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202305280942528.png" alt="" loading="lazy"></li>
+</ul>
+<h3 id="243-u-boot烧录镜像分析">2.4.3 u-boot烧录镜像分析</h3>
+<p>参考视频链接：<a href="https://www.bilibili.com/video/BV1s4411t7eT?p=10&amp;spm_id_from=pageDriver&amp;vd_source=9752c2c90782ff8bd76174dfbc76c933">点击此处</a></p>
+<ul>
+<li>
+<p>mkv210芯片uboot加载的片内（iROM）内存仅为16k，若uboot大小超过16k怎么办呢？<br>
+通过代码限制，将uboot中重要的前16k内容（包括校验和）先拷贝进去，等完成内存（DDR）初始化后，将剩余的全部拷贝到内存中，进行系统启动，并清除片内内存（IROM）</p>
+</li>
+<li>
+<p>片内内存和片外内存的数据关系图示</p>
+<ul>
+<li><strong>校验和</strong>：除校验和16字节外的其余内容累加求和<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202305281623781.png" alt="" loading="lazy"></li>
+</ul>
+</li>
+<li>
+<p>mkv210_image.c源码（三星的S5PV210所特有的）<br>
+作用：保证文件小于16k，并为BL1添加校验头。</p>
+<pre><code class="language-c">    /*
+    * mkv210_image.c作用：将usb启动时使用的xxx_usb.bin制作得到由sd卡启动的镜像xxx_sd.bin
+    * 本文件来自于友善之臂的裸机教程，据友善之臂的文档中讲述，本文件是一个热心网友提供，在此表示感谢。
+    *
+    * 在BL0阶段，Irom内固化的代码读取nandflash或SD卡前16K的内容，
+    * 并比对前16字节中的校验和是否正确，正确则继续，错误则停止。
+    */
+    #include &lt;stdio.h&gt;
+    #include &lt;string.h&gt;
+    #include &lt;stdlib.h&gt;
+
+    #define BUFSIZE                 (16*1024)
+    #define IMG_SIZE                (16*1024)
+    #define SPL_HEADER_SIZE         16
+    #define SPL_HEADER            &quot;S5PC110 HEADER  &quot;    // 16字节，随便16个字节即可
+
+    int main (int argc, char *argv[])
+    {
+        FILE *fp;
+        char *Buf, *a;
+        int BufLen;
+        int nbytes, fileLen;
+        unsigned int checksum, count;
+        int i;
+
+        // 1.检查参数个数是否为3
+        if (argc != 3)
+        {
+            printf(&quot;Usage: %s &lt;source file&gt; &lt;destination file&gt;\n&quot;, argv[0]);
+            return -1;
+        }
+
+        // 2.分配16K的buffer并请零
+        BufLen = BUFSIZE;
+        Buf = (char *)malloc(BufLen);
+        if (!Buf)
+        {
+            printf(&quot;malloc buffer failed!\n&quot;);
+            return -1;
+        }
+        memset(Buf, 0x00, BufLen);
+
+        // 3.读源bin到buffer
+        // 3.1 打开源bin
+        fp = fopen(argv[1], &quot;rb&quot;);
+        if( fp == NULL)
+        {
+            printf(&quot;source file open error\n&quot;);
+            free(Buf);
+            return -1;
+        }
+        // 3.2获取源bin长度
+        fseek(fp, 0L, SEEK_END);                                // 定位到文件尾
+        fileLen = ftell(fp);                                    // 得到文件长度
+        fseek(fp, 0L, SEEK_SET);                                // 再次定位到文件头
+        // 3.3源bin长度不得超过16K-16byte，
+        // 注意若裸机程序大于16KB，则裸机程序会出问题，在后续做LCD实验时需特别注意
+        count = (fileLen &lt; (IMG_SIZE - SPL_HEADER_SIZE))
+            ? fileLen : (IMG_SIZE - SPL_HEADER_SIZE);
+        // 3.4在buffer[0~15]中存放&quot;S5PC110 HEADER  &quot;
+        memcpy(&amp;Buf[0], SPL_HEADER, SPL_HEADER_SIZE);
+        // 3.5读源bin到buffer[16]
+        nbytes = fread(Buf + SPL_HEADER_SIZE, 1, count, fp);
+        if ( nbytes != count )
+        {
+            printf(&quot;source file read error\n&quot;);
+            free(Buf);
+            fclose(fp);
+            return -1;
+        }
+        fclose(fp);
+
+        // 4.计算校验和
+        // 4.1从第16byte开始计算，把buffer中所有的字节数据加和起来得到的结果
+        a = Buf + SPL_HEADER_SIZE;
+        for(i = 0, checksum = 0; i &lt; IMG_SIZE - SPL_HEADER_SIZE; i++)
+            checksum += (0x000000FF) &amp; *a++;
+        // 4.2将校验和保存在buffer[8~12]
+        a = Buf + 8;    // Buf是xxx_sd.bin的起始地址，+8表示向后位移2个字，也就是说写入到第3个字
+        *((unsigned int *)a) = checksum;
+
+        // 5.拷贝buffer中的内容到目的bin
+        // 5.1打开目的bin
+        fp = fopen(argv[2], &quot;wb&quot;);
+        if (fp == NULL)
+        {
+            printf(&quot;destination file open error\n&quot;);
+            free(Buf);
+            return -1;
+        }
+        // 5.2将16k的buffer拷贝到目的bin中
+        a = Buf;
+        nbytes = fwrite(a, 1, BufLen, fp);
+        if (nbytes != BufLen)
+        {
+            printf(&quot;destination file write error\n&quot;);
+            free(Buf);
+            fclose(fp);
+            return -1;
+        }
+
+        free(Buf);
+        fclose(fp);
+
+        return 0;
+    }
+</code></pre>
+</li>
+<li>
+<p>使用hexdump分析16进制代码</p>
+<ul>
+<li>大端存储<br>
+数据的高字节存储在低地址中，数据的低字节存储在高地址中 如：<br>
+<strong>用于网络数据报协议传输,暂时不可替代。</strong></li>
+<li>小端存储<br>
+数据的低位放在低地址空间，数据的高位放在高地址空间<br>
+简记：小端就是低位对应低地址，高位对应高地址</li>
+</ul>
+</li>
+</ul>
+<h2 id="25-编写自己的boot程序">2.5 编写自己的boot程序</h2>
+<h3 id="251-gcc编译过程详解">2.5.1 gcc编译过程详解</h3>
+<figure data-type="image" tabindex="2"><img src="https://33373sl116.zicp.fun:443/image-blog/202305282239296.png" alt="" loading="lazy"></figure>
+<h3 id="252-文件链接过程">2.5.2 文件链接过程</h3>
+<blockquote>
+<p>text：存放代码<br>
+data：存放已经初始化且不为0的全局变量<br>
+bss：存放初始化为0或未初始化的全局变量，以及标记说明</p>
+</blockquote>
+<ul>
+<li>
+<p>工具链使用</p>
+<ul>
+<li>arm-none-eabi-as /arm-none-eabi-gcc -c        #编译</li>
+<li>arm-none-eabi-ld -T      #链接文件</li>
+</ul>
+</li>
+<li>
+<p>链接示意图<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202305282318742.png" alt="" loading="lazy"></p>
+</li>
+<li>
+<p>代码示例<br>
+<code>ldr fp, [pc,#20]</code>: 中<code>[pc,#20]</code>属于基址变址寻址，pc+20的地方取址</p>
+<ul>
+<li>mystart.S文件——uboot初始化代码<pre><code class="language-c">/***********处理异常中断处理——根据cpu的中断向量长度来设置`b reset`的个数***********/
+b reset
+b reset
+b reset
+b reset
+b reset
+b reset
+b reset
+b reset
+/**********初始化uboot的启动函数************/
+reset:  
+        bl gpio_out
+        bl led2_on
+        mov r0,r1          //无意义的空指令
+        mov r1,r2
+        mov r2,r3
+        mov r3,r4
+        mov r4,r5
+1:
+        b 1b    @ b:back jump;f:forward jump
+/************配置GPIO输出功能************/
+gpio_out:
+        ldr     r11, =0xE0200200
+        ldr     r12, =0x00001111
+        str     r12, [r11]
+
+        ldr     r11, =0xE0200284
+        ldr     r12, =0XF
+        str     r12, [r11]
+        mov     pc, lr
+</code></pre>
+</li>
+<li>mylowlevel.S文件——led点亮代码<pre><code class="language-c">.globl led2_on  @ .globl:marking the instruction can be used in other file
+led2_on:
+        ldr     r11, =0xE0200284
+        ldr     r12, [r11]
+        bic     r12, r12, #[1&lt;&lt;1]       @ left shift one step,turn on led2
+        str     r12, [r11]
+        mov     pc, lr              
+</code></pre>
+</li>
+<li>myboot.lds链接配置文件<pre><code class="language-c">SECTIONS
+{
+        . = 0xD0020010; /** 16k memory start addr*/
+        .text : {
+                mystart.o
+                * (.text)
+        }
+        .data : {
+                * (.data)
+        }
+        .bss_start = .;
+        .bss : {
+                * (.bss)
+        }
+        .bss_end = .;
+}                                    
+</code></pre>
+</li>
+</ul>
+</li>
+<li>
+<p>objdump调试链接文件</p>
+<ul>
+<li><code>arm-none-eabi-objdump -S myboot</code></li>
+</ul>
+</li>
+<li>
+<p>objcopy剥离注释说明生成二进制文件</p>
+<ul>
+<li><code>arm-none-eabi-objcopy -O binary myboot myboot.bin</code></li>
+</ul>
+</li>
+</ul>
+<h3 id="253-makefile命令">2.5.3 Makefile命令</h3>
+<ul>
+<li>.PHONY<br>
+但是如果Makefile当前目录下有一个和clean目标同名的文件clean，那么这么写就会有问题，因为clean文件永远是最新的，所以clean目标的命令永远得不到执行，为了解决这个问题，Makefile提供了伪目标这个功能，所以新的清除命令可以写成下面这样：<pre><code class="language-make">.PHONY : clean
+clean :
+    $(RM) *.o target
+</code></pre>
+只要有这个声明，不管是否有clean文件，make clean都会得到执行，make在执行此规则时不会去试图查找隐含规则来创建它，这样也提高了make的最新效率。</li>
+<li>自动化变量
+<ul>
+<li><code>$@</code>：所有目标文件集合</li>
+<li><code>$&lt;</code>：所有依赖文件中的第一个</li>
+<li><code>$^</code>：所有依赖文件集合</li>
+</ul>
+</li>
+<li>模式匹配
+<ul>
+<li><code>%</code>：%.o，%.s</li>
+</ul>
+</li>
+</ul>
+<h2 id="26-uart分析">2.6 UART分析</h2>
+<h3 id="261-异步通信uart和同步通信spi概念">2.6.1 异步通信（UART）和同步通信（SPI）概念</h3>
+<p>通信协议（SPI，UART，I2C）：<a href="https://zhuanlan.zhihu.com/p/450963372">点击此处</a></p>
+<ul>
+<li>同步串行通信（SPI）<br>
+在SPI设备中，设备分为主机与从机系统。主机是控制设备（通常是微控制器），而从机（通常是传感器，显示器或存储芯片）从主机那获取指令。一套SPI通讯共包含四种信号线：MOSI (Master Output/Slave Input) – 信号线，主机输出，从机输入。MISO (Master Input/Slave Output) – 信号线，主机输入，从机输出。SCLK (Clock) – 时钟信号。SS/CS (Slave Select/Chip Select) – 片选信号。
+<ul>
+<li>通信方式：全双工通信</li>
+<li>缺点：通讯距离短，一般适用于开发板直接连线通信；SPI使用四根线（I2C和UART使用两根线），没有信号接收成功的确认（I2C拥有此功能），没有任何形式的错误检查（如UART中的奇偶校验位等）。</li>
+<li>优点：可以无中断传输数据，可以连续地发送或接收任意数量的位；没有像I2C这样的复杂的从站寻址系统，数据传输速率比I2C更高（几乎快两倍）。独立的MISO和MOSI线路，可以同时发送和接收数据。</li>
+<li>图示：<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202305291552101.png" alt="" loading="lazy"></li>
+</ul>
+</li>
+<li>异步串行通信（UART）<br>
+UART代表通用异步接收器/发送器也称为串口通讯，它不像SPI和I2C这样的通信协议，而是微控制器中的物理电路或独立的IC。<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202305291558790.png" alt="" loading="lazy"><br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202305291624175.png" alt="" loading="lazy"><br>
+UART的主要目的是发送和接收串行数据，其最好的优点是它仅使用两条线在设备之间传输数据。 UART属于<strong>异步通讯</strong>，这意味着<strong>没有时钟信号</strong>，取而代之的是在数据包中添加开始和停止位。
+<ul>
+<li>数据报文格式：<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202305291605763.png" alt="" loading="lazy"><br>
+<strong>起始位</strong>：发送1位逻辑0（低电平），开始传输数据。<br>
+<strong>数据位</strong>：可以是5~8位的数据，先发低位，再发高位，一般常见的就是8位（1个字节），其他的如7位的ASCII码。<br>
+<strong>校验位</strong>：奇偶校验，将数据位加上校验位，1的位数为偶数（偶校验），1的位数4为奇数（奇校验）。<br>
+<strong>停止位</strong>：停止位是数据传输结束的标志，可以是1/1.5/2位的逻辑1（高电平）。<br>
+<strong>空闲位</strong>：空闲时数据线为高电平状态，代表无数据传输</li>
+<li>通信方式：全双工通信（需要协调波特率）</li>
+<li>缺点：
+<ul>
+<li>数据帧的大小最大为9位</li>
+<li>不支持多个从属系统或多个主系统</li>
+<li>每个UART的波特率必须在彼此的10％之内</li>
+</ul>
+</li>
+<li>优点：
+<ul>
+<li>仅使用两根电线</li>
+<li>无需时钟信号</li>
+<li>具有奇偶校验位以允许进行错误检查</li>
+<li>只要双方都设置好数据包的结构</li>
+<li>有据可查并得到广泛使用的方法</li>
+</ul>
+</li>
+<li>图示：<br>
+启动条件：当SCL是高电平时，SDA从高电平向低电平切换。停止条件：当SCL是高电平时，SDA由低电平向高电平切换。<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202305291602981.png" alt="" loading="lazy"></li>
+</ul>
+</li>
+<li>波特率的概念<br>
+波特率，即调制速率，模拟线路信号的速率，以波形每秒的振荡数来衡量。如果数据不压缩，波特率等于每秒钟传输的数据位数，单位bit/s或bps。注意和比特率不严格相关<br>
+在UART中：BYTE/s = bps / 10
+<ul>
+<li>
+<p>波特率与传输举例的关系</p>
+<table>
+<thead>
+<tr>
+<th>data rate（bps）</th>
+<th>maximum（meters）</th>
+<th>distance（feet）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>19200</td>
+<td>15</td>
+<td>45</td>
+</tr>
+<tr>
+<td>9600</td>
+<td>25</td>
+<td>76</td>
+</tr>
+<tr>
+<td>4800</td>
+<td>50</td>
+<td>152</td>
+</tr>
+<tr>
+<td>2400</td>
+<td>100</td>
+<td>304</td>
+</tr>
+<tr>
+<td>1200</td>
+<td>200</td>
+<td>608</td>
+</tr>
+<tr>
+<td>600</td>
+<td>400</td>
+<td>1216</td>
+</tr>
+</tbody>
+</table>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="262-uart时钟频率配置">2.6.2 UART时钟频率配置</h3>
+<ul>
+<li>波特率设置（UBRDIV0，R/W，Address=0x----_----)<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202305291655458.png" alt="" loading="lazy"></li>
+<li>信道划分槽（UDIVSLOT0，R/W，Address=0x----_----）<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202305291701675.png" alt="" loading="lazy"></li>
+<li>串口数据发送寄存器设置（UTXH0，W，Address=0x----_----)<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202305291708478.png" alt="" loading="lazy"></li>
+</ul>
+<pre><code class="language-c">100:
+    ...........
+    ldr r0,=0xE2900020
+    ldr r1,=0x55            @ UTH0 = 'U'
+    str r1,[r0]                 @ 将r1中的内存传输到r0地址缓冲区中
+
+    ldr r1,=0x61            @UTH0 = 'a'
+    str r1,[r0]                 @ 将r1中的内存传输到r0地址缓冲区中
+    ...........
+</code></pre>
+<p><strong>str指令</strong></p>
+<blockquote>
+<p>str r0，[r1]，＃8             ；将R0中的字数据写入以r1为地址的存储器中，并将新地址R1＋8写入R1。<br>
+str r0，[r1，＃8]             ；将r0中的字数据写入以r1＋8为地址的存储器中。<br>
+str     r1, [r0]                       ；将r1寄存器的值，传送到地址值为r0的（存储器）内存中</p>
+</blockquote>
+<ul>
+<li>串口数据接受寄存器设置（URXH0，W，Address=0x----_----）<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202305291710979.png" alt="" loading="lazy"></li>
+</ul>
+<pre><code class="language-c">
+</code></pre>
+<h3 id="263-可能存在问题">2.6.3 可能存在问题</h3>
+<p>参考链接：<a href="https://www.bilibili.com/video/BV1s4411t7eT/?p=25&amp;spm_id_from=pageDriver&amp;vd_source=9752c2c90782ff8bd76174dfbc76c933">点击此处</a><br>
+<strong>编译文件顺序</strong><br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202305292320659.png" alt="" loading="lazy"><br>
+<strong>问题描述</strong>：<br>
+自定义的lowlevel_init.S文件编译时处于编译的最末尾，在后续截取16k有效uboot时，会被截取掉<br>
+<strong>解决方法</strong>：</p>
+<pre><code class="language-shell">vim makefile
+# 搜索变量 “LIBS”
+# 将$(LIBBOARD)变量放在前面即可
+</code></pre>
+<blockquote>
+<p>start.S为最重要的（必须有的），其他的都是可有可无的</p>
+</blockquote>
+<h3 id="264-uart显示内存中数据">2.6.4 UART显示内存中数据</h3>
+<ul>
+<li>
+<p>原理图展示：</p>
+</li>
+<li>
+<p>代码展示（lowlevel_init.S)：</p>
+<ul>
+<li>显示代码<pre><code class="language-c">display_hex:
+    ldr r1,=0xE2900020
+
+    ldr r2,=0x30
+    str r2,[r1]            @UTH0='0'
+
+    ldr r2,=0x78
+    str r2,[r1]            @UTH0='x'
+
+    ldr r3,=28           @ 记录右移位数
+
+disphex_loop_cnt:
+    lsr r2, r0, r3          @将r0的数据右移28位，存入r2
+    and r2, r2, #0xF    @ 清除最后一位外的其他位,并存入r2
+    cmp r2,#10
+    addmi   r2,r2,#0x30     @cmp小于10则累加
+    addpl   r2,r2,#0x37     @cmp大于10则累加
+    str r2,[r1]
+
+    sub r3,r3,#4
+    cmp r3,#0
+    bpl disphex_loop_cnt    @若没移位完，继续循环
+
+    ldr r2,=0xA
+    str r2,[r1]     @UTH0='\r'
+
+    ldr r2,=0x0
+    str r2,[r1]     @UTH0='\n'
+
+    mov     pc,lr       @通过bl跳转，故需要将lr1放入pc指针，进行返回
+</code></pre>
+</li>
+<li>uart初始化代码<pre><code class="language-c">    /* for UART */
+    bl	uart_asm_init
+
+    ldr	r0, =0x1234abcd         @内存中要读入的数据
+    bl	display_hex                 @跳转的处理函数
+
+    bl	internal_ram_init
+</code></pre>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="27-ddr内存">2.7 DDR内存</h2>
+<h3 id="271-sram-dram-ddr-sdram存储器的区别">2.7.1 SRAM、DRAM、DDR、SDRAM存储器的区别</h3>
+<p>内存可分为DRAM动态随机存取内存和SRAM静态随机存取内存两种。两种存储器都是挥发性的内存，SRAM的主要使用flip-flop正反器，通常用于快取(Cache)，而DRAM则是使用电容器及晶体管组成。<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202305301025932.png" alt="" loading="lazy"></p>
+<ul>
+<li>SRAM<br>
+SRAM是一种基于触发器的存储器，使用稳定的存储电路来存储和保持数据。每个存储单元由一个存储器单元和控制电路组成，其中<strong>存储器单元由多个触发器构成</strong>，能够存储比特数据。由于采用了触发器结构，SRAM在不断刷新的过程中保持数据的<strong>稳定性</strong>。
+<ul>
+<li>特点：</li>
+</ul>
+<blockquote>
+<p>由于SRAM的存储单元采用稳定的触发器结构，不需要进行定期刷新操作。数据可以一直保持稳定，无需周期性刷新。<br>
+SRAM的访问速度非常快，因为数据存储在触发器中，可以立即读取和写入。SRAM具有较低的访问延迟和高速的读写性能。</p>
+</blockquote>
+<ul>
+<li>用途：</li>
+</ul>
+<blockquote>
+<p>高速缓存</p>
+</blockquote>
+</li>
+<li>DRAM<br>
+DRAM是一种基于电容的存储器，使用<strong>电容来存储和表示数据</strong>。每个存储单元由一个电容和一个访问晶体管组成。电容在存储器中充电或放电来表示数据的0和1。由于电容会逐渐漏电，DRAM需要定期刷新以保持数据的<strong>正确性</strong>。
+<ul>
+<li>特点：</li>
+<li>由于DRAM的电容逐渐漏电，数据需要定期刷新以保持其正确性。DRAM需要通过刷新操作周期性地重新写入数据，否则数据会丢失。</li>
+<li>由于DRAM的电容逐渐漏电，数据需要定期刷新以保持其正确性。DRAM需要通过刷新操作周期性地重新写入数据，否则数据会丢失。</li>
+<li>用途：</li>
+</ul>
+<blockquote>
+<p>内存条</p>
+</blockquote>
+</li>
+<li>DDR</li>
+</ul>
+<blockquote>
+<p>DDR其实指的是DDRSDRAM<br>
+DDR2 是 2 * 2 * SDRAM</p>
+</blockquote>
+<ul>
+<li>SDRAM</li>
+</ul>
+<blockquote>
+<p>同步动态随机存储器</p>
+</blockquote>
+<h3 id="272-ddr在cpu中的架构">2.7.2 DDR在CPU中的架构</h3>
+<p>CPU中DRAM的架构图<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202305301338753.png" alt="" loading="lazy"><br>
+DRAM内部实现结构<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202305301340730.png" alt="" loading="lazy"></p>
+<h3 id="273-ddr内存初始化">2.7.3 DDR内存初始化</h3>
+<h3 id="274-随机存储和顺序存储方式">2.7.4 随机存储和顺序存储方式</h3>
+<p>随机存储：内存，<br>
+顺序存储：机械硬盘，磁带</p>
+<h2 id="28-board_init_f函数分析">2.8 board_init_f函数分析</h2>
+<p>board_init_f：调用c语言函数</p>
+<h3 id="281-堆栈的初始化">2.8.1 堆栈的初始化</h3>
+<p>代码示例：</p>
+<pre><code class="language-c">/* Set stackpointer in internal RAM to call board_init_f */
+call_board_init_f:
+	ldr	sp, =(CONFIG_SYS_INIT_SP_ADDR)                  @初始化堆栈指针
+	bic	sp, sp, #7 /* 8-byte alignment for ABI compliance */   
+	ldr	r0,=0x00000000      @设置函数入口参数
+	bl	board_init_f            @跳转c语言函数，位于：u-boot-2012.10\arch\arm\lib\board.c
+
+</code></pre>
+<h3 id="282-代码分析">2.8.2 代码分析</h3>
+<ul>
+<li>board_init_f代码分析</li>
+<li><code>u-boot-2012.10\arch\arm\include\asm\global_data.h</code>代码分析</li>
+</ul>
+<pre><code class="language-c">#define DECLARE_GLOBAL_DATA_PTR     register volatile gd_t *gd asm (&quot;r8&quot;)
+</code></pre>
+<p><code>register</code>：声明数据存储在寄存器中<br>
+<code>volatile</code>：声明变量不需要进行优化操作<br>
+<code>asm (&quot;r8&quot;)</code>：设置存储的寄存器</p>
+<h2 id="29-mmc_relocate分析">2.9 mmc_relocate分析</h2>
+<h2 id="210-u-boot的镜像结构">2.10 u-boot的镜像结构</h2>
+<h2 id="211-">2.11 -----</h2>
+<h2 id="212-bootm启动流程分析">2.12 bootm启动流程分析</h2>
+<h2 id="213-附加芯片基础知识">2.13 附加——芯片基础知识</h2>
+<h3 id="2131-lowlevel_inits分析">2.13.1 lowlevel_init.S分析</h3>
+<p>参考链接：<a href="https://blog.csdn.net/a1598025967/article/details/106893165">点击此处</a></p>
+<blockquote>
+<p>目录：u-boot-2012.10/board/samsung/goni/lowlevel_init.S<br>
+u-boot-2012.10/arch/arm/cpu/armv7/lowlevel_init.S：弱属性，当没有任何芯片定义对应的<code>lowlevel.S</code>文件时会执行<br>
+u-boot-2012.10/board/samsung/goni/lowlevel_init.S：具体实现不同芯片的初始化代码</p>
+</blockquote>
+<ul>
+<li>
+<p>#include头文件引入符与文件路径不同？<br>
+<img src="https://33373sl116.zicp.fun:443/image-blog/202305291022318.png" alt="" loading="lazy"></p>
+</li>
+<li>
+<p>EVT1和EVT0？</p>
+<ul>
+<li>EVT(工程验证测试)→DVT(设计验证测试)→MVT(生产验证测试)→PP(中试生产)→MP(导入量产)</li>
+</ul>
+</li>
+<li>
+<p>隐藏寄存器</p>
+</li>
+</ul>
+<pre><code class="language-c">skip_check_didle:
+    ...................
+    /*
+    * Diable ABB block to reduce sleep current at low temperature
+    * Note that it's hidden register setup don't modify it
+    */
+    ldr	r0, =0xE010C300
+    ldr	r1, =0x00800000
+    str	r1, [r0]
+</code></pre>
+<ul>
+<li>IO设置
+<ul>
+<li>初始化ro文件</li>
+</ul>
+<pre><code class="language-c">100:
+    /* IO retension release */
+    ldreq	r0, =S5PC100_OTHERS			@ 0xE0108200            
+    ldrne	r0, =S5PC110_OTHERS			@ 0xE010E000
+    .......................
+</code></pre>
+<blockquote>
+<p>S5PC100_OTHERS和S5PC110_OTHERS：定义在<code>u-boot-2012.10/arch/arm/include/asm/arch-s5pc1xx/power.h</code>头文件中</p>
+</blockquote>
+</li>
+<li>设置看门狗（watch timer）程序</li>
+</ul>
+<pre><code class="language-c">100:
+    ..................
+    /* Disable Watchdog */
+    ldreq	r0, =S5PC100_WATCHDOG_BASE		@ 0xEA200000
+    ldrne	r0, =S5PC110_WATCHDOG_BASE		@ 0xE2700000
+    str	r5, [r0]
+    ...................
+</code></pre>
+<ul>
+<li>设置SRAM</li>
+</ul>
+<blockquote>
+<p>RAM可分为<strong>静态存储器</strong>（Static Random Access Memory,SRAM）和<strong>动态存储器</strong>（Dynamic Random Access Memory）。SRAM中的存储单元相当于一个锁存器，只有0，1两个稳态；DRAM则是利用电容存储电荷来保存0和1两种状态，因此需要定时对其进行刷新，否则随着时间的推移，电容其中存储的电荷将逐渐消失。<br>
+<strong>SRAM</strong>：读写速度快，生产成本高，多用于容量较小的高速缓冲存储器。<br>
+<strong>DRAM</strong>：读写速度较慢，集成度高，生产成本低，多用于容量较大的主存储器。</p>
+</blockquote>
+<pre><code class="language-c">100:
+    .................
+	/* setting SRAM */
+	ldreq	r0, =S5PC100_SROMC_BASE
+	ldrne	r0, =S5PC110_SROMC_BASE
+	ldr	r1, =0x9
+	str	r1, [r0]
+    ...................
+</code></pre>
+<ul>
+<li>
+<p>设置中断IRQ和FRQ等中断</p>
+</li>
+<li>
+<p>UART初始化代码分析</p>
+</li>
+</ul>
+]]></content>
+    </entry>
+</feed>
